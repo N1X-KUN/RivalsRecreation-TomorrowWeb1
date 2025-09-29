@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#0f0f16" />
+  <meta name="description" content="Rivals Nexus — a fast, cinematic hero shooter showcase with dynamic UI, parallax hero, scroll reveals, tilt cards, and a smooth maps carousel." />
+  <title>Rivals Nexus</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs/%3E%3Ccircle cx='32' cy='32' r='30' fill='%230b0b12'/%3E%3Cpath d='M16 44 L32 12 L48 44 L40 44 L32 28 L24 44 Z' fill='%23e93d54'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="Rivals.css" />
+</head>
+<body>
+  <a class="sr-only" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#" aria-label="Rivals Nexus Home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <strong>Rivals</strong><span>Nexus</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#maps">Maps</a>
+        <a href="#heroes">Heroes</a>
+        <a href="#news">News</a>
+        <a href="#esports">Esports</a>
+        <a class="cta" data-magnetic href="#download"><span class="shine" aria-hidden="true"></span>Play Now</a>
+      </nav>
+      <button class="hamburger" aria-controls="mobile-drawer" aria-expanded="false" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+    <div class="drawer" id="mobile-drawer" hidden>
+      <div class="drawer-panel" role="dialog" aria-label="Mobile Menu">
+        <a href="#features">Features</a>
+        <a href="#maps">Maps</a>
+        <a href="#heroes">Heroes</a>
+        <a href="#news">News</a>
+        <a href="#esports">Esports</a>
+        <a class="cta" data-magnetic href="#download"><span class="shine" aria-hidden="true"></span>Play Now</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-label="Hero">
+      <div class="stars" aria-hidden="true"></div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orb red" data-parallax data-depth="0.06"></div>
+        <div class="orb gold" data-parallax data-depth="0.08"></div>
+        <div class="orb blue" data-parallax data-depth="0.04"></div>
+      </div>
+      <div class="container hero-inner" data-reveal>
+        <span class="eyebrow"><span class="dot"></span> Live: Season Zenith 3.5</span>
+        <h1>Fast-Paced 6v6 Hero Action in the <span class="accent">Nexus</span></h1>
+        <p class="subhead">Enter a cinematic clash across timelines. Master team-up abilities, reshape the battlefield, and write your legend in a world forged by power, style, and momentum.</p>
+        <div class="hero-cta">
+          <a class="cta" data-magnetic href="#download"><span class="shine" aria-hidden="true"></span>Download</a>
+          <a class="btn" href="#trailer">Watch Trailer</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="container" aria-labelledby="features-title">
+      <div class="section-head">
+        <h2 id="features-title">Core Features</h2>
+        <p>Designed for clarity, speed, and spectacle</p>
+      </div>
+      <div class="features">
+        <article class="card" data-tilt data-reveal>
+          <span class="badge">Team-Up Abilities</span>
+          <h3>Create Synergy</h3>
+          <p>Combine ultimates and utilities to unlock spectacular duo plays that swing momentum.</p>
+        </article>
+        <article class="card" data-tilt data-reveal>
+          <span class="badge">Destructible Spaces</span>
+          <h3>Reshape Maps</h3>
+          <p>Crack open flanks and reveal new sightlines with dynamic environmental destruction.</p>
+        </article>
+        <article class="card" data-tilt data-reveal>
+          <span class="badge">Competitive Focus</span>
+          <h3>Tournament Ready</h3>
+          <p>Balanced objectives, clear roles, and clean readability for top-tier play.</p>
+        </article>
+        <article class="card" data-tilt data-reveal>
+          <span class="badge">Optimized</span>
+          <h3>Run Smooth</h3>
+          <p>Adaptable visuals and responsive input deliver fluid motion on a wide range of systems.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="maps" class="container" aria-labelledby="maps-title">
+      <div class="section-head">
+        <h2 id="maps-title">Maps Showcase</h2>
+        <p>Traverse realms from celestial gardens to neon skylines</p>
+      </div>
+      <div class="carousel" data-reveal>
+        <div class="carousel-track" id="maps-track">
+          <figure class="slide" aria-label="Heart of Heaven">
+            <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=1400&auto=format&fit=crop" alt="Golden palace under vast tree roots" />
+            <figcaption class="meta">
+              <h4>Heart of Heaven</h4>
+              <p>Sanctuary paths and royal battlements entwined with the World Tree.</p>
+            </figcaption>
+          </figure>
+          <figure class="slide" aria-label="Empire of Night">
+            <img src="https://images.unsplash.com/photo-1496511843566-1ef9a8a63a3e?q=80&w=1400&auto=format&fit=crop" alt="Gothic city park shrouded in moonless night" />
+            <figcaption class="meta">
+              <h4>Empire of Night</h4>
+              <p>Midtown under eclipse—siege routes, shadow vaults, and arcane wards.</p>
+            </figcaption>
+          </figure>
+          <figure class="slide" aria-label="Klyntar Husk">
+            <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1400&auto=format&fit=crop" alt="Alien landscape with colossal husk and vivid clouds" />
+            <figcaption class="meta">
+              <h4>Celestial Husk</h4>
+              <p>Shifting terrain over ancient remains—adapt or be swallowed whole.</p>
+            </figcaption>
+          </figure>
+          <figure class="slide" aria-label="Tokyo 2099">
+            <img src="https://images.unsplash.com/photo-1526481280698-8fcc13fd9130?q=80&w=1400&auto=format&fit=crop" alt="Neon megacity skyline at night" />
+            <figcaption class="meta">
+              <h4>Skyline 2099</h4>
+              <p>Sleek rooftops and cable lines—vertical play with momentum lanes.</p>
+            </figcaption>
+          </figure>
+        </div>
+        <div class="carousel-controls">
+          <button type="button" id="prev">Prev</button>
+          <button type="button" id="next">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="heroes" class="container" aria-labelledby="heroes-title">
+      <div class="section-head">
+        <h2 id="heroes-title">Roster Highlights</h2>
+        <p>Distinct roles, crisp silhouettes, and expressive playstyles</p>
+      </div>
+      <div class="heroes">
+        <article class="hero-card" data-tilt data-reveal aria-label="Vanguard">
+          <img src="https://images.unsplash.com/photo-1606117331092-2539977a7b32?q=80&w=1200&auto=format&fit=crop" alt="Armored vanguard silhouette" />
+          <span class="label">Vanguard</span>
+        </article>
+        <article class="hero-card" data-tilt data-reveal aria-label="Skirmisher">
+          <img src="https://images.unsplash.com/photo-1610476441443-97f211c5e367?q=80&w=1200&auto=format&fit=crop" alt="Agile skirmisher in motion" />
+          <span class="label">Skirmisher</span>
+        </article>
+        <article class="hero-card" data-tilt data-reveal aria-label="Controller">
+          <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop" alt="Technomancer with glowing devices" />
+          <span class="label">Controller</span>
+        </article>
+        <article class="hero-card" data-tilt data-reveal aria-label="Support">
+          <img src="https://images.unsplash.com/photo-1493612276216-ee3925520721?q=80&w=1200&auto=format&fit=crop" alt="Healer amid radiant particles" />
+          <span class="label">Support</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="news" class="container" aria-labelledby="news-title">
+      <div class="section-head">
+        <h2 id="news-title">Latest Updates</h2>
+        <p>No downtime updates. Jump back in after patch.</p>
+      </div>
+      <div class="news">
+        <article class="news-card" data-reveal>
+          <div style="background:url('https://images.unsplash.com/photo-1526498460520-4c246339dccb?q=80&w=1200&auto=format&fit=crop') center/cover"></div>
+          <div class="news-body">
+            <h4>Version 20250925 Patch Notes</h4>
+            <p>Balance passes, performance tweaks, and quality-of-life improvements roll out.</p>
+          </div>
+        </article>
+        <article class="news-card" data-reveal>
+          <div style="background:url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1200&auto=format&fit=crop') center/cover"></div>
+          <div class="news-body">
+            <h4>Season 4: Heart of the Dragon</h4>
+            <p>A new guardian joins the fray. Claim rewards with fresh event tracks.</p>
+          </div>
+        </article>
+        <article class="news-card" data-reveal>
+          <div style="background:url('https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=1200&auto=format&fit=crop') center/cover"></div>
+          <div class="news-body">
+            <h4>Ignite Stage 2 Details</h4>
+            <p>Regional clashes heat up as teams fight for championship points.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="esports" class="container" aria-labelledby="esports-title">
+      <div class="section-head">
+        <h2 id="esports-title">Esports Spotlight</h2>
+        <p>Follow brackets, stats, and highlight reels</p>
+      </div>
+      <div class="esports" data-reveal>
+        <div class="inner">
+          <div>
+            <h3>Mid-Season Finals Incoming</h3>
+            <p>Prime rosters collide in a best-of series. Track live data and relive every clutch play.</p>
+            <div class="hero-cta">
+              <a class="cta" data-magnetic href="#watch"><span class="shine" aria-hidden="true"></span>Watch Live</a>
+              <a class="btn" href="#bracket">View Bracket</a>
+            </div>
+          </div>
+          <div class="art">
+            <img src="https://images.unsplash.com/photo-1559575003-1c4365c6f50b?q=80&w=1400&auto=format&fit=crop" alt="Arena lights and roaring crowd" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="download" class="container" aria-labelledby="download-title">
+      <div class="section-head">
+        <h2 id="download-title">Play Now</h2>
+        <p>Available on Windows, PlayStation, and Xbox</p>
+      </div>
+      <div class="features">
+        <a class="card" href="#" data-tilt data-magnetic data-reveal>
+          <h3>Windows</h3>
+          <p>Direct download for desktop. Optimized render path and input latency.</p>
+        </a>
+        <a class="card" href="#" data-tilt data-magnetic data-reveal>
+          <h3>PlayStation</h3>
+          <p>Seamless HDR visuals and adaptive trigger presets.</p>
+        </a>
+        <a class="card" href="#" data-tilt data-magnetic data-reveal>
+          <h3>Xbox</h3>
+          <p>Quick Resume ready with stable 120Hz modes.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <div>
+        <div class="brand"><span class="brand-mark" aria-hidden="true"></span><strong>Rivals</strong><span>Nexus</span></div>
+        <small>© 2025 Rivals Nexus. All rights reserved.</small>
+      </div>
+      <div>
+        <h5>Explore</h5>
+        <a href="#features">Features</a>
+        <a href="#maps">Maps</a>
+        <a href="#heroes">Heroes</a>
+        <a href="#news">News</a>
+      </div>
+      <div>
+        <h5>Legal</h5>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </footer>
+
+  <script defer src="Rivals.js"></script>
+</body>
+</html>
+
+

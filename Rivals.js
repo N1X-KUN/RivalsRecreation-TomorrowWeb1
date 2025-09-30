@@ -148,6 +148,56 @@
   const style = document.createElement('style');
   style.textContent = `.user-tabbing :focus { outline: 2px solid ${getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#e93d54'} !important; outline-offset: 2px; }`;
   document.head.appendChild(style);
+
+  // Hero video splash -> banner transition
+  const heroVideo = document.getElementById('hero-video');
+  const heroContent = document.querySelector('.hero .content');
+  if (heroVideo && heroContent) {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      heroVideo.classList.remove('video-intro');
+      heroVideo.classList.add('video-banner');
+      heroContent.classList.add('visible');
+    } else {
+      // Lock scroll during splash
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      const SPLASH_MS = 8000; // 8 seconds fullscreen splash
+      setTimeout(() => {
+        // Smooth FLIP transition from fullscreen to hero banner position
+        const heroSection = document.querySelector('.hero');
+        const heroRect = heroSection ? heroSection.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+
+        // First: measure fullscreen (A)
+        const startRect = { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+        const endRect = heroRect; // where the banner will be
+
+        // Compute scale and translate
+        const scaleX = endRect.width / startRect.width;
+        const scaleY = endRect.height / startRect.height;
+        const translateX = endRect.left - startRect.left;
+        const translateY = endRect.top - startRect.top;
+
+        // Apply transform to animate into place
+        heroVideo.style.transformOrigin = 'top left';
+        heroVideo.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+
+        // When the transform animation ends, switch to in-hero layout class
+        const onTransitionEnd = () => {
+          heroVideo.removeEventListener('transitionend', onTransitionEnd);
+          heroVideo.style.transform = '';
+          heroVideo.classList.remove('video-intro');
+          heroVideo.classList.add('video-banner');
+          heroContent.classList.add('visible');
+          document.body.style.overflow = originalOverflow || '';
+          try { heroVideo.loop = true; } catch (_) {}
+        };
+        heroVideo.addEventListener('transitionend', onTransitionEnd);
+      }, SPLASH_MS);
+    }
+  }
+
 })();
 
 

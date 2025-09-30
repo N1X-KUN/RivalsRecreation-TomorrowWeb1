@@ -44,13 +44,17 @@
 
   <main id="main">
     <section class="hero" aria-label="Hero">
+    <video id="hero-video" class="video-intro" autoplay muted playsinline loop>
+      <source src="Videos/HeroBanner Vid.mp4" type="video/mp4">
+    </video>
+
       <div class="stars" aria-hidden="true"></div>
       <div class="hero-art" aria-hidden="true">
         <div class="orb red" data-parallax data-depth="0.06"></div>
         <div class="orb gold" data-parallax data-depth="0.08"></div>
         <div class="orb blue" data-parallax data-depth="0.04"></div>
       </div>
-      <div class="container hero-inner" data-reveal>
+      <div class="container hero-inner content" data-reveal>
         <span class="eyebrow"><span class="dot"></span> Live: Season Zenith 3.5</span>
         <h1>Fast-Paced 6v6 Hero Action in the <span class="accent">Nexus</span></h1>
         <p class="subhead">Enter a cinematic clash across timelines. Master team-up abilities, reshape the battlefield, and write your legend in a world forged by power, style, and momentum.</p>
@@ -61,39 +65,43 @@
       </div>
     </section>
 
-    <section id="features" class="container" aria-labelledby="features-title">
+    <section id="features" class="container section-sep" aria-labelledby="features-title">
       <div class="section-head">
         <h2 id="features-title">Core Features</h2>
-        <p>Designed for clarity, speed, and spectacle</p>
+        <p>Fast, readable, and cinematic multiplayer action</p>
       </div>
       <div class="features">
-        <article class="card" data-tilt data-reveal>
-          <span class="badge">Team-Up Abilities</span>
-          <h3>Create Synergy</h3>
-          <p>Combine ultimates and utilities to unlock spectacular duo plays that swing momentum.</p>
+        <article class="feature" data-reveal>
+          <div class="media"><img src="https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=1400&auto=format&fit=crop" alt="Heroes clashing in 6v6" /></div>
+          <div class="copy">
+            <span class="badge">6v6 Hero Shooter</span>
+            <h3>Team Up. Counter. Dominate.</h3>
+            <p>Pick unique roles and combine abilities for explosive synergy. Momentum swings with coordinated plays.</p>
+          </div>
         </article>
-        <article class="card" data-tilt data-reveal>
-          <span class="badge">Destructible Spaces</span>
-          <h3>Reshape Maps</h3>
-          <p>Crack open flanks and reveal new sightlines with dynamic environmental destruction.</p>
+        <article class="feature" data-reveal>
+          <div class="media"><img src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=1400&auto=format&fit=crop" alt="Free-to-play action" /></div>
+          <div class="copy">
+            <span class="badge">Free To Play</span>
+            <h3>Jump In Instantly</h3>
+            <p>Fair progression and seasonal rewards. Play casually or climb competitive ladders.</p>
+          </div>
         </article>
-        <article class="card" data-tilt data-reveal>
-          <span class="badge">Competitive Focus</span>
-          <h3>Tournament Ready</h3>
-          <p>Balanced objectives, clear roles, and clean readability for top-tier play.</p>
-        </article>
-        <article class="card" data-tilt data-reveal>
-          <span class="badge">Optimized</span>
-          <h3>Run Smooth</h3>
-          <p>Adaptable visuals and responsive input deliver fluid motion on a wide range of systems.</p>
+        <article class="feature" data-reveal>
+          <div class="media"><img src="https://images.unsplash.com/photo-1517817748492-bdacc0be9d39?q=80&w=1400&auto=format&fit=crop" alt="Destructible arenas" /></div>
+          <div class="copy">
+            <span class="badge">Dynamic Maps</span>
+            <h3>Shape The Battlefield</h3>
+            <p>Open flanks and reveal new sightlines mid-round with reactive environments and shifting objectives.</p>
+          </div>
         </article>
       </div>
     </section>
 
-    <section id="maps" class="container" aria-labelledby="maps-title">
+    <section id="maps" class="container section-sep" aria-labelledby="maps-title">
       <div class="section-head">
         <h2 id="maps-title">Maps Showcase</h2>
-        <p>Traverse realms from celestial gardens to neon skylines</p>
+        <p>Swipe or use arrows — captions under each map</p>
       </div>
       <div class="carousel" data-reveal>
         <div class="carousel-track" id="maps-track">
@@ -133,31 +141,6 @@
       </div>
     </section>
 
-    <section id="heroes" class="container" aria-labelledby="heroes-title">
-      <div class="section-head">
-        <h2 id="heroes-title">Roster Highlights</h2>
-        <p>Distinct roles, crisp silhouettes, and expressive playstyles</p>
-      </div>
-      <div class="heroes">
-        <article class="hero-card" data-tilt data-reveal aria-label="Vanguard">
-          <img src="https://images.unsplash.com/photo-1606117331092-2539977a7b32?q=80&w=1200&auto=format&fit=crop" alt="Armored vanguard silhouette" />
-          <span class="label">Vanguard</span>
-        </article>
-        <article class="hero-card" data-tilt data-reveal aria-label="Skirmisher">
-          <img src="https://images.unsplash.com/photo-1610476441443-97f211c5e367?q=80&w=1200&auto=format&fit=crop" alt="Agile skirmisher in motion" />
-          <span class="label">Skirmisher</span>
-        </article>
-        <article class="hero-card" data-tilt data-reveal aria-label="Controller">
-          <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop" alt="Technomancer with glowing devices" />
-          <span class="label">Controller</span>
-        </article>
-        <article class="hero-card" data-tilt data-reveal aria-label="Support">
-          <img src="https://images.unsplash.com/photo-1493612276216-ee3925520721?q=80&w=1200&auto=format&fit=crop" alt="Healer amid radiant particles" />
-          <span class="label">Support</span>
-        </article>
-      </div>
-    </section>
-
     <section id="news" class="container" aria-labelledby="news-title">
       <div class="section-head">
         <h2 id="news-title">Latest Updates</h2>
@@ -188,46 +171,23 @@
       </div>
     </section>
 
-    <section id="esports" class="container" aria-labelledby="esports-title">
-      <div class="section-head">
-        <h2 id="esports-title">Esports Spotlight</h2>
-        <p>Follow brackets, stats, and highlight reels</p>
-      </div>
-      <div class="esports" data-reveal>
+    
+
+    <section id="download" class="section-sep full-bleed" aria-labelledby="download-title">
+      <div class="cta-download" data-reveal>
+        <div class="bg"><video src="Videos/HeroBanner Vid.mp4" autoplay muted loop playsinline></video></div>
+        <div class="overlay"></div>
         <div class="inner">
-          <div>
-            <h3>Mid-Season Finals Incoming</h3>
-            <p>Prime rosters collide in a best-of series. Track live data and relive every clutch play.</p>
-            <div class="hero-cta">
-              <a class="cta" data-magnetic href="#watch"><span class="shine" aria-hidden="true"></span>Watch Live</a>
-              <a class="btn" href="#bracket">View Bracket</a>
-            </div>
-          </div>
-          <div class="art">
-            <img src="https://images.unsplash.com/photo-1559575003-1c4365c6f50b?q=80&w=1400&auto=format&fit=crop" alt="Arena lights and roaring crowd" />
+          <h2 id="download-title">Join The Rivals Now</h2>
+          <p class="subhead">Choose your platform. Links are placeholders—you can add real URLs.</p>
+          <div class="platforms">
+            <a href="#">Steam</a>
+            <a href="#">Epic Games</a>
+            <a href="#">PlayStation</a>
+            <a href="#">Xbox</a>
+            <a href="#">Windows</a>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section id="download" class="container" aria-labelledby="download-title">
-      <div class="section-head">
-        <h2 id="download-title">Play Now</h2>
-        <p>Available on Windows, PlayStation, and Xbox</p>
-      </div>
-      <div class="features">
-        <a class="card" href="#" data-tilt data-magnetic data-reveal>
-          <h3>Windows</h3>
-          <p>Direct download for desktop. Optimized render path and input latency.</p>
-        </a>
-        <a class="card" href="#" data-tilt data-magnetic data-reveal>
-          <h3>PlayStation</h3>
-          <p>Seamless HDR visuals and adaptive trigger presets.</p>
-        </a>
-        <a class="card" href="#" data-tilt data-magnetic data-reveal>
-          <h3>Xbox</h3>
-          <p>Quick Resume ready with stable 120Hz modes.</p>
-        </a>
       </div>
     </section>
   </main>

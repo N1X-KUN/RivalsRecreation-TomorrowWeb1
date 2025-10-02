@@ -6,8 +6,8 @@
   --bg-0: #0b0b12;
   --bg-1: #0f0f16;
   --bg-2: #141826;
-  --text-0: #f5f7ff;
-  --text-1: #c7c9d1;
+  --text-0: #ffea4d;
+  --text-1: #ffffff;
   --brand: #000000;
   --brand-2: #f7a928;
   --muted: #2a2f45;
@@ -64,7 +64,7 @@ header.site-header {
 .cta {
   display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px;
   background: linear-gradient(180deg, #ffeb3b, #ffd700);
-  color: #e93d54; font-weight: 800; letter-spacing: 0.3px;
+  color: #000000; font-weight: 800; letter-spacing: 0.3px;
   box-shadow: 0 10px 24px rgba(255, 215, 0, 0.35);
   transform: translateZ(0);
   will-change: transform;
@@ -127,7 +127,7 @@ header.site-header {
   text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 .hero-cta { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-.btn { padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); color: var(--text-0); font-weight: 700; }
+.btn { padding: 12px 14px; border-radius: 12px; background: rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.08); color: var(--text-0); font-weight: 700; }
 .btn:hover { background: rgba(255,255,255,0.1); }
 
 .hero-art { position: absolute; inset: 0; pointer-events: none; }
@@ -229,6 +229,8 @@ footer { margin-top: 0; }
   gap: 10px;
   order: 1;
   transition: all 0.4s ease;
+  position: relative;
+  min-height: 120px;
 }
 
 .feature:hover .copy {
@@ -273,14 +275,35 @@ footer { margin-top: 0; }
   text-shadow: 0 0 20px rgba(255,215,0,0.3);
 }
 
-.feature .copy p { 
+.feature .copy .description-normal,
+.feature .copy .description-hover { 
   margin: 0; 
   color: var(--text-1);
   line-height: 1.5;
   transition: all 0.4s ease;
+  position: absolute;
+  width: calc(100% - 44px);
+  top: 80px;
 }
 
-.feature:hover .copy p {
+.feature .copy .description-normal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feature .copy .description-hover {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.feature:hover .copy .description-normal {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.feature:hover .copy .description-hover {
+  opacity: 1;
+  transform: translateY(0);
   color: var(--text-0);
   font-size: 15px;
 }
@@ -541,6 +564,16 @@ footer { margin-top: 0; }
   animation-direction: reverse;
 }
 
+.maps-roulette.normal-right .roulette-track {
+  animation-duration: 20s;
+  animation-direction: normal;
+}
+
+.maps-roulette.normal-left .roulette-track {
+  animation-duration: 20s;
+  animation-direction: reverse;
+}
+
 /* Hover effects */
 .roulette-slide:hover img {
   transform: scale(1.05);
@@ -557,7 +590,9 @@ footer { margin-top: 0; }
   .maps-roulette.fast-right .roulette-track,
   .maps-roulette.fast-left .roulette-track,
   .maps-roulette.slow-right .roulette-track,
-  .maps-roulette.slow-left .roulette-track {
+  .maps-roulette.slow-left .roulette-track,
+  .maps-roulette.normal-right .roulette-track,
+  .maps-roulette.normal-left .roulette-track {
     animation: none !important;
   }
   
@@ -600,10 +635,113 @@ footer { margin-top: 0; }
 .hero-card .label { position: absolute; left: 10px; top: 10px; background: rgba(0,0,0,0.5); padding: 6px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); font-size: 12px; }
 
 .news { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
-.news-card { display: grid; grid-template-rows: 180px auto; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.03)); box-shadow: 0 10px 24px rgba(0,0,0,0.25); }
-.news-body { padding: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03)); }
-.news-body h4 { margin: 0 0 6px; }
-.news-body p { margin: 0; color: var(--text-1); }
+.news-card { 
+  display: grid; 
+  grid-template-rows: 180px auto; 
+  border-radius: 16px; 
+  overflow: hidden; 
+  border: 1px solid rgba(255,255,255,0.1); 
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.03)); 
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.news-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  border-color: rgba(255,215,0,0.3);
+}
+
+.news-card > div:first-child {
+  transition: transform 0.3s ease;
+}
+
+.news-card:hover > div:first-child {
+  transform: scale(1.05);
+}
+
+.news-body { 
+  padding: 12px; 
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+  transition: all 0.3s ease;
+}
+
+.news-card:hover .news-body {
+  background: linear-gradient(180deg, rgba(255,215,0,0.08), rgba(255,215,0,0.05));
+}
+
+.news-body h4 { 
+  margin: 0 0 6px;
+  transition: color 0.3s ease;
+}
+
+.news-card:hover .news-body h4 {
+  color: var(--yellow-primary);
+}
+
+.news-body p { 
+  margin: 0; 
+  color: var(--text-1);
+  transition: color 0.3s ease;
+}
+
+.news-card:hover .news-body p {
+  color: var(--text-0);
+}
+
+/* View More Patch Button */
+.news-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.patch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,235,59,0.15));
+  border: 2px solid rgba(255,215,0,0.3);
+  color: var(--yellow-primary);
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.patch-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,235,59,0.25));
+  border-color: rgba(255,215,0,0.6);
+  box-shadow: 0 8px 25px rgba(255,215,0,0.3);
+}
+
+.patch-btn .btn-icon {
+  font-size: 20px;
+  transition: transform 0.3s ease;
+}
+
+.patch-btn:hover .btn-icon {
+  transform: translateX(4px);
+}
+
+.patch-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.patch-btn:hover::before {
+  transform: translateX(100%);
+}
 
 /* Download CTA section */
 .cta-download { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid rgba(0, 0, 0, 0.08); }

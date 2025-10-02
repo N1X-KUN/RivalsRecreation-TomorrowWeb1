@@ -170,14 +170,17 @@
     document.querySelectorAll('[data-tilt]').forEach(makeTilt);
   }
 
-  // Maps Roulette (mouse direction control)
+  // Maps Roulette (mouse direction control with persistence)
   const mapsRoulette = document.getElementById('maps-roulette');
   const rouletteTrack = document.getElementById('roulette-track');
   
   if (mapsRoulette && rouletteTrack) {
     let mouseX = 0;
     let isHovering = false;
-    let centerPauseTimeout = null;
+    let lastDirection = 'right'; // Default direction
+    let lastSpeed = 'normal'; // normal, slow, fast
+    let isPaused = false;
+    let currentSlideIndex = 0;
     
     function updateRouletteDirection(e) {
       if (!isHovering) return;
@@ -195,12 +198,14 @@
       
       // Center pause zone (60px radius)
       if (distanceFromCenter < 60) {
+        isPaused = true;
         mapsRoulette.classList.add('paused');
-        mapsRoulette.classList.remove('fast-right', 'fast-left', 'slow-right', 'slow-left');
+        mapsRoulette.classList.remove('fast-right', 'fast-left', 'slow-right', 'slow-left', 'normal-right', 'normal-left');
         return;
       }
       
       // Remove paused state
+      isPaused = false;
       mapsRoulette.classList.remove('paused');
       
       // Determine direction and speed based on mouse position
@@ -210,21 +215,50 @@
       const intensity = Math.abs(distanceFromCenterX) / maxDistance;
       
       // Clear all direction classes
-      mapsRoulette.classList.remove('fast-right', 'fast-left', 'slow-right', 'slow-left');
+      mapsRoulette.classList.remove('fast-right', 'fast-left', 'slow-right', 'slow-left', 'normal-right', 'normal-left');
       
       if (distanceFromCenterX > 20) {
         // Mouse on right side - scroll right
+        lastDirection = 'right';
         if (intensity > 0.6) {
+          lastSpeed = 'fast';
           mapsRoulette.classList.add('fast-right');
         } else {
+          lastSpeed = 'slow';
           mapsRoulette.classList.add('slow-right');
         }
       } else if (distanceFromCenterX < -20) {
         // Mouse on left side - scroll left
+        lastDirection = 'left';
         if (intensity > 0.6) {
+          lastSpeed = 'fast';
           mapsRoulette.classList.add('fast-left');
         } else {
+          lastSpeed = 'slow';
           mapsRoulette.classList.add('slow-left');
+        }
+      }
+    }
+    
+    function resumeLastDirection() {
+      // Resume with the last known direction and speed
+      mapsRoulette.classList.remove('paused', 'fast-right', 'fast-left', 'slow-right', 'slow-left', 'normal-right', 'normal-left');
+      
+      if (lastDirection === 'right') {
+        if (lastSpeed === 'fast') {
+          mapsRoulette.classList.add('fast-right');
+        } else if (lastSpeed === 'slow') {
+          mapsRoulette.classList.add('slow-right');
+        } else {
+          mapsRoulette.classList.add('normal-right');
+        }
+      } else {
+        if (lastSpeed === 'fast') {
+          mapsRoulette.classList.add('fast-left');
+        } else if (lastSpeed === 'slow') {
+          mapsRoulette.classList.add('slow-left');
+        } else {
+          mapsRoulette.classList.add('normal-left');
         }
       }
     }
@@ -238,7 +272,8 @@
     
     mapsRoulette.addEventListener('mouseleave', () => {
       isHovering = false;
-      mapsRoulette.classList.remove('paused', 'fast-right', 'fast-left', 'slow-right', 'slow-left');
+      // Don't reset to default - resume last direction
+      resumeLastDirection();
     });
     
     // Handle touch events for mobile
@@ -256,7 +291,7 @@
     
     mapsRoulette.addEventListener('touchend', () => {
       isHovering = false;
-      mapsRoulette.classList.remove('paused', 'fast-right', 'fast-left', 'slow-right', 'slow-left');
+      resumeLastDirection();
     });
   }
 

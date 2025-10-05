@@ -9,16 +9,12 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs/%3E%3Ccircle cx='32' cy='32' r='30' fill='%230b0b12'/%3E%3Cpath d='M16 44 L32 12 L48 44 L40 44 L32 28 L24 44 Z' fill='%23e93d54'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="Rivals.css" />
   <style>
-    /* Enable image media for hero cards */
-    .hero-media { position: relative; overflow: hidden; border-radius: 12px; }
-    .hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    /* Hover-only description overlay for patch cards */
-    .hero-card { position: relative; }
-    .hero-tooltip { position: absolute; inset: 0; background: rgba(12,12,18,0.78); color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; border-radius: 14px; opacity: 0; visibility: hidden; transition: opacity .18s ease; }
-    .hero-card:hover .hero-tooltip { opacity: 1; visibility: visible; }
-    .hero-body .hero-desc { display: none; }
     /* Make news cards act like links you can fill in later */
     .news-card[role="link"] { cursor: pointer; }
+    /* Media helpers for images */
+    .hero-media img, .news-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .news-media { min-height: 120px; }
+    .hero-media { min-height: 160px; }
   </style>
 </head>
 <body>
@@ -57,7 +53,7 @@
   </header>
 
   <!-- Full-width hero banner -->
-  <section class="page-hero" aria-label="News & Patch Notes banner" style="background-image: linear-gradient(rgba(15,15,22,.55), rgba(15,15,22,.55)), url('Images/SpiderMap.jpg'); background-size: cover; background-position: center; padding: 64px 5vw; margin: 0 0 24px; min-height: 220px; display: flex; align-items: flex-end;">
+  <section class="page-hero" aria-label="News & Patch Notes banner" style="background-image: linear-gradient(rgba(15,15,22,.55), rgba(15,15,22,.55)), url('Images/PatchImage.jpg'); background-size: cover; background-position: center; padding: 64px 5vw; margin: 0 0 24px; min-height: 220px; display: flex; align-items: flex-end;">
     <div class="container" style="width:100%">
       <h1 style="margin:0">News & Patch Notes</h1>
     </div>
@@ -74,28 +70,28 @@
 
       <div class="news-grid" id="news-grid" data-collapsed="true" aria-live="polite">
         <!-- Visible items -->
-        <article class="news-card" tabindex="0">
-          <figure class="news-media" aria-hidden="true"></figure>
+        <article class="news-card" tabindex="0" data-href="https://www.marvelrivals.com/gameupdate/20251003/41548_1263184.html">
+          <figure class="news-media" aria-hidden="true"><img src="Images/New1.jpg" alt="News image" /></figure>
           <div class="news-meta">
-            <span class="pill">Game Update</span>
+            <span class="pill">Version Update</span>
             <time datetime="2025-10-10">Oct 10, 2025</time>
           </div>
-          <h3 class="news-title">Version 20251010 Patch Notes</h3>
-          <p class="news-desc">Comprehensive balance pass, map tweaks, and performance improvements.</p>
+          <h3 class="news-title">Patch Notes: Season 4.5 Arrives</h3>
+          <p class="news-desc">In Season 4.5, Daredevil is set to unleash the beast!</p>
         </article>
 
-        <article class="news-card" tabindex="0">
-          <figure class="news-media alt" aria-hidden="true"></figure>
+        <article class="news-card" tabindex="0" data-href="https://www.marvelrivals.com/balancepost/20251001/41667_1263090.html">
+          <figure class="news-media alt" aria-hidden="true"><img src="Images/New2.jpg" alt="News image" /></figure>
           <div class="news-meta">
             <span class="pill">Balance Post</span>
             <time datetime="2025-10-10">Oct 10, 2025</time>
           </div>
           <h3 class="news-title">Hero Balance Adjustments</h3>
-          <p class="news-desc">Targeted buffs and nerfs to bring outlier heroes toward the pack.</p>
+          <p class="news-desc">The Marvel Rivals universe never stands still! With new buffs, nerfs, and team-up tweaks, the meta is evolving once again. Suit up and see which heroes are rising and who's getting knocked down a peg!</p>
         </article>
 
-        <article class="news-card more" tabindex="0" hidden style="display:none">
-          <figure class="news-media dark" aria-hidden="true"></figure>
+        <article class="news-card more" tabindex="0" hidden style="display:none" data-href="">
+          <figure class="news-media dark" aria-hidden="true"><img src="Images/SpiderMap.jpg" alt="News image" /></figure>
           <div class="news-meta">
             <span class="pill">Announcement</span>
             <time datetime="2025-10-02">Oct 2, 2025</time>
@@ -104,8 +100,8 @@
           <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
         </article>
 
-        <article class="news-card" tabindex="0">
-          <figure class="news-media dark" aria-hidden="true"></figure>
+        <article class="news-card" tabindex="0" data-href="">
+          <figure class="news-media dark" aria-hidden="true"><img src="Images/DraculaCastle.jpg" alt="News image" /></figure>
           <div class="news-meta">
             <span class="pill">Announcement</span>
             <time datetime="2025-10-02">Oct 2, 2025</time>
@@ -114,8 +110,8 @@
           <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
         </article>
 
-        <article class="news-card" tabindex="0">
-          <figure class="news-media dark" aria-hidden="true"></figure>
+        <article class="news-card" tabindex="0" data-href="">
+          <figure class="news-media dark" aria-hidden="true"><img src="Images/JumpIN.jpg" alt="News image" /></figure>
           <div class="news-meta">
             <span class="pill">Announcement</span>
             <time datetime="2025-10-02">Oct 2, 2025</time>
@@ -124,8 +120,8 @@
           <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
         </article>
 
-        <article class="news-card" tabindex="0">
-          <figure class="news-media dark" aria-hidden="true"></figure>
+        <article class="news-card" tabindex="0" data-href="">
+          <figure class="news-media dark" aria-hidden="true"><img src="Images/KunLun.jpg" alt="News image" /></figure>
           <div class="news-meta">
             <span class="pill">Announcement</span>
             <time datetime="2025-10-02">Oct 2, 2025</time>
@@ -145,8 +141,8 @@
         </article>
 
         <!-- Hidden by default, revealed with Show more -->
-        <article class="news-card more" hidden style="display:none">
-          <figure class="news-media" aria-hidden="true"></figure>
+        <article class="news-card more" hidden style="display:none" data-href="">
+          <figure class="news-media" aria-hidden="true"><img src="Images/Maps.jpg" alt="News image" /></figure>
           <div class="news-meta">
             <span class="pill">Dev Diaries</span>
             <time datetime="2025-09-25">Sep 25, 2025</time>
@@ -155,8 +151,8 @@
           <p class="news-desc">How we reduced packet loss and improved hit registration.</p>
         </article>
 
-        <article class="news-card more" hidden style="display:none">
-          <figure class="news-media alt" aria-hidden="true"></figure>
+        <article class="news-card more" hidden style="display:none" data-href="">
+          <figure class="news-media alt" aria-hidden="true"><img src="Images/TeamUp.jpg" alt="News image" /></figure>
           <div class="news-meta">
             <span class="pill">Event</span>
             <time datetime="2025-09-20">Sep 20, 2025</time>
@@ -183,60 +179,135 @@
 
       <div class="hero-grid">
         <!-- Example Buff Card -->
-        <article class="hero-card">
+        <article class="hero-card" data-href="">
           <figure class="hero-media" aria-label="Venom artwork">
-            <div class="media-swatch buff" aria-hidden="true"></div>
+            <img src="Images/PVenom.jpg" alt="VenomWin" />
           </figure>
           <div class="hero-body">
             <div class="hero-header">
               <h3 class="hero-name">Venom</h3>
               <span class="badge buff" aria-label="Buffed">Buff</span>
             </div>
-            <p class="hero-desc">Basic combo damage slightly increased; cooldown on Echo Sense reduced by 2s.</p>
+            <p class="hero-desc">Became A Pain In The-</p>
           </div>
         </article>
 
-        <article class="hero-card">
-          <figure class="hero-media" aria-label="Daredevil artwork">
-            <div class="media-swatch buff" aria-hidden="true"></div>
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Angela artwork">
+            <img src="Images/PAngela.jpg" alt="AngelaWin" />
           </figure>
           <div class="hero-body">
             <div class="hero-header">
-              <h3 class="hero-name">Daredevil</h3>
+              <h3 class="hero-name">Angela</h3>
               <span class="badge buff" aria-label="Buffed">Buff</span>
             </div>
-            <p class="hero-desc">Basic combo damage slightly increased; cooldown on Echo Sense reduced by 2s.</p>
+            <p class="hero-desc">A Giant Mommy Mosquito Poking Hard.</p>
           </div>
         </article>
 
-
-        <!-- Example Nerf Card -->
-        <article class="hero-card">
-          <figure class="hero-media" aria-label="Loki artwork">
-            <div class="media-swatch nerf" aria-hidden="true"></div>
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Blade artwork">
+            <img src="Images/PBlade.jpg" alt="BladeWin" />
           </figure>
           <div class="hero-body">
             <div class="hero-header">
-              <h3 class="hero-name">Loki</h3>
-              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+              <h3 class="hero-name">Blade</h3>
+              <span class="badge buff" aria-label="Buffed">Buff</span>
             </div>
-            <p class="hero-desc">Illusionary Strike slow reduced and ultimate duration shortened by 1s.</p>
+            <p class="hero-desc">Virgil Reincarnated But In The Hood...</p>
           </div>
         </article>
 
-        <article class="hero-card">
-          <figure class="hero-media" aria-label="Loki artwork">
-            <div class="media-swatch nerf" aria-hidden="true"></div>
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Emma artwork">
+            <img src="Images/PEmma.jpg" alt="EmmaLose" />
           </figure>
           <div class="hero-body">
             <div class="hero-header">
-              <h3 class="hero-name">Loki</h3>
+              <h3 class="hero-name">Emma</h3>
               <span class="badge nerf" aria-label="Nerfed">Nerf</span>
             </div>
-            <p class="hero-desc">Illusionary Strike slow reduced and ultimate duration shortened by 1s.</p>
+            <p class="hero-desc">The Thicker It Is, The Longer The Skills.</p>
           </div>
         </article>
-        
+
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Moon artwork">
+            <img src="Images/PMoon.jpg" alt="MoonWin" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Moon Knight</h3>
+              <span class="badge buff" aria-label="Buffed">Buff</span>
+            </div>
+            <p class="hero-desc">Sailor Moon Power Rise!</p>
+          </div>
+        </article>
+
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Torch artwork">
+            <img src="Images/PTorch.jpg" alt="TorchL" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Human Torch</h3>
+              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+            </div>
+            <p class="hero-desc">He is just a bon fire now...</p>
+          </div>
+        </article>
+
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="CND artwork">
+            <img src="Images/PClok.jpg" alt="CNDL" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Cloak and Dagger</h3>
+              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+            </div>
+            <p class="hero-desc">Became Clok and Slow Fr</p>
+          </div>
+        </article>
+
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Jeff artwork">
+            <img src="Images/PJeff.jpg" alt="JeffL" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Jeff The Land Shark</h3>
+              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+            </div>
+            <p class="hero-desc">No Longer A Menance To Me.</p>
+          </div>
+        </article>
+
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Ultron artwork">
+            <img src="Images/PUltron.jpg" alt="UltronL" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Ultron</h3>
+              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+            </div>
+            <p class="hero-desc">Not even a support at this point. Where heals?</p>
+          </div>
+        </article>
+
+        <article class="hero-card" data-href="">
+          <figure class="hero-media" aria-label="Majik artwork">
+            <img src="Images/PMajik.jpg" alt="MajikWin" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Majik</h3>
+              <span class="badge buff" aria-label="Buffed">Buff</span>
+            </div>
+            <p class="hero-desc">Nana said "not broken enough" sure...</p>
+          </div>
+        </article>
       </div>
     </section>
   </main>
@@ -354,6 +425,7 @@
       if (!grid || !btnMore || !btnLess) return;
 
       const extraCards = Array.from(grid.querySelectorAll('.news-card.more'));
+      const allCards = Array.from(grid.querySelectorAll('.news-card'));
 
       function showExtras(show) {
         extraCards.forEach(card => {
@@ -367,6 +439,29 @@
 
       btnMore.addEventListener('click', function () { showExtras(true); });
       btnLess.addEventListener('click', function () { showExtras(false); });
+
+      // Make news cards clickable (fill href later)
+      allCards.forEach(card => {
+        const href = card.getAttribute('data-href') || '';
+        card.setAttribute('role', 'link');
+        card.tabIndex = 0;
+        function go() { if (href) window.location.href = href; }
+        card.addEventListener('click', go);
+        card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+      });
+
+      // Make hero cards clickable too
+      const heroCards = Array.from(document.querySelectorAll('.hero-card'));
+      heroCards.forEach(card => {
+        const href = card.getAttribute('data-href') || '';
+        if (!href) return; // leave inert until you add a URL
+        card.setAttribute('role', 'link');
+        card.tabIndex = 0;
+        function go() { if (href) window.location.href = href; }
+        card.addEventListener('click', go);
+        card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+        card.style.cursor = 'pointer';
+      });
 
       // Initialize: extras hidden
       showExtras(false);

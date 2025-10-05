@@ -1195,17 +1195,18 @@ footer { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .hero-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
 .hero-card { position: relative; display: flex; flex-direction: column; background: #0f1219; border: 1px solid #1e2432; border-radius: 14px; overflow: hidden; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .hero-card:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(0,0,0,0.4); border-color: #2a3350; }
-.hero-media { aspect-ratio: 7/9; background: #0c0f15; display: block; }
+.hero-media { height: 260px; background: #0c0f15; display: block; margin: 0; }
+.hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0; }
 .media-swatch { width: 100%; height: 100%; background: #222; }
 .media-swatch.buff { background: linear-gradient(180deg, #1b3b1f, #0d1f11); }
 .media-swatch.nerf { background: linear-gradient(180deg, #3b1b1b, #1f0d0d); }
-.hero-body { display: flex; flex-direction: column; gap: 8px; padding: 12px 12px 14px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0)); min-height: 96px; }
+.hero-body { display: flex; flex-direction: column; gap: 8px; padding: 14px 14px 16px; background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0)); min-height: 148px; }
 .hero-header { display: flex; align-items: center; justify-content: space-between; }
 .hero-name { font-size: 14px; letter-spacing: .7px; text-transform: uppercase; margin: 0; }
 .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
 .badge.buff { color: #90e39a; border-color: #2d6a3f; background: rgba(45,106,63,.15); }
 .badge.nerf { color: #ff9a9a; border-color: #7a2b2b; background: rgba(122,43,43,.15); }
-.hero-desc { margin: 0; color: #c6ccda; font-size: 13px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.hero-desc { margin: 0; color: #c6ccda; font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
 @media (max-width: 1200px) {
   .news-grid { grid-template-columns: repeat(2, 1fr); }

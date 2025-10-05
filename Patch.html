@@ -8,13 +8,25 @@
   <title>Patch Notes - Rivals Nexus</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs/%3E%3Ccircle cx='32' cy='32' r='30' fill='%230b0b12'/%3E%3Cpath d='M16 44 L32 12 L48 44 L40 44 L32 28 L24 44 Z' fill='%23e93d54'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="Rivals.css" />
+  <style>
+    /* Enable image media for hero cards */
+    .hero-media { position: relative; overflow: hidden; border-radius: 12px; }
+    .hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* Hover-only description overlay for patch cards */
+    .hero-card { position: relative; }
+    .hero-tooltip { position: absolute; inset: 0; background: rgba(12,12,18,0.78); color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; border-radius: 14px; opacity: 0; visibility: hidden; transition: opacity .18s ease; }
+    .hero-card:hover .hero-tooltip { opacity: 1; visibility: visible; }
+    .hero-body .hero-desc { display: none; }
+    /* Make news cards act like links you can fill in later */
+    .news-card[role="link"] { cursor: pointer; }
+  </style>
 </head>
 <body>
   <a class="sr-only" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="container nav">
       <a class="brand" href="Rivals.html" aria-label="Rivals Nexus Home">
-        <img src="Images/Icon Logo.svg" alt="Brand" style="height:40px;width:auto" />
+        <img src="Images/Icon Logo.svg" alt="Brand" style="height:28px;width:auto" />
       </a>
       <nav class="nav-links" aria-label="Primary">
         <a href="Patch.html" aria-current="page">Patch Page</a>
@@ -44,10 +56,212 @@
     </div>
   </header>
 
+  <!-- Full-width hero banner -->
+  <section class="page-hero" aria-label="News & Patch Notes banner" style="background-image: linear-gradient(rgba(15,15,22,.55), rgba(15,15,22,.55)), url('Images/SpiderMap.jpg'); background-size: cover; background-position: center; padding: 64px 5vw; margin: 0 0 24px; min-height: 220px; display: flex; align-items: flex-end;">
+    <div class="container" style="width:100%">
+      <h1 style="margin:0">News & Patch Notes</h1>
+    </div>
+  </section>
+
   <main id="main" class="container">
-    <h1>Patch Notes</h1>
-    <p>Coming soon.</p>
+
+    <!-- News & Updates -->
+    <section class="news-section" aria-labelledby="news-heading">
+      <div class="section-head">
+        <h2 id="news-heading">Latest News & Updates</h2>
+        <p class="section-sub">Fresh drops from the dev team — events, balance, and more.</p>
+      </div>
+
+      <div class="news-grid" id="news-grid" data-collapsed="true" aria-live="polite">
+        <!-- Visible items -->
+        <article class="news-card" tabindex="0">
+          <figure class="news-media" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Game Update</span>
+            <time datetime="2025-10-10">Oct 10, 2025</time>
+          </div>
+          <h3 class="news-title">Version 20251010 Patch Notes</h3>
+          <p class="news-desc">Comprehensive balance pass, map tweaks, and performance improvements.</p>
+        </article>
+
+        <article class="news-card" tabindex="0">
+          <figure class="news-media alt" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Balance Post</span>
+            <time datetime="2025-10-10">Oct 10, 2025</time>
+          </div>
+          <h3 class="news-title">Hero Balance Adjustments</h3>
+          <p class="news-desc">Targeted buffs and nerfs to bring outlier heroes toward the pack.</p>
+        </article>
+
+        <article class="news-card more" tabindex="0" hidden style="display:none">
+          <figure class="news-media dark" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Announcement</span>
+            <time datetime="2025-10-02">Oct 2, 2025</time>
+          </div>
+          <h3 class="news-title">Season 3.5 — Winners Event</h3>
+          <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
+        </article>
+
+        <article class="news-card" tabindex="0">
+          <figure class="news-media dark" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Announcement</span>
+            <time datetime="2025-10-02">Oct 2, 2025</time>
+          </div>
+          <h3 class="news-title">Season 3.5 — Winners Event</h3>
+          <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
+        </article>
+
+        <article class="news-card" tabindex="0">
+          <figure class="news-media dark" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Announcement</span>
+            <time datetime="2025-10-02">Oct 2, 2025</time>
+          </div>
+          <h3 class="news-title">Season 3.5 — Winners Event</h3>
+          <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
+        </article>
+
+        <article class="news-card" tabindex="0">
+          <figure class="news-media dark" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Announcement</span>
+            <time datetime="2025-10-02">Oct 2, 2025</time>
+          </div>
+          <h3 class="news-title">Season 3.5 — Winners Event</h3>
+          <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
+        </article>
+
+        <article class="news-card" tabindex="0">
+          <figure class="news-media dark" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Announcement</span>
+            <time datetime="2025-10-02">Oct 2, 2025</time>
+          </div>
+          <h3 class="news-title">Season 3.5 — Winners Event</h3>
+          <p class="news-desc">Earn event currency to unlock exclusive cosmetics and banners.</p>
+        </article>
+
+        <!-- Hidden by default, revealed with Show more -->
+        <article class="news-card more" hidden style="display:none">
+          <figure class="news-media" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Dev Diaries</span>
+            <time datetime="2025-09-25">Sep 25, 2025</time>
+          </div>
+          <h3 class="news-title">Netcode Improvements Deep Dive</h3>
+          <p class="news-desc">How we reduced packet loss and improved hit registration.</p>
+        </article>
+
+        <article class="news-card more" hidden style="display:none">
+          <figure class="news-media alt" aria-hidden="true"></figure>
+          <div class="news-meta">
+            <span class="pill">Event</span>
+            <time datetime="2025-09-20">Sep 20, 2025</time>
+          </div>
+          <h3 class="news-title">Community Clash Weekend</h3>
+          <p class="news-desc">Queue with friends for double progression and themed challenges.</p>
+        </article>
+      </div>
+
+      <div class="section-actions">
+        <button id="news-more" class="btn-ghost" aria-controls="news-grid">Show more</button>
+        <button id="news-less" class="btn-ghost" aria-controls="news-grid" hidden>Show less</button>
+      </div>
+    </section>
+
+    <div class="section-divider" role="separator" aria-hidden="true"></div>
+
+    <!-- Patch Updates -->
+    <section class="patch-section" aria-labelledby="patch-heading">
+      <div class="section-head">
+        <h2 id="patch-heading">Patch Updates</h2>
+        <p class="section-sub">Who rose, who fell, and why.</p>
+      </div>
+
+      <div class="hero-grid">
+        <!-- Example Buff Card -->
+        <article class="hero-card">
+          <figure class="hero-media" aria-label="Venom artwork">
+            <div class="media-swatch buff" aria-hidden="true"></div>
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Venom</h3>
+              <span class="badge buff" aria-label="Buffed">Buff</span>
+            </div>
+            <p class="hero-desc">Basic combo damage slightly increased; cooldown on Echo Sense reduced by 2s.</p>
+          </div>
+        </article>
+
+        <article class="hero-card">
+          <figure class="hero-media" aria-label="Daredevil artwork">
+            <div class="media-swatch buff" aria-hidden="true"></div>
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Daredevil</h3>
+              <span class="badge buff" aria-label="Buffed">Buff</span>
+            </div>
+            <p class="hero-desc">Basic combo damage slightly increased; cooldown on Echo Sense reduced by 2s.</p>
+          </div>
+        </article>
+
+
+        <!-- Example Nerf Card -->
+        <article class="hero-card">
+          <figure class="hero-media" aria-label="Loki artwork">
+            <div class="media-swatch nerf" aria-hidden="true"></div>
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Loki</h3>
+              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+            </div>
+            <p class="hero-desc">Illusionary Strike slow reduced and ultimate duration shortened by 1s.</p>
+          </div>
+        </article>
+
+        <article class="hero-card">
+          <figure class="hero-media" aria-label="Loki artwork">
+            <div class="media-swatch nerf" aria-hidden="true"></div>
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Loki</h3>
+              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+            </div>
+            <p class="hero-desc">Illusionary Strike slow reduced and ultimate duration shortened by 1s.</p>
+          </div>
+        </article>
+        
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <div class="container foot">
+      <div>
+        <div class="brand"><span class="brand-mark" aria-hidden="true"></span><strong>Rivals</strong><span>Nexus</span></div>
+        <small>© 2025 Rivals Nexus. All rights reserved.</small>
+      </div>
+      <div>
+        <h5>Explore</h5>
+        <a href="#features">Features</a>
+        <a href="#maps">Maps</a>
+        <a href="#heroes">Heroes</a>
+        <a href="#news">News</a>
+      </div>
+      <div>
+        <h5>Legal</h5>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- Login/Sign-in Popup -->
   <div id="login-popup" class="login-popup" hidden>
@@ -131,6 +345,33 @@
     </div>
   </div>
 
+  <script>
+    // News grid: show first 6, toggle the rest all at once (Show more/less)
+    (function () {
+      const grid = document.getElementById('news-grid');
+      const btnMore = document.getElementById('news-more');
+      const btnLess = document.getElementById('news-less');
+      if (!grid || !btnMore || !btnLess) return;
+
+      const extraCards = Array.from(grid.querySelectorAll('.news-card.more'));
+
+      function showExtras(show) {
+        extraCards.forEach(card => {
+          card.hidden = !show;
+          card.style.display = show ? '' : 'none';
+        });
+        btnMore.hidden = show;
+        btnLess.hidden = !show;
+        grid.dataset.collapsed = String(!show);
+      }
+
+      btnMore.addEventListener('click', function () { showExtras(true); });
+      btnLess.addEventListener('click', function () { showExtras(false); });
+
+      // Initialize: extras hidden
+      showExtras(false);
+    })();
+  </script>
   <script defer src="Rivals.js"></script>
 </body>
 </html>

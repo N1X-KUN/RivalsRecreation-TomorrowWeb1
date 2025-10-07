@@ -634,7 +634,10 @@ footer { margin-top: 0; }
 .hero-card { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03)); aspect-ratio: 1/1.15; }
 .hero-card .label { position: absolute; left: 10px; top: 10px; background: rgba(0,0,0,0.5); padding: 6px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); font-size: 12px; }
 
-.news { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+.news { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+@media (max-width: 1200px) { .news { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 860px) { .news { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .news { grid-template-columns: 1fr; } }
 .news-card { 
   display: grid; 
   grid-template-rows: 180px auto; 
@@ -684,6 +687,7 @@ footer { margin-top: 0; }
   margin: 0; 
   color: var(--text-1);
   transition: color 0.3s ease;
+  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;
 }
 
 .news-card:hover .news-body p {
@@ -755,12 +759,22 @@ footer { margin-top: 0; }
 .platforms { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 .platforms a { display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); font-weight: 700; }
 
-footer { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.08); background: linear-gradient(180deg, var(--bg-0), #08080d); color: var(--text-1); }
-.foot { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; }
-.foot h5 { margin: 0 0 10px; color: var(--text-0); }
-.foot a { display: inline-block; padding: 6px 0; color: var(--text-1); }
-.foot small { display: block; margin-top: 14px; }
-@media (max-width: 860px) { .foot { grid-template-columns: 1fr; } }
+footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); background: linear-gradient(180deg, var(--bg-0), #08080d); color: var(--text-1); }
+.foot { display: none; }
+
+/* New compact global footer */
+.foot-min { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 13px; color: #bfc6d9; }
+.foot-links a { color: #e6e8ee; }
+.foot-links .sep { opacity: 0.4; }
+.foot-meta { margin-top: 8px; font-size: 12px; color: #98a2b7; }
+.foot-badges { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+.foot-badges .badge-ph { width: 140px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); display: inline-block; }
+.foot-badges img { height: 34px; width: auto; display: inline-block; border-radius: 6px; }
+.foot-right { display: flex; align-items: center; gap: 18px; }
+.foot-logo { width: 200px; height: 50px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.foot-logo img { height: 100%; max-height: 100%; width: auto; display: block; }
+@media (max-width: 860px) { .foot-min { grid-template-columns: 1fr; } .foot-right { justify-content: flex-start; } }
 
 /* Global footer improvements */
 .foot .brand { display: inline-flex; align-items: center; gap: 10px; }
@@ -855,6 +869,33 @@ footer { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   transform: scale(1.08) rotate(-5deg);
   filter: blur(28px) saturate(170%);
 }
+
+/* Starlord's Mixtapes (floating audio player) - boxed layout */
+.mixtape { position: fixed; left: 14px; bottom: 18px; z-index: 80; color: #e6e8ee; }
+.mixtape .panel { width: 280px; min-height: 220px; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; padding: 12px; border-radius: 14px; background: rgba(15,15,22,0.92); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 24px 50px rgba(0,0,0,0.55); }
+.mixtape .head { display:flex; align-items:center; justify-content: space-between; gap:8px; }
+.mixtape .title { font-weight: 800; letter-spacing: .3px; font-size: 14px; }
+.mixtape .close-btn { width: 28px; height: 28px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); cursor: pointer; }
+.mixtape .art { height: 105px; border-radius: 10px; background: linear-gradient(135deg, #2a2f45, #1b2033); border:1px solid rgba(255,255,255,0.06); }
+.mixtape .meta { display:flex; align-items:center; justify-content: space-between; font-size:12px; color:#cbd3e8; }
+.mixtape .label { font-weight:600; }
+.mixtape .controls { display:flex; align-items:center; justify-content:center; gap:10px; }
+.mixtape button { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #fff; cursor: pointer; }
+.mixtape .play { width: 46px; height: 46px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); }
+.mixtape button:hover { background: rgba(255,255,255,0.16); }
+.mixtape .progress { width: 100%; height: 6px; background: rgba(255,255,255,0.12); border-radius: 999px; overflow: hidden; cursor: pointer; }
+.mixtape .progress > span { display:block; height:100%; width:0; background: linear-gradient(90deg, #ffeb3b, #ffd700); }
+.mixtape .panel { display: none; }
+.mixtape:hover .panel { display: grid; }
+/* keep icon visible even when expanded */
+.mixtape .fab { display: inline-flex; }
+.mixtape .fab { width: 46px; height: 46px; display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 18px 36px rgba(0,0,0,0.45); cursor: pointer; }
+.mixtape .fab:hover { background: rgba(255,255,255,0.14); }
+.mixtape .fab svg { width: 28px; height: 28px; }
+/* spinning when playing */
+@keyframes spinDisc { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.mixtape.playing .fab svg { animation: spinDisc 2.2s linear infinite; }
+@media (max-width: 720px) { .mixtape .panel { width: 240px; min-height: 200px; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }

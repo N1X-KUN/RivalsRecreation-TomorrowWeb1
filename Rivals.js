@@ -349,14 +349,13 @@
     banner.setAttribute('aria-live', 'polite');
     banner.innerHTML = `
       <div class="cookie-head">
-        <h4 class="cookie-title">We use cookies</h4>
+        <h4 class="cookie-title">We Got Cookies... Want Some?</h4>
         <button class="cookie-btn" data-action="close" aria-label="Close">×</button>
       </div>
-      <p>Cookies help us improve your experience and keep things secure. You can accept or deny. This is a demo banner only.</p>
+      <p>A cookie is a dessert food with different toppings, like chocolate chips, raisins, and many more. So the dev finished this site thanks to some delicious cookies! </p>
       <div class="cookie-actions">
-        <button class="cookie-btn" data-action="deny">Deny</button>
-        <button class="cookie-btn" data-action="adjust">Adjust</button>
-        <button class="cookie-btn primary" data-action="accept">Accept all</button>
+        <button class="cookie-btn" data-action="deny">I Dislike Cookies</button>
+        <button class="cookie-btn primary" data-action="accept">I Eat Cookies</button>
       </div>
     `;
     document.body.appendChild(banner);
@@ -368,6 +367,135 @@
       if (!btn) return;
       done();
     });
+  })();
+
+  // Starlord's Mixtapes - floating audio player with persistence across pages
+  (function mixtape(){
+    if (document.querySelector('.mixtape')) return;
+    const state = {
+      list: [
+        // Put your own files in Videos/ or elsewhere and update paths below
+        { title: "Guardians Of The Galaxy", src: "Videos/Guardians Music.mp3" },
+        { title: "Fantastic 4", src: "Videos/Fantastic Music.mp3" },
+        { title: "The Avengers", src: "Videos/Avengers Music.mp3" },
+        { title: "Marvel's Ultimate", src: "Videos/Marvel Music.mp3" }
+      ],
+      index: 0,
+      time: 0,
+      playing: true,
+      volume: 0.2,
+      collapsed: localStorage.getItem('mixtape.collapsed') === 'true'
+    };
+
+    const wrap = document.createElement('div');
+    wrap.className = 'mixtape' + (state.collapsed ? ' collapsed' : '');
+    wrap.innerHTML = `
+      <div class="panel" role="region" aria-label="Starlord's Mixtapes">
+        <div class="head">
+          <strong class="title">Starlord's Mixtapes</strong>
+          <button class="close-btn" title="Collapse" aria-label="Collapse">×</button>
+        </div>
+        <div class="art" aria-hidden="true"></div>
+        <div class="meta">
+          <span class="label">${state.list[state.index]?.title || '—'}</span>
+          <span class="time" aria-live="off">0:00</span>
+        </div>
+        <div class="progress" aria-label="Progress"><span></span></div>
+        <div class="controls">
+          <button class="prev" title="Previous" aria-label="Previous">⏮</button>
+          <button class="play" title="Play/Pause" aria-label="Play/Pause">⏸</button>
+          <button class="next" title="Next" aria-label="Next">⏭</button>
+        </div>
+      </div>
+      <button class="fab" title="Open Starlord's Mixtapes" aria-label="Open Mixtapes" ${state.collapsed ? '' : 'style="display:none"'}>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 10h2v4H8zM14 10h2v4h-2z"/></svg>
+      </button>
+      <audio preload="auto"></audio>
+    `;
+    document.body.appendChild(wrap);
+
+    const audio = wrap.querySelector('audio');
+    const btnPlay = wrap.querySelector('.play');
+    const btnPrev = wrap.querySelector('.prev');
+    const btnNext = wrap.querySelector('.next');
+    const btnCollapse = wrap.querySelector('.close-btn');
+    const fab = wrap.querySelector('.fab');
+    const progress = wrap.querySelector('.progress');
+    const progressBar = progress.querySelector('span');
+    const timeEl = wrap.querySelector('.time');
+    const label = wrap.querySelector('.label');
+
+    function fmt(sec){
+      sec = Math.max(0, Math.floor(sec || 0));
+      const m = Math.floor(sec / 60);
+      const s = (sec % 60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    function load(index){
+      if (!state.list[index]) return;
+      state.index = index;
+      localStorage.setItem('mixtape.index', String(state.index));
+      const track = state.list[state.index];
+      label.textContent = track.title;
+      audio.src = track.src;
+      audio.volume = state.volume;
+      audio.onloadedmetadata = () => { try { audio.currentTime = 0; } catch(_) {} };
+    }
+
+    function updateFabSpin(){ wrap.classList.toggle('playing', !audio.paused); }
+    function play(){ state.playing = true; btnPlay.textContent = '⏸'; audio.play().catch(()=>{}); updateFabSpin(); }
+    function pause(){ state.playing = false; btnPlay.textContent = '▶️'; audio.pause(); updateFabSpin(); }
+
+    function next(){ load((state.index + 1) % state.list.length); if (state.playing) play(); }
+    function prev(){ load((state.index - 1 + state.list.length) % state.list.length); if (state.playing) play(); }
+
+    btnPlay.addEventListener('click', () => { (audio.paused ? play : pause)(); });
+    btnNext.addEventListener('click', next);
+    btnPrev.addEventListener('click', prev);
+    btnCollapse.addEventListener('click', () => {
+      wrap.classList.add('collapsed');
+      wrap.querySelector('.fab').style.display = '';
+      localStorage.setItem('mixtape.collapsed','true');
+    });
+    fab.addEventListener('click', () => {
+      wrap.classList.remove('collapsed');
+      fab.style.display = 'none';
+      localStorage.setItem('mixtape.collapsed','false');
+    });
+
+    progress.addEventListener('click', (e) => {
+      const r = progress.getBoundingClientRect();
+      const pct = (e.clientX - r.left) / r.width;
+      audio.currentTime = Math.max(0, Math.min(1, pct)) * (audio.duration || 0);
+    });
+    // Fixed volume at 20%
+    audio.volume = state.volume;
+
+    audio.addEventListener('timeupdate', () => {
+      const d = audio.duration || 0;
+      const c = audio.currentTime || 0;
+      progressBar.style.width = d ? (c / d * 100) + '%' : '0%';
+      timeEl.textContent = fmt(c);
+      // do not persist time across sessions
+    });
+    audio.addEventListener('ended', () => { state.time = 0; next(); });
+
+    // Best-effort autoplay: try immediately, and after first user interaction if blocked
+    function tryAutoplay(){
+      audio.play().then(()=>{ updateFabSpin(); }).catch(()=>{
+        // wait for a user gesture
+        const onFirst = () => { document.removeEventListener('click', onFirst); audio.play().then(updateFabSpin).catch(()=>{}); };
+        document.addEventListener('click', onFirst, { once: true });
+      });
+    }
+
+    // Initialize
+    // Force Guardians to be first on initial load and always start at 0
+    state.index = 0; localStorage.setItem('mixtape.index','0');
+    load(state.index);
+    // Autoplay (muted allowed by browsers); unmute toggles via button/hover control
+    tryAutoplay();
   })();
 
   // Hero video splash -> banner transition
@@ -390,7 +518,7 @@
         const heroSection = document.querySelector('.hero');
         const heroRect = heroSection ? heroSection.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
 
-        // First: measure fullscreen (A)
+        // First: measure fullscreen
         const startRect = { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
         const endRect = heroRect; // where the banner will be
 

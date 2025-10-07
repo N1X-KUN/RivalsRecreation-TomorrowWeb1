@@ -315,6 +315,61 @@
   style.textContent = `.user-tabbing :focus { outline: 2px solid ${getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#e93d54'} !important; outline-offset: 2px; }`;
   document.head.appendChild(style);
 
+  // Inject global social sidebar
+  (function injectSocialSidebar(){
+    if (document.querySelector('.social-sidebar')) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'social-sidebar';
+    wrapper.innerHTML = `
+      <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.9v-7h-2.3V12h2.3V9.8c0-2.27 1.35-3.53 3.43-3.53.99 0 2.03.18 2.03.18v2.22h-1.14c-1.12 0-1.47.69-1.47 1.4V12h2.5l-.4 2.9h-2.1v7A10 10 0 0 0 22 12z"/></svg>
+      </a>
+      <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2A2.8 2.8 0 1 0 12 16.8 2.8 2.8 0 0 0 12 9.2zM17.5 6.5a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/></svg>
+      </a>
+      <a href="https://x.com" target="_blank" rel="noopener" aria-label="X">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 3h3.7l5.1 7 5.5-7H21l-7.3 9.3L21 21h-3.7l-5.5-7.6L6 21H3l7.8-9.9L3 3z"/></svg>
+      </a>
+      <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a3 3 0 0 0-2.1-2.1C17.7 4.5 12 4.5 12 4.5s-5.7 0-7.5.6A3 3 0 0 0 2.4 7.2C1.8 9 1.8 12 1.8 12s0 3 .6 4.8a3 3 0 0 0 2.1 2.1c1.8.6 7.5.6 7.5.6s5.7 0 7.5-.6a3 3 0 0 0 2.1-2.1c.6-1.8.6-4.8.6-4.8s0-3-.6-4.8zM10 15.3V8.7l6 3.3-6 3.3z"/></svg>
+      </a>
+      <a href="https://discord.com" target="_blank" rel="noopener" aria-label="Discord">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.8 19.8 0 0 0-4.885-1.515c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25A19.74 19.74 0 0 0 3.677 4.37C.533 9.046-.32 13.58.099 18.057a19.9 19.9 0 0 0 5.993 3.03c.462-.63.874-1.295 1.226-1.994a12.9 12.9 0 0 1-1.872-.892 10.2 10.2 0 0 0 .372-.292c3.928 1.793 8.18 1.793 12.062 0 .12.098.246.198.373.292-.56.324-1.2.635-1.873.892.36.698.772 1.362 1.225 1.993a19.84 19.84 0 0 0 6.002-3.03c.5-5.177-.838-9.674-3.549-13.66z"/></svg>
+      </a>
+    `;
+    document.body.appendChild(wrapper);
+  })();
+
+  // Cookie banner: show once per session until a choice or close
+  (function cookieBanner(){
+    if (sessionStorage.getItem('cookieBannerSeen')) return;
+    const banner = document.createElement('div');
+    banner.className = 'cookie-banner';
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-live', 'polite');
+    banner.innerHTML = `
+      <div class="cookie-head">
+        <h4 class="cookie-title">We use cookies</h4>
+        <button class="cookie-btn" data-action="close" aria-label="Close">×</button>
+      </div>
+      <p>Cookies help us improve your experience and keep things secure. You can accept or deny. This is a demo banner only.</p>
+      <div class="cookie-actions">
+        <button class="cookie-btn" data-action="deny">Deny</button>
+        <button class="cookie-btn" data-action="adjust">Adjust</button>
+        <button class="cookie-btn primary" data-action="accept">Accept all</button>
+      </div>
+    `;
+    document.body.appendChild(banner);
+    // slight delay for layout
+    requestAnimationFrame(() => banner.setAttribute('open', ''));
+    const done = () => { sessionStorage.setItem('cookieBannerSeen', '1'); banner.remove(); };
+    banner.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      done();
+    });
+  })();
+
   // Hero video splash -> banner transition
   const heroVideo = document.getElementById('hero-video');
   const heroContent = document.querySelector('.hero .content');

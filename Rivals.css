@@ -762,6 +762,13 @@ footer { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .foot small { display: block; margin-top: 14px; }
 @media (max-width: 860px) { .foot { grid-template-columns: 1fr; } }
 
+/* Global footer improvements */
+.foot .brand { display: inline-flex; align-items: center; gap: 10px; }
+.foot .brand-mark { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(180deg, #ffeb3b, #ffd700); box-shadow: 0 0 12px rgba(255,215,0,0.5); }
+.foot .social-mini { display: flex; gap: 10px; margin-top: 10px; }
+.foot .social-mini a { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); transition: transform .15s ease, background .2s ease; }
+.foot .social-mini a:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
+
 [data-reveal] { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
 [data-reveal].revealed { opacity: 1; transform: translateY(0); }
 
@@ -855,6 +862,23 @@ footer { padding: 36px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   .cta { animation: none; }
   .hero::after { animation: none; }
 }
+
+/* Social sidebar */
+.social-sidebar { position: fixed; right: 14px; top: 24vh; display: flex; flex-direction: column; gap: 10px; z-index: 60; }
+.social-sidebar a { width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; color: #e8edf7; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 18px rgba(0,0,0,0.35); transition: transform .15s ease, background .2s ease, color .2s ease; }
+.social-sidebar a:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); color: #ffffff; }
+@media (max-width: 920px) { .social-sidebar { right: 8px; top: auto; bottom: 18px; flex-direction: row; } }
+
+/* Cookie banner */
+.cookie-banner { position: fixed; right: 18px; bottom: 18px; width: min(460px, 92vw); background: linear-gradient(145deg, rgba(15,15,22,0.96), rgba(11,11,18,0.98)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); color: var(--text-1); z-index: 70; padding: 16px; display: none; }
+.cookie-banner[open] { display: block; }
+.cookie-banner .cookie-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.cookie-banner .cookie-title { margin: 0; font-size: 16px; color: var(--text-0); }
+.cookie-banner p { margin: 8px 0 12px; font-size: 13px; color: #cbd3e8; }
+.cookie-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.cookie-btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: #e6e8ee; cursor: pointer; }
+.cookie-btn.primary { background: linear-gradient(180deg, #ffeb3b, #ffd700); color: #000; border-color: rgba(0,0,0,0.1); font-weight: 800; }
+.cookie-btn:hover { filter: brightness(1.05); }
 
 /* Login Popup Styles */
 .login-popup {

@@ -1,0 +1,41 @@
+// Main SCSS file for Rivals Nexus
+// Compile this to CSS if you want to use SCSS features
+// For now, keeping CSS files as they are more compatible
+
+// Variables
+$primary-accent: #ffd700;
+$bg-dark: #0b0b12;
+$text-light: #f5f7ff;
+$text-muted: #c7c9d1;
+
+// Music Player Styles
+@import 'music-player.scss';
+
+// Hero Styles
+@import 'hero.scss';
+
+// You can organize your styles here using SCSS features like:
+// - Variables
+// - Nesting
+// - Mixins
+// - Functions
+// - Partials
+
+// Example mixin for hero cards
+@mixin hero-card($accent-color) {
+  border-color: rgba($accent-color, 0.6);
+  box-shadow: 0 30px 60px rgba($accent-color, 0.25);
+  
+  &:hover {
+    border-color: rgba($accent-color, 0.35);
+    box-shadow: 0 24px 46px rgba(0,0,0,0.45), 0 0 20px rgba($accent-color, 0.15);
+  }
+}
+
+// Note: To use SCSS, you'll need a compiler like:
+// - sass (npm install -g sass)
+// - node-sass
+// - VS Code extension: "Live Sass Compiler"
+// 
+// Compile command: sass styles.scss styles.css
+

@@ -23,6 +23,8 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 1001;
   user-select: none;
+  opacity: 1;
+  visibility: visible;
 }
 
 .music-player-icon:hover {
@@ -41,12 +43,13 @@
   pointer-events: none;
 }
 
-.music-player-icon.playing {
+.music-player-icon.playing:not(.muted) {
   animation: rotate 3s linear infinite;
 }
 
 .music-player-icon.muted {
   opacity: 0.7;
+  animation: none !important; /* Stop rotation when muted */
 }
 
 .mute-indicator {
@@ -142,6 +145,18 @@
   padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(15, 15, 20, 0.5);
+  animation: fadeInNowPlaying 0.3s ease;
+}
+
+@keyframes fadeInNowPlaying {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .now-playing-label {
@@ -157,6 +172,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
 }
 
 .now-playing-art {
@@ -228,6 +244,11 @@
   text-overflow: ellipsis;
 }
 
+.now-playing-item .queue-remove-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .upload-indicator {
   display: inline-block;
   width: 12px;
@@ -281,8 +302,20 @@
   padding: 12px;
   border-radius: 0;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  animation: slideInQueueItem 0.3s ease;
+}
+
+@keyframes slideInQueueItem {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .queue-item:hover {

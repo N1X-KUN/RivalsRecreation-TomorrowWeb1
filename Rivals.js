@@ -341,6 +341,7 @@
   })();
 
   // Cookie banner: show once per session until a choice or close
+  // Fades in after 10 seconds (after splash video)
   (function cookieBanner(){
     if (sessionStorage.getItem('cookieBannerSeen')) return;
     const banner = document.createElement('div');
@@ -359,9 +360,21 @@
       </div>
     `;
     document.body.appendChild(banner);
-    // slight delay for layout
-    requestAnimationFrame(() => banner.setAttribute('open', ''));
-    const done = () => { sessionStorage.setItem('cookieBannerSeen', '1'); banner.remove(); };
+    
+    // Fade in after 10 seconds
+    setTimeout(() => {
+      banner.classList.add('cookie-banner--visible');
+    }, 10000);
+    
+    const done = () => {
+      sessionStorage.setItem('cookieBannerSeen', '1');
+      // Smooth fade out
+      banner.classList.add('cookie-banner--fade-out');
+      setTimeout(() => {
+        banner.remove();
+      }, 400); // Match transition duration
+    };
+    
     banner.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-action]');
       if (!btn) return;
@@ -369,134 +382,7 @@
     });
   })();
 
-  // Starlord's Mixtapes - floating audio player with persistence across pages
-  (function mixtape(){
-    if (document.querySelector('.mixtape')) return;
-    const state = {
-      list: [
-        // Put your own files in Videos/ or elsewhere and update paths below
-        { title: "Guardians Of The Galaxy", src: "Videos/Guardians Music.mp3" },
-        { title: "Fantastic 4", src: "Videos/Fantastic Music.mp3" },
-        { title: "The Avengers", src: "Videos/Avengers Music.mp3" },
-        { title: "Marvel's Ultimate", src: "Videos/Marvel Music.mp3" }
-      ],
-      index: 0,
-      time: 0,
-      playing: true,
-      volume: 0.2,
-      collapsed: localStorage.getItem('mixtape.collapsed') === 'true'
-    };
-
-    const wrap = document.createElement('div');
-    wrap.className = 'mixtape' + (state.collapsed ? ' collapsed' : '');
-    wrap.innerHTML = `
-      <div class="panel" role="region" aria-label="Starlord's Mixtapes">
-        <div class="head">
-          <strong class="title">Starlord's Mixtapes</strong>
-          <button class="close-btn" title="Collapse" aria-label="Collapse">×</button>
-        </div>
-        <div class="art" aria-hidden="true"></div>
-        <div class="meta">
-          <span class="label">${state.list[state.index]?.title || '—'}</span>
-          <span class="time" aria-live="off">0:00</span>
-        </div>
-        <div class="progress" aria-label="Progress"><span></span></div>
-        <div class="controls">
-          <button class="prev" title="Previous" aria-label="Previous">⏮</button>
-          <button class="play" title="Play/Pause" aria-label="Play/Pause">⏸</button>
-          <button class="next" title="Next" aria-label="Next">⏭</button>
-        </div>
-      </div>
-      <button class="fab" title="Open Starlord's Mixtapes" aria-label="Open Mixtapes" ${state.collapsed ? '' : 'style="display:none"'}>
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 10h2v4H8zM14 10h2v4h-2z"/></svg>
-      </button>
-      <audio preload="auto"></audio>
-    `;
-    document.body.appendChild(wrap);
-
-    const audio = wrap.querySelector('audio');
-    const btnPlay = wrap.querySelector('.play');
-    const btnPrev = wrap.querySelector('.prev');
-    const btnNext = wrap.querySelector('.next');
-    const btnCollapse = wrap.querySelector('.close-btn');
-    const fab = wrap.querySelector('.fab');
-    const progress = wrap.querySelector('.progress');
-    const progressBar = progress.querySelector('span');
-    const timeEl = wrap.querySelector('.time');
-    const label = wrap.querySelector('.label');
-
-    function fmt(sec){
-      sec = Math.max(0, Math.floor(sec || 0));
-      const m = Math.floor(sec / 60);
-      const s = (sec % 60).toString().padStart(2,'0');
-      return `${m}:${s}`;
-    }
-
-    function load(index){
-      if (!state.list[index]) return;
-      state.index = index;
-      localStorage.setItem('mixtape.index', String(state.index));
-      const track = state.list[state.index];
-      label.textContent = track.title;
-      audio.src = track.src;
-      audio.volume = state.volume;
-      audio.onloadedmetadata = () => { try { audio.currentTime = 0; } catch(_) {} };
-    }
-
-    function updateFabSpin(){ wrap.classList.toggle('playing', !audio.paused); }
-    function play(){ state.playing = true; btnPlay.textContent = '⏸'; audio.play().catch(()=>{}); updateFabSpin(); }
-    function pause(){ state.playing = false; btnPlay.textContent = '▶️'; audio.pause(); updateFabSpin(); }
-
-    function next(){ load((state.index + 1) % state.list.length); if (state.playing) play(); }
-    function prev(){ load((state.index - 1 + state.list.length) % state.list.length); if (state.playing) play(); }
-
-    btnPlay.addEventListener('click', () => { (audio.paused ? play : pause)(); });
-    btnNext.addEventListener('click', next);
-    btnPrev.addEventListener('click', prev);
-    btnCollapse.addEventListener('click', () => {
-      wrap.classList.add('collapsed');
-      wrap.querySelector('.fab').style.display = '';
-      localStorage.setItem('mixtape.collapsed','true');
-    });
-    fab.addEventListener('click', () => {
-      wrap.classList.remove('collapsed');
-      fab.style.display = 'none';
-      localStorage.setItem('mixtape.collapsed','false');
-    });
-
-    progress.addEventListener('click', (e) => {
-      const r = progress.getBoundingClientRect();
-      const pct = (e.clientX - r.left) / r.width;
-      audio.currentTime = Math.max(0, Math.min(1, pct)) * (audio.duration || 0);
-    });
-    // Fixed volume at 20%
-    audio.volume = state.volume;
-
-    audio.addEventListener('timeupdate', () => {
-      const d = audio.duration || 0;
-      const c = audio.currentTime || 0;
-      progressBar.style.width = d ? (c / d * 100) + '%' : '0%';
-      timeEl.textContent = fmt(c);
-      // do not persist time across sessions
-    });
-    audio.addEventListener('ended', () => { state.time = 0; next(); });
-
-    // Best-effort autoplay: try immediately, and after first user interaction if blocked
-    function tryAutoplay(){
-      audio.play().then(()=>{ updateFabSpin(); }).catch(()=>{
-        // wait for a user gesture
-        const onFirst = () => { document.removeEventListener('click', onFirst); audio.play().then(updateFabSpin).catch(()=>{}); };
-        document.addEventListener('click', onFirst, { once: true });
-      });
-    }
-
-    // Initialize
-    // Force Guardians to be first on initial load and always start at 0
-    state.index = 0; localStorage.setItem('mixtape.index','0');
-    load(state.index);
-    // Autoplay (muted allowed by browsers); unmute toggles via button/hover control
-    tryAutoplay();
-  })();
+  // Old mixtape player removed - React music player handles all audio now
 
   // Hero page logic
   (function initHeroPage(){
@@ -536,40 +422,40 @@
 
     const abilityTemplates = {
       vanguard: [
-        { name: 'Bulwark Advance', description: 'Charge forward and gain a stacking barrier. Each enemy hit extends the shield and leaves a protective trail for allies.' },
-        { name: 'Guardian Pulse', description: 'Emit a shockwave that cleanses crowd control on nearby allies while marking enemies for bonus team damage.' },
-        { name: 'Bastion Breaker', description: 'Plant a rallying standard that redirects incoming fire, fortifies allies, and detonates in a dazzling blast after a short channel.' }
+        { name: 'Skill 1', description: 'That does this...!' },
+        { name: 'Skill 2', description: 'This does that...?' },
+        { name: 'Ultimate', description: 'This is your wasted ult.' }
       ],
       duelist: [
-        { name: 'Precision Combo', description: 'A light-to-heavy attack chain that locks on to marked foes, refreshing cooldowns on elimination.' },
-        { name: 'Momentum Flip', description: 'Vault over targets to reposition while leaving behind a delayed energy slash.' },
-        { name: 'Showdown', description: 'Draw a dueling arena that isolates the priority target and amplifies critical hit output until one combatant falls.' }
+        { name: 'Skill 1', description: 'That does this...!' },
+        { name: 'Skill 2', description: 'This does that...?' },
+        { name: 'Ultimate', description: 'This is your wasted ult.' }
       ],
       strategist: [
-        { name: 'Command Uplink', description: 'Deploy a tactical node that grants vision and buffs allies who play around it.' },
-        { name: 'Planar Shift', description: 'Displace enemies with a gravitational field while accelerating allies out of danger.' },
-        { name: 'Grand Stratagem', description: 'Trigger a map-wide scheme that swaps objective control points and floods lanes with support drones.' }
+        { name: 'Skill 1', description: 'That does this...!' },
+        { name: 'Skill 2', description: 'This does that...?' },
+        { name: 'Ultimate', description: 'This is your wasted ult.' }
       ]
     };
 
     const statTemplates = {
       vanguard: [
         { label: 'Difficulty', value: '★★★☆☆' },
-        { label: 'Durability', value: 'Very High' },
+        { label: 'Attack Type', value: 'Very High' },
         { label: 'Mobility', value: 'Medium' },
-        { label: 'Utility', value: 'Team Shields' }
+        { label: 'Passive', value: 'Team Shields' }
       ],
       duelist: [
         { label: 'Difficulty', value: '★★★★☆' },
-        { label: 'Burst', value: 'Explosive' },
+        { label: 'Attack Type', value: 'Explosive' },
         { label: 'Mobility', value: 'High' },
-        { label: 'Sustain', value: 'Low' }
+        { label: 'Passive', value: 'Low' }
       ],
       strategist: [
         { label: 'Difficulty', value: '★★★☆☆' },
-        { label: 'Control', value: 'Zone Denial' },
+        { label: 'Attack Type', value: 'Zone Denial' },
         { label: 'Support', value: 'High' },
-        { label: 'Vision', value: 'Command Grid' }
+        { label: 'Passive', value: 'Command Grid' }
       ]
     };
 
@@ -578,150 +464,273 @@
         id: 'angela',
         category: 'vanguard',
         name: 'Angela',
-        tagline: 'Radiant Spear Vanguard',
-        summary: 'A celestial frontliner who dives first, anchors the fight with radiant spears, and shields her squad with luminous barriers.',
-        lore: 'Angela, the Hunter of Heven, embraces her new allegiance to the Nexus by leading the charge. Her spear techniques weave between offense and protection, letting squads push into impossible angles.',
-        portrait: 'Images/PAngela.jpg',
-        background: 'Images/KunLun.jpg',
+        tagline: 'Muscle Mommy of the Multiverse',
+        summary: 'The mosquito that buzz and pokes you or jabs you out of the map boundaries.',
+        lore: 'As the Hand of Heven, the warrior called Angela embodies unwavering courage and determination. Able to manipulate Ichors into various weapons and unfurl her wings to soar across the battlefield, she is ready to deliver divine judgment upon her foes!',
+        portrait: 'Images/AngelaStory.png',
+        background: 'Images/AngelaSilhouette.png',
+        card: 'Images/Angela.png',
         accent: '#ff9cd6',
         realName: 'Aldrif Odinsdottir',
         attackType: 'Melee Heroes',
-        health: '275',
+        health: '450',
         stats: [
-          { label: 'Difficulty', value: '★★★☆☆' },
-          { label: 'Durability', value: 'High' },
-          { label: 'Mobility', value: 'Leaping' },
-          { label: 'Utility', value: 'Barrier Field' }
+          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Attack Type', value: 'Jab,Block,Charge' },
+          { label: 'Mobility', value: 'Flight/Ground' },
+          { label: 'Passive', value: 'Wingblade Ascent' }
         ],
         abilities: [
-          { name: 'Hevenward Lunge', description: 'Throw the spear forward, then warp to it, staggering the first target struck.' },
-          { name: 'Celestial Bulwark', description: 'Create a rotating shield halo that blocks projectiles for nearby allies.' },
-          { name: 'Choir of Spears', description: 'Summon a barrage of radiant blades that pin enemies in a circle and grant allies lifesteal.' }
+          { name: 'Shielded Stance', description: 'Transform Ichors into a shield, gaining Attack Charge when absorbing damage.' },
+          { name: 'Assassins Charge', description: 'Enter an accelerated dash state. Enemies struck head-on are carried through the air for a short distance.' },
+          { name: 'Divine Judgement', description: 'Dive downward to create a Divine Judgement Zone upon impact.' },
+          { name: 'Hevens Retribution', description: 'Upon impact, the ribbons bind nearby enemies. Angela can leap to the spears location, damaging surrounding enemies and creating a Divine Judgement Zone.' }
         ]
       },
       {
         id: 'captain-america',
         category: 'vanguard',
         name: 'Captain America',
-        tagline: 'Shielded Vanguard',
-        summary: 'Absorbs pressure with kinetic shields, bounces the iconic ricochet toss, and rallies teammates with precision calls.',
-        lore: 'Steve Rogers leads from the front, turning the Nexus chaos into disciplined momentum. Every deflected strike empowers his counter-offensive to keep lanes stabilized.',
-        portrait: 'Images/PTorch.jpg',
-        background: 'Images/New1.jpg',
-        accent: '#5fb4ff',
+        tagline: 'Mr. I Can Do This All Day',
+        summary: 'He really can do this all day... He hates cloak users.',
+        lore: 'Enhanced by the Super-Soldier Serum, Steven "Steve" Rogers uses his Vibranium shield and extensive combat training to confront any threat to justice. When Captain America rallies his troops, a wave of courage sweeps across the battlefield!',
+        portrait: 'Images/AmericaStory.png',
+        background: 'Images/AmericaSilhouette.png',
+        card: 'Images/America.png',
+        accent: '#4287f5',
         realName: 'Steve Rogers',
-        attackType: 'Projectile Heroes'
+        attackType: 'Melee Heroes',
+        health: '575',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Attack Type', value: 'Melee Bonking' },
+          { label: 'Mobility', value: 'Alot of Mobility' },
+          { label: 'Passive', value: 'Captains Spirit' }
+        ],
+        abilities: [
+          { name: 'Living Legend', description: 'Raise the shield to deflect incoming Projectiles, sending them ricocheting in random directions.' },
+          { name: 'Vibranium Energy Saw', description: 'Hurl the energy-charged shield to strike enemies in a path.' },
+          { name: 'Freedom Charge', description: 'Shield held high, carve a path forward, granting both himself and allies along the path continuous Bonus Health and Movement Boosts.' }
+        ]
       },
       {
-        id: 'adam-warlock',
+        id: 'venom',
         category: 'vanguard',
-        name: 'Adam Warlock',
-        tagline: 'Quantum Vanguard',
-        summary: 'Cycles between shielding, damage reflection, and temporal rewinds that reset his frontline positioning.',
-        lore: 'An avatar of cosmic balance, Warlock converts incoming fire into golden counterbursts. His command of energy lets teams hold ground far longer than expected.',
-        portrait: 'Images/PClok.jpg',
-        background: 'Images/New11.jpg',
-        accent: '#f6d95f',
-        realName: 'Adam',
-        attackType: 'Projectile Heroes'
-      },
-      {
-        id: 'she-hulk',
-        category: 'vanguard',
-        name: 'She-Hulk',
-        tagline: 'Courtroom Crusher',
-        summary: 'Uses seismic grapples, courtroom objections that taunt foes, and unstoppable slams that open objectives.',
-        lore: 'Jennifer Walters turns litigation into literal ground control—slamming the gavel before enemies can even raise their case.',
-        portrait: 'Images/PVenom.jpg',
-        background: 'Images/New5.png',
-        accent: '#6dd36a',
-        realName: 'Jennifer Walters'
+        name: 'Venom',
+        tagline: 'The 19- Dark Symbiote',
+        summary: 'Loves going for the snow bunny healers and is the living Mahoraga to tank all those damages.',
+        lore: 'Using his symbiote-enhanced body as the perfect living weapon, Eddie Brock and his alien ally stand ever-ready to unleash vicious attacks upon anyone he deems an enemy. Those ensnared by Venoms tentacles have no choice but to surrender to this insatiable predator.',
+        portrait: 'Images/VenomStory.png',
+        background: 'Images/VenomSilhouette.png',
+        card: 'Images/Venom.png',
+        accent: '#38403f',
+        realName: 'Eddie Brock',
+        attackType: 'Melee Heroes',
+        health: '650',
+        stats: [
+          { label: 'Difficulty', value: '★' },
+          { label: 'Attack Type', value: 'Tentacle Touchy' },
+          { label: 'Mobility', value: 'Swing' },
+          { label: 'Passive', value: 'Alien Biology' }
+        ],
+        abilities: [
+          { name: 'Symbiotic Resilience', description: 'The lower Venoms Health, the greater the Bonus Health generated.' },
+          { name: 'Frenzied Arrival', description: 'Dash to the target location from a certain height and launch them Up towards the landing point.' },
+          { name: 'Divine Judgement', description: 'Dive downward to create a Divine Judgement Zone upon impact.' },
+          { name: 'Cellular Corrosion', description: 'Unleash tentacles to Slow enemies within reach. Enemies unable to break free in time will suffer damage.' },
+          { name: 'Feast Of The Abyss', description: 'Burrow underground for free movement. Devour enemies above to deal damage based on the enemys current health and generate equivalent Bonus Health.' },
+        ]
       },
       {
         id: 'thor',
         category: 'vanguard',
         name: 'Thor',
-        tagline: 'Stormfront Vanguard',
-        summary: 'Channels the Bifrost to leap across the lane, drop lightning barriers, and hammer-line enemies into stuns.',
-        lore: 'The Odinson roars into every skirmish with thunderous authority, making the battlefield itself swear fealty.',
-        portrait: 'Images/PTorch.jpg',
-        background: 'Images/New7.png',
-        accent: '#9cd4ff',
-        realName: 'Thor Odinson'
+        tagline: 'Need a tank to do alot of damage?',
+        summary: '"Where were you? We need tank!" Thor: "I was killing the enemies that were in the way."',
+        lore: 'The son of Odin taps into his divine power to call forth thunder and lightning, raining down relentless fury upon his enemies. With his mighty hammer Mjölnir in hand, Thor effortlessly asserts his dominance on the field of combat.',
+        portrait: 'Images/ThorStory.png',
+        background: 'Images/ThorSilhouette.png',
+        card: 'Images/Thor.png',
+        accent: '#85ceff',
+        realName: 'Thor Odinson',
+        attackType: 'Melee Heroes',
+        health: '600',
+        stats: [
+          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Attack Type', value: 'Shazam' },
+          { label: 'Mobility', value: 'Charge Ram' },
+          { label: 'Passive', value: 'Thorforce' }
+        ],
+        abilities: [
+          { name: 'Hammer Throw', description: 'Throw Mjolnir forward which then returns. Restore Thorforce upon hit.' },
+          { name: 'Awakening Rune', description: 'Enter the Awakened state, granting Bonus Health and enhancing Mjölnir Bash. Gain Thorforce upon exiting the state.' },
+          { name: 'Lightning Realm', description: 'Summon lightning to restore Thorforce based on the number of hit enemies. Enemies leaving the Lightning Realm will suffer Slow and Grounded effects.' },
+          { name: 'God Of Thunder', description: 'Soar upwards and smite the ground after charging for a duration, inflicting damage and stunning enemies within range.' }
+        ]
       },
       {
-        id: 'war-machine',
+        id: 'thing',
         category: 'vanguard',
-        name: 'War Machine',
-        tagline: 'Ironclad Vanguard',
-        summary: 'Deploys hardlight riot walls, micro-missile interceptors, and overclocked thrusters to hold choke points.',
-        lore: 'Colonel Rhodes locks down airspace and ground lanes alike, providing mobile cover that keeps his team advancing.',
-        portrait: 'Images/PUltron.jpg',
-        background: 'Images/New6.jpg',
-        accent: '#8bd0ff',
-        realName: 'James Rhodes',
-        attackType: 'Projectile Heroes'
+        name: 'The Thing',
+        tagline: 'Its a thing...',
+        summary: 'See well heres the thing about it...',
+        lore: 'Benjamin J. Grimm is unquestionably the rock star of any team hes on. Always at the forefront of the fight, the Thing shields his allies with his unbreakable form, selflessly fending off any harm that comes their way.',
+        portrait: 'Images/ThingStory.png',
+        background: 'Images/ThingSilhouette.png',
+        card: 'Images/Thing.png',
+        accent: '#ffae00',
+        realName: 'Ben Grimm',
+        attackType: 'Melee Heroes',
+        health: '700',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Attack Type', value: 'Left, Right, Goodnight' },
+          { label: 'Mobility', value: 'Running' },
+          { label: 'Passive', value: 'Unyielding Will' }
+        ],
+        abilities: [
+          { name: 'Yancy Street Charge', description: 'Continuously charge forward, launching up enemies and leaving behind a zone at the final position that prevents the use of mobility abilities.' },
+          { name: 'Stone Haymaker', description: 'Deliver a devastating Heavy Blow that inflicts additional damage with each strike! Upon hit, gain Bonus Health. ' },
+          { name: 'Clobberin Time', description: 'Use immense power to launch all enemies in front of you into the air.' },
+        ]
       },
       {
-        id: 'luke-cage',
+        id: 'peni',
         category: 'vanguard',
-        name: 'Luke Cage',
-        tagline: 'Harlem Shield',
-        summary: 'Unbreakable skin, seismic punches, and an aura that converts damage taken into teamwide damage reduction.',
-        lore: 'Power Man stands immovable in defense of his crew, turning every hit into righteous payback for Harlem and beyond.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New2.jpg',
-        accent: '#fbbc5b',
-        realName: 'Carl Lucas'
+        name: 'Peni Parker',
+        tagline: 'Potato Miner',
+        summary: 'Its protected by the law and lots of ticking web mines',
+        lore: 'Peni Parker may be young, but she bravely stands on the frontlines to protect the Web of Life and Destiny. Together, this teen prodigy and her state-of-the-art mech, the sensational SP//dr, make for the most thrilling duo on the battlefield!',
+        portrait: 'Images/PeniStory.png',
+        background: 'Images/PeniSilhouette.png',
+        card: 'Images/Peni.png',
+        accent: '#ff1e00',
+        realName: 'Peni Parker',
+        attackType: 'Projectile Heroes',
+        health: '750',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Attack Type', value: 'Web, Place Mine, Web again.' },
+          { label: 'Mobility', value: 'Webs' },
+          { label: 'Passive', value: 'Wall Crawl' }
+        ],
+        abilities: [
+          { name: 'Bionic Spider-nest', description: 'Generate a Bionic Spider-Nest at a targeted area, periodically spawning Spider-Drones and creating Cyber-Webs.' },
+          { name: 'Cyber-web Snare', description: 'Cast futuristic webbing that Immobilizes enemies or creates a Cyber-Web. ' },
+          { name: 'Arachno-mine', description: 'Deploy Arachno-Mines that can be concealed within the confines of a Cyber-Web.' },
+          { name: 'Spider-sweeper', description: 'Enhance the SP//dr suit, Launching Up enemies in its path and deploying Arachno-Mines, Spider-Drones, and Cyber-Webs repeatedly.' },
+        ]
       },
       {
-        id: 'beta-ray-bill',
+        id: 'magneto',
         category: 'vanguard',
-        name: 'Beta Ray Bill',
-        tagline: 'Stormbreaker Vanguard',
-        summary: 'Swings Stormbreaker to carve plasma arcs, vortex pull foes, and rain meteor hammers that empower allies.',
-        lore: 'Champion of the Korbinites, Bill rides the cosmic tempest to anchor the Nexus skies for his allies.',
-        portrait: 'Images/PTorch.jpg',
-        background: 'Images/New12.jpg',
-        accent: '#ffa96c',
-        realName: 'Korbinite Champion'
+        name: 'Magneto',
+        tagline: 'Best Tanker in the game',
+        summary: 'Its a magnet...',
+        lore: 'The Master of Magnetism bends even the strongest metal to his whims, shielding his allies and striking at his foes. Whether he calls himself Max Eisenhardt, Erik Lehnsherr, or simply Magneto, the hardships this warrior has endured have made him as unbreakable as the steel he brandishes.',
+        portrait: 'Images/MagnetoStory.png',
+        background: 'Images/MagnetoSilhouette.png',
+        card: 'Images/Magneto.png',
+        accent: '#7b0aa1',
+        realName: 'Max Eisenhardt',
+        attackType: 'Projectile Heroes',
+        health: '650',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Attack Type', value: 'Throws Metal and Shields Metal' },
+          { label: 'Mobility', value: 'Air Decend' },
+          { label: 'Passive', value: 'Ace Greatswords Fired' }
+        ],
+        abilities: [
+          { name: 'Metallic Curtain', description: 'Change the magnetic field around to form a metallic curtain, blocking all incoming Projectiles.' },
+          { name: 'Metal Bulwark', description: 'Conjure a metal shield around a chosen ally. Damage taken will transform into rings on Magnetos back.' },
+          { name: 'Meteor M', description: 'Draw in all materials around to forge an iron meteor that deals massive damage upon impact. Absorbing enemy Projectiles can enhance the meteors power, yet overloading will cause it to self-destruct.' },
+        ]
       },
       {
-        id: 'juggernaut',
+        id: 'hulk',
         category: 'vanguard',
-        name: 'Juggernaut',
-        tagline: 'Unstoppable Vanguard',
-        summary: 'Builds momentum with every stride, shrugging off slows and erupting into earth-shattering impact zones.',
-        lore: 'Once Cain Marko starts moving, objectives fall. His demonic gem-fueled armor crushes anything foolish enough to stand in lane.',
-        portrait: 'Images/PVenom.jpg',
-        background: 'Images/New4.png',
-        accent: '#ff7b5f',
-        realName: 'Cain Marko'
+        name: 'Hulk',
+        tagline: 'Green Goliath',
+        summary: 'Green big boi with lots of health and damage to spare and is target lock to Jeff',
+        lore: 'Brilliant scientist Dr. Bruce Banner has finally found a way to coexist with his monstrous alter ego, the Hulk. By accumulating gamma energy over transformations, he can become a wise and strong Hero Hulk or a fierce and destructive Monster Hulk',
+        portrait: 'Images/HulkStory.png',
+        background: 'Images/HulkSilhouette.png',
+        card: 'Images/Hulk.png',
+        accent: '#04ff00',
+        realName: 'Bruce Banner',
+        attackType: 'Melee Heroes',
+        health: '200 (Human Form)',
+        health: '650 (Hero Hulk Form)',
+        health: '1400 (Monster Hulk Form)',
+        stats: [
+          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Attack Type', value: 'Smash, Punch, and Throw' },
+          { label: 'Mobility', value: 'Jump...Smash' },
+          { label: 'Passive', value: 'Puny Banner' }
+        ],
+        abilities: [
+          { name: 'Gamma Grenade', description: 'Launch a Gamma Grenade to inflict damage and Launch Up enemies.' },
+          { name: 'Radioactive Lockdown', description: 'Emit gamma energy to render enemies immobilized and immune to all ability effects.' },
+          { name: 'Incredible Leap', description: 'THold to perform a charged leap that allows Hero Hulk to Knock Down flying enemies.' },
+          { name: 'Indestructible Guard', description: 'Generate gamma shields for Hero Hulk and nearby allies, absorbing and converting damage into energy for HULK SMASH!' },
+          { name: 'Hulk Smash', description: 'Unleash stored gamma energy, transforming from Hero Hulk into Monster Hulk for a limited time period.' },
+          { name: 'World Breaker', description: 'Gets loki treatment.' },
+        ]
       },
       {
-        id: 'captain-marvel',
+        id: 'groot',
         category: 'vanguard',
-        name: 'Captain Marvel',
-        tagline: 'Binary Vanguard',
-        summary: 'Absorbs energy to trigger Binary Overdrive, dashing through enemies and establishing aerial denial zones.',
-        lore: 'Carol Danvers takes point with photon-charged resolve, forcing enemies to respect the skies or burn trying.',
-        portrait: 'Images/PTorch.jpg',
-        background: 'Images/New8.png',
-        accent: '#ffcf6d',
-        realName: 'Carol Danvers',
-        attackType: 'Hybrid Striker'
+        name: 'Groot',
+        tagline: 'Average Fornite Players',
+        summary: 'I. Am. Groot.',
+        lore: 'A flora colossus from Planet X, the alien known as Groot exhibits enhanced vitality and the ability to manipulate all forms of vegetation. As sturdy as a towering tree, Groot forges his own way, serving as the teams silent but reliable pathfinder.',
+        portrait: 'Images/GrootStory.png',
+        background: 'Images/GrootSilhouette.png',
+        card: 'Images/Groot.png',
+        accent: '#009118',
+        realName: 'Groot',
+        attackType: 'Melee Heroes',
+        health: '700',
+        stats: [
+          { label: 'Difficulty', value: '★★' },
+          { label: 'Attack Type', value: 'Sticks' },
+          { label: 'Mobility', value: 'Walking' },
+          { label: 'Passive', value: 'Flora Colossus' }
+        ],
+        abilities: [
+          { name: 'Thornlash Wall', description: 'Im Groot..' },
+          { name: 'Ironwood Wall', description: 'I am Groot?' },
+          { name: 'Spore Bomb', description: 'Im GRROOOT!' },
+          { name: 'Strangling Prison', description: 'I. AM. GROOOT!' },
+        ]
       },
       {
-        id: 'thor-odinforce',
+        id: 'emma-frost',
         category: 'vanguard',
-        name: 'Thor (Odinforce)',
-        tagline: 'All-Father Vanguard',
-        summary: 'Channels the Odinforce to redirect projectiles, mend allies, and call down rune hammers that shatter formation.',
-        lore: 'Empowered beyond a single hammer, Thor bends storm, rune, and will to sculpt the battle exactly as he sees fit.',
-        portrait: 'Images/PTorch.jpg',
-        background: 'Images/New10.jpg',
-        accent: '#f7e27a',
-        realName: 'Thor Odinson'
+        name: 'Emma Frost',
+        tagline: 'Mommy Queen Of Gooners',
+        summary: 'The White Queen is a powerful telepath and shapeshifter who is the leader of the X-Men.',
+        lore: 'For Emma Frost, war is the purest form of art. With her formidable telepathic abilities, she intricately weaves a deadly mental web that ensnares her foes, while her indestructible diamond form lets her lead her teammates fearlessly into the fray.',
+        portrait: 'Images/EmmaStory.png',
+        background: 'Images/EmmaSilhouette.png',
+        card: 'Images/Emma.png',
+        accent: '#6efffa',
+        realName: 'Emma Frost',
+        attackType: 'Hitscan Heroes',
+        health: '550',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Attack Type', value: 'Mind Laser' },
+          { label: 'Mobility', value: 'Walking' },
+          { label: 'Passive', value: 'Diamond Form' }
+        ],
+        abilities: [
+          { name: 'Minds Aegis', description: 'Create a levitating barrier at the designated location.' },
+          { name: 'Crystal Kick', description: 'In Diamond Form, unleash a flying kick forward and knock back enemies; extra damage is dealt if theyre propelled into a wall.' },
+          { name: 'Carbon Crush', description: 'In Diamond Form, lunge forward to grab an enemy, then execute a back slam to inflict damage.' },
+          { name: 'Psionic Seduction', description: 'Project a forward psychic assault that stuns foes and prevents them from unleashing their Ultimate Abilities; if the effect lingers, it gradually commandeers their mind, forcing them to move toward Emma Frost.' },
+        ]
       }
     ];
 
@@ -766,13 +775,27 @@
         id: 'moon-knight',
         category: 'duelist',
         name: 'Moon Knight',
-        tagline: 'Lunar Duelist',
-        summary: 'Swaps between crescent glaives and gritty boxing stances, peaking at midnight with unstoppable combos.',
-        lore: 'Marc Spector channels Khonshu’s phases to bewilder the opposition and strike from impossible angles.',
-        portrait: 'Images/PMoon.jpg',
-        background: 'Images/DraculaCastle.jpg',
+        tagline: 'Vigilante Duelist',
+        summary: 'If you see an enemy that others cannot see... TAKE IT DOWN! What Konshu wants, Konshu gets.',
+        lore: 'As the avatar of the Egyptian God of Vengeance, Marc Spectors body has been enhanced by Khonshu himself. Bathed in a luminous aura that pierces the darkness, Moon Knight glides through the night, ready to sear his enemies with his masters sacred Ankhs.',
+        portrait: 'Images/MoonStory.png',
+        background: 'Images/MoonSilhouette.png',
+        card: 'Images/Moon.png',
         accent: '#b7c7ff',
-        realName: 'Marc Spector'
+        realName: 'Marc Spector, Jake Lockley, Steven Grant',
+        health: '250',
+        attackType: 'Projectile Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★★★' },
+          { label: 'Durability', value: 'High' },
+          { label: 'Mobility', value: 'Limited' },
+          { label: 'Utility', value: 'Moonlight Hook' } ],
+          abilities: [
+            { name: 'Moon Blade', description: 'Bounce between enemies and Ankhs, dealing damage to enemies while granting Bonus Health.' },
+            { name: 'Ancient Ankh', description: 'Fire an Ankh to Knock enemies within its radius airborne towards the center.' },
+            { name: 'Night Glider', description: 'Great... He glides now.' },
+            { name: 'Hand Of Khonshu', description: 'Open a portal that allows Khonshu to bombard enemies with his talons.' }
+          ]
       },
       {
         id: 'magik',
@@ -785,19 +808,6 @@
         background: 'Images/New11.jpg',
         accent: '#ff8be8',
         realName: 'Illyana Rasputina'
-      },
-      {
-        id: 'venom',
-        category: 'duelist',
-        name: 'Venom',
-        tagline: 'Symbiote Duelist',
-        summary: 'Whips, bites, and ensnares foes with symbiote tendrils, converting aggression into sustain.',
-        lore: 'The lethal protector lunges between vantage points, keeping opponents guessing where the next bite will land.',
-        portrait: 'Images/PVenom.jpg',
-        background: 'Images/New4.png',
-        accent: '#9df16d',
-        realName: 'Eddie Brock',
-        attackType: 'Melee Heroes'
       },
       {
         id: 'daredevil',
@@ -1030,6 +1040,32 @@
 
     const strategistHeroes = [
       {
+        id: 'adam-warlock',
+        category: 'strategist',
+        name: 'Adam Warlock',
+        tagline: 'Dps Warlock',
+        summary: 'Only goes for perfect KDA and cant be bothered to heal his team.',
+        lore: 'The genetically-engineered Adam Warlock wields powerful Quantum Magic, enabling him to connect and heal souls with a gentle touch. When the time comes for his allies to unite, Warlock stands as the unwavering epicenter of cosmic justice!',
+        portrait: 'Images/AdamStory.png',
+        background: 'Images/AdamSilhouette.png',
+        card: 'Images/Adam.png',
+        accent: '#f6d95f',
+        realName: 'Adam',
+        attackType: 'Projectile Heroes',
+        health: '250',
+        stats: [
+          { label: 'Difficulty', value: '★★☆☆☆' },
+          { label: 'Attack Type', value: 'Hitscan' },
+          { label: 'Mobility', value: 'Nerf Movement MORE' },
+          { label: 'Passive', value: 'Regenerative Cocoon' }
+        ],
+        abilities: [  
+          { name: 'Avatar Life Stream', description: 'Target an ally for a bouncing stream of healing energy, which also heals himself upon casting; self-targets if no ally is selected.' },
+          { name: 'Soul Bond', description: 'Forge a soul bond with allies, granting Healing Over Time and distributing damage taken across the bond.' },
+          { name: 'Karmic Revival', description: 'Awaken the karma of allies to revive them. Allies revived have lower health but enjoy a brief period of invincibility.' }
+        ]
+      },
+      {
         id: 'doctor-strange',
         category: 'strategist',
         name: 'Doctor Strange',
@@ -1077,18 +1113,6 @@
         background: 'Images/New3.jpg',
         accent: '#ff796d',
         realName: 'Scott Summers'
-      },
-      {
-        id: 'emma-frost',
-        category: 'strategist',
-        name: 'Emma Frost',
-        tagline: 'Diamond Strategist',
-        summary: 'Dominates the psychic battlefield, projecting decoys and hardening allies with diamond skin.',
-        lore: 'The White Queen wraps her allies in telepathic poise, dictating tempo with elegant precision.',
-        portrait: 'Images/PEmma.jpg',
-        background: 'Images/New2.jpg',
-        accent: '#f7bfff',
-        realName: 'Emma Frost'
       },
       {
         id: 'vision',
@@ -1161,6 +1185,7 @@
         summary: config.summary,
         lore: config.lore || `${config.name} is still preparing their grand entrance. Check back soon for a full dossier.`,
         portrait: config.portrait || 'Images/PAngela.jpg',
+        card: config.card || config.portrait || 'Images/PAngela.jpg', // Card image (use 'card:' property)
         backgroundImage: config.background || 'Images/New1.jpg',
         backgroundPosition: config.backgroundPosition || 'center',
         accent,
@@ -1192,7 +1217,6 @@
     const featureSummary = document.querySelector('[data-feature-summary]');
     const featureStats = document.querySelector('[data-feature-stats]');
     const featurePanel = document.querySelector('[data-feature-panel]');
-    const featureButton = document.querySelector('[data-feature-modal]');
     const featureAttack = document.querySelector('[data-feature-attack]');
     const featureRealName = document.querySelector('[data-feature-realname]');
     const featureHealth = document.querySelector('[data-feature-health]');
@@ -1202,9 +1226,12 @@
     const filterButtons = Array.from(document.querySelectorAll('.hero-filter'));
     const heroFocus = document.querySelector('[data-hero-focus]');
     const rosterSection = document.querySelector('[data-roster-section]');
+    const viewMoreButton = document.querySelector('.hero-feature__view-more');
     const viewMorePopup = document.querySelector('[data-feature-popup]');
     const viewMorePopupSkills = document.querySelector('[data-feature-popup-skills]');
     const viewMorePopupLore = document.querySelector('[data-feature-popup-lore]');
+    
+    let isPopupPinned = false; // Track if popup is pinned open
 
     const countAll = document.querySelector('[data-count-all]');
     const countVanguard = document.querySelector('[data-count-vanguard]');
@@ -1308,6 +1335,15 @@
         featurePanel.style.setProperty('--hero-accent', hero.accent);
         featurePanel.style.setProperty('--hero-accent-soft', hero.accentSoft);
       }
+      // Also set accent colors on view more button and popup to ensure they inherit
+      if (viewMoreButton) {
+        viewMoreButton.style.setProperty('--hero-accent', hero.accent);
+        viewMoreButton.style.setProperty('--hero-accent-soft', hero.accentSoft);
+      }
+      if (viewMorePopup) {
+        viewMorePopup.style.setProperty('--hero-accent', hero.accent);
+        viewMorePopup.style.setProperty('--hero-accent-soft', hero.accentSoft);
+      }
       if (featureAttack) featureAttack.textContent = hero.attackType;
       if (featureRealName) featureRealName.textContent = hero.realName;
       if (featureHealth) featureHealth.textContent = hero.health;
@@ -1319,15 +1355,10 @@
       }
       renderStats(featureStats, hero.stats);
 
-      if (featureButton) {
-        featureButton.dataset.heroId = hero.id;
-      }
-
-      // Update View More popup - show up to 6 skills
+      // Update View More popup - show all skills (no placeholders)
       if (viewMorePopupSkills && hero.abilities) {
         viewMorePopupSkills.innerHTML = '';
-        const skillsToShow = hero.abilities.slice(0, 6);
-        skillsToShow.forEach((ability, index) => {
+        hero.abilities.forEach((ability) => {
           const li = document.createElement('li');
           const strong = document.createElement('strong');
           strong.textContent = ability.name;
@@ -1337,26 +1368,18 @@
           li.appendChild(span);
           viewMorePopupSkills.appendChild(li);
         });
-        // Fill remaining slots up to 6 if needed
-        if (skillsToShow.length < 6) {
-          for (let i = skillsToShow.length; i < 6; i++) {
-            const li = document.createElement('li');
-            li.style.opacity = '0.5';
-            const strong = document.createElement('strong');
-            strong.textContent = `Skill ${i + 1}`;
-            const span = document.createElement('span');
-            span.textContent = 'Skill description will be added here.';
-            li.appendChild(strong);
-            li.appendChild(span);
-            viewMorePopupSkills.appendChild(li);
-          }
-        }
       }
       if (viewMorePopupLore) {
         viewMorePopupLore.textContent = hero.lore || 'Additional hero information will be displayed here.';
       }
+      
+      // Reset pinned state when hero changes
+      isPopupPinned = false;
+      if (viewMoreButton) {
+        viewMoreButton.classList.remove('popup-pinned');
+      }
       if (viewMorePopup) {
-        viewMorePopup.toggleAttribute('hidden', false);
+        viewMorePopup.classList.remove('pinned');
       }
 
       // Update roster active state
@@ -1377,11 +1400,16 @@
       heroes.forEach(hero => {
         const card = document.createElement('button');
         card.type = 'button';
-        card.className = 'hero-roster__card';
+        card.className = `hero-roster__card hero-roster__card--${hero.id}`;
         card.dataset.heroId = hero.id;
+        // Apply unique styling using hero's accent color
+        card.style.setProperty('--hero-accent', hero.accent || '#ffd700');
+        card.style.setProperty('--hero-accent-soft', hero.accentSoft || 'rgba(255,215,0,0.2)');
+        // Use card property if available, otherwise fall back to portrait
+        const cardImg = hero.card || hero.portrait;
         card.innerHTML = `
           <div class="hero-roster__art">
-            <img src="${hero.portrait}" alt="${hero.name}" loading="lazy" />
+            <img src="${cardImg}" alt="${hero.name}" loading="lazy" />
             <span class="hero-roster__role">${roleLabels[hero.category] || hero.category}</span>
           </div>
           <p class="hero-roster__name">${hero.name}</p>
@@ -1453,11 +1481,59 @@
       });
     });
 
-    if (featureButton) {
-      featureButton.addEventListener('click', () => {
-        if (!activeHero) return;
-        openHeroModal(activeHero);
+    // View More button - toggle pin/unpin popup
+    if (viewMoreButton) {
+      viewMoreButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event bubbling
+        isPopupPinned = !isPopupPinned;
+        
+        if (isPopupPinned) {
+          // Pin popup open
+          viewMoreButton.classList.add('popup-pinned');
+          if (viewMorePopup) {
+            viewMorePopup.classList.add('pinned');
+          }
+        } else {
+          // Unpin - return to hover-only
+          viewMoreButton.classList.remove('popup-pinned');
+          if (viewMorePopup) {
+            viewMorePopup.classList.remove('pinned');
+          }
+        }
       });
+    }
+
+    // Prevent popup scroll from scrolling the main page
+    if (viewMorePopup) {
+      // Stop wheel events from bubbling to prevent page scroll
+      viewMorePopup.addEventListener('wheel', (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = viewMorePopup;
+        const isScrollingUp = e.deltaY < 0;
+        const isScrollingDown = e.deltaY > 0;
+        const isAtTop = scrollTop <= 0;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+        
+        // If we can scroll in the popup, prevent the event from reaching the page
+        if (!((isAtTop && isScrollingUp) || (isAtBottom && isScrollingDown))) {
+          e.stopPropagation();
+        } else {
+          // At boundaries, prevent default to stop page scroll
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, { passive: false });
+
+      // Stop touch scroll events from bubbling
+      viewMorePopup.addEventListener('touchmove', (e) => {
+        const { scrollTop, scrollHeight, clientHeight } = viewMorePopup;
+        const isAtTop = scrollTop <= 0;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+        
+        // If not at boundaries, stop propagation so page doesn't scroll
+        if (!isAtTop && !isAtBottom) {
+          e.stopPropagation();
+        }
+      }, { passive: true });
     }
 
     function getFilteredHeroList() {

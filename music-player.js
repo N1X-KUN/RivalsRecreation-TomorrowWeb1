@@ -1,55 +1,135 @@
-// Music Player Component using React
-// Auto-plays on homepage only, muted on other pages
 (function() {
   'use strict';
 
   const { useState, useEffect, useRef } = React;
 
-  // Global audio instance that persists across pages
-  let globalAudio = null;
+  // TODO: Replace these with your YouTube API credentials
+  const YOUTUBE_API_KEY = 'AIzaSyDQcRnvaqDlX0xD4EGS3uImntcvtxzPI34'; 
+  const YOUTUBE_PLAYLIST_ID = 'PLifrH-9w0BzLWOBZ7VbonEQHI6xTt1B_5'; 
+ 
+  const FALLBACK_AUDIO_MAP = {
+  };
+  
+  let globalPlayer = null;
+  let globalAudio = null; 
   let globalPlaylist = null;
   let globalCurrentIndex = 0;
   let globalIsPlaying = false;
   let globalIsMuted = false;
-  const DEFAULT_VOLUME = 60; // Fixed at 60%
+  const DEFAULT_VOLUME = 60; 
+  let youtubeAPIReady = false;
+  let isAdvancing = false; 
+  let playbackPositionInterval = null; 
+  let usingFallback = false;
 
-  // Check if current page is homepage
+  // This checks if current page is homepage
   function isHomepage() {
     const path = window.location.pathname;
     const filename = path.split('/').pop() || '';
     const href = window.location.href;
-    // Check for homepage - Rivals.html, index.html, or root
     return filename === 'Rivals.html' || filename === '' || filename === 'index.html' || href.endsWith('/') || href.includes('Rivals.html');
   }
-  
-  // Helper to get correct audio path
-  function getAudioPath(url) {
-    if (!url) return '';
-    // If already absolute path, use as is
-    if (url.startsWith('/') || url.startsWith('http')) {
-      return url;
+
+  // Initialize YouTube IFrame API
+  function initYouTubeAPI() {
+    if (window.YT && window.YT.Player) {
+      youtubeAPIReady = true;
+      return Promise.resolve();
     }
-    // Otherwise make it relative to current directory
-    return url.startsWith('Videos/') ? url : `Videos/${url}`;
+    
+    return new Promise((resolve) => {
+      if (window.onYouTubeIframeAPIReady) {
+        const oldCallback = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = () => {
+          oldCallback();
+          youtubeAPIReady = true;
+          resolve();
+        };
+      } else {
+        window.onYouTubeIframeAPIReady = () => {
+          youtubeAPIReady = true;
+          resolve();
+        };
+      }
+    });
+  }
+
+  // Fetch YouTube playlist items
+  async function fetchYouTubePlaylist(playlistId, apiKey) {
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${apiKey}`
+      );
+      
+      if (!response.ok) {
+        throw new Error(`YouTube API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.items || data.items.length === 0) {
+        throw new Error('Playlist is empty or not found');
+      }
+      
+      const songs = data.items.map((item, index) => {
+        const snippet = item.snippet;
+        const videoId = snippet.resourceId.videoId;
+        return {
+          _id: item.id,
+          videoId: videoId,
+          title: snippet.title,
+          artist: snippet.videoOwnerChannelTitle || 'Unknown Artist',
+          albumArt: snippet.thumbnails?.high?.url || snippet.thumbnails?.default?.url || '',
+          duration: snippet.duration || null
+        };
+      });
+      
+      return {
+        name: 'YouTube Playlist',
+        songs: songs,
+        currentSongIndex: 0
+      };
+    } catch (error) {
+      console.error('Error fetching YouTube playlist:', error);
+      throw error;
+    }
   }
 
   function MusicPlayer() {
     const [playlist, setPlaylist] = useState(null);
     const [currentSongIndex, setCurrentSongIndex] = useState(0);
     const [isMuted, setIsMuted] = useState(() => {
-      // On homepage: start unmuted, on other pages: start muted
+      // Check if user manually unmuted (this persists across pages)
+      const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+      
       if (isHomepage()) {
+        // On homepage: check if user manually muted
         return localStorage.getItem('musicMuted') === 'true';
+      } else {
+        return !userManuallyUnmuted;
       }
-      return true; // Always muted on non-homepage pages
     });
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     
-    const audioRef = useRef(null);
+    const playerContainerRef = useRef(null);
     const clickTimeoutRef = useRef(null);
 
-    // Initialize or get global audio
-    useEffect(() => {
+    // Play fallback audio (local file) when YouTube embedding fails
+    const playFallbackAudio = (audioPath, song) => {
+      console.log('🎵 Using fallback audio for:', song.title);
+      usingFallback = true;
+      
+      // Stop YouTube player
+      if (globalPlayer && globalPlayer.stopVideo) {
+        try {
+          globalPlayer.stopVideo();
+        } catch (e) {
+          // Ignore errors
+        }
+      }
+      
+      // Create or reuse HTML5 audio element
       if (!globalAudio) {
         globalAudio = new Audio();
         globalAudio.volume = DEFAULT_VOLUME / 100;
@@ -60,187 +140,507 @@
           if (globalPlaylist && globalPlaylist.songs.length > 0) {
             const nextIndex = (globalCurrentIndex + 1) % globalPlaylist.songs.length;
             globalCurrentIndex = nextIndex;
-            const audioPath = getAudioPath(globalPlaylist.songs[nextIndex].audioUrl);
-            globalAudio.src = audioPath;
-            globalAudio.volume = globalIsMuted ? 0 : DEFAULT_VOLUME / 100;
-            globalAudio.play().catch(e => console.log('Play error on next song:', e));
-            globalIsPlaying = true;
             setCurrentSongIndex(nextIndex);
             localStorage.setItem('currentSongIndex', nextIndex.toString());
-            updateCurrentSongIndex(nextIndex);
+            startPlaying(nextIndex, false);
           }
         });
-
+        
         globalAudio.addEventListener('play', () => {
           globalIsPlaying = true;
         });
-
+        
         globalAudio.addEventListener('pause', () => {
           globalIsPlaying = false;
         });
       }
       
-      audioRef.current = globalAudio;
-      
-      // Set initial mute state based on page
+      // Set volume based on mute state
       const shouldBeMuted = isHomepage() 
         ? (localStorage.getItem('musicMuted') === 'true')
-        : true; // Always muted on non-homepage
+        : !(localStorage.getItem('userManuallyUnmuted') === 'true');
+      
+      globalIsMuted = shouldBeMuted;
+      setIsMuted(shouldBeMuted);
+      globalAudio.volume = shouldBeMuted ? 0 : DEFAULT_VOLUME / 100;
+      
+      // Load and play audio
+      globalAudio.src = audioPath;
+      globalAudio.load();
+      
+      // Auto-play on homepage if not muted
+      if (isHomepage() && !shouldBeMuted) {
+        const playPromise = globalAudio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('✅ Fallback audio started playing');
+              globalIsPlaying = true;
+            })
+            .catch(error => {
+              console.log('⚠️ Fallback audio autoplay prevented:', error);
+              // Try on user interaction
+              const tryPlayOnInteraction = () => {
+                globalAudio.play().catch(e => console.log('Still blocked:', e));
+                document.removeEventListener('click', tryPlayOnInteraction);
+                document.removeEventListener('touchstart', tryPlayOnInteraction);
+              };
+              document.addEventListener('click', tryPlayOnInteraction, { once: true });
+              document.addEventListener('touchstart', tryPlayOnInteraction, { once: true });
+            });
+        }
+      }
+    };
+
+    // Play next song - defined outside useEffect so it's accessible to callbacks
+    const playNextSong = () => {
+      if (!globalPlaylist || globalPlaylist.songs.length === 0) {
+        console.log('No playlist or empty playlist');
+        return;
+      }
+      
+      if (isAdvancing) {
+        console.log('Already advancing, skipping');
+        return;
+      }
+      
+      // Stop fallback audio if playing
+      if (usingFallback && globalAudio) {
+        globalAudio.pause();
+        usingFallback = false;
+      }
+      
+      // Clear saved position when moving to next song
+      localStorage.removeItem('playbackPosition');
+      
+      const nextIndex = (globalCurrentIndex + 1) % globalPlaylist.songs.length;
+      console.log('Advancing to next song, index:', nextIndex);
+      startPlaying(nextIndex, false); // Don't restore position for new song
+    };
+
+    // Start playing a song - defined outside useEffect so it's accessible
+    const startPlaying = (index, restorePosition = false) => {
+      if (!globalPlayer || !globalPlaylist || !globalPlaylist.songs[index]) {
+        console.log('Cannot play: player or playlist not ready');
+        return;
+      }
+
+      const song = globalPlaylist.songs[index];
+      console.log('Starting to play:', song.title, 'at index:', index, 'restorePosition:', restorePosition);
+      
+      setCurrentSongIndex(index);
+      globalCurrentIndex = index;
+      localStorage.setItem('currentSongIndex', index.toString());
+
+      // Determine mute state
+      const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+      const isOnHomepage = isHomepage();
+      let shouldBeMuted;
+      
+      if (isOnHomepage) {
+        // On homepage: check if user manually muted
+        const savedMuteState = localStorage.getItem('musicMuted');
+        shouldBeMuted = savedMuteState === 'true';
+        console.log('🏠 Homepage detected - mute state:', shouldBeMuted, 'saved:', savedMuteState);
+        
+        // If this is the first load and no mute state is saved, default to unmuted
+        if (savedMuteState === null && !restorePosition) {
+          shouldBeMuted = false;
+          localStorage.setItem('musicMuted', 'false');
+          console.log('🏠 First load on homepage - setting to unmuted');
+        }
+      } else {
+        // On other pages: auto-mute only if user hasn't manually unmuted
+        shouldBeMuted = !userManuallyUnmuted;
+        console.log('📄 Other page detected - auto-mute:', shouldBeMuted, 'userManuallyUnmuted:', userManuallyUnmuted);
+      }
       
       globalIsMuted = shouldBeMuted;
       setIsMuted(shouldBeMuted);
       
-      if (globalAudio) {
-        globalAudio.volume = shouldBeMuted ? 0 : DEFAULT_VOLUME / 100;
-      }
-    }, []);
-
-    // Load playlist and start playing
-    useEffect(() => {
-      // Use fallback playlist directly (API might not be available)
-      const fallbackPlaylist = {
-        name: "Starlord's Playlist",
-        songs: [
-          { title: "Guardians Theme", artist: "Tyler Bates", audioUrl: "Videos/Guardians Music.mp3", albumArt: "Images/New1.jpg", _id: "1" },
-          { title: "Avengers Theme", artist: "Alan Silvestri", audioUrl: "Videos/Avengers Music.mp3", albumArt: "Images/New2.jpg", _id: "2" },
-          { title: "Fantastic Four Theme", artist: "Marco Beltrami", audioUrl: "Videos/Fantastic Music.mp3", albumArt: "Images/New3.jpg", _id: "3" },
-          { title: "Marvel Theme", artist: "Various Artists", audioUrl: "Videos/Marvel Music.mp3", albumArt: "Images/New4.png", _id: "4" }
-        ],
-        currentSongIndex: 0
-      };
+      // Get saved playback position
+      const savedPosition = restorePosition ? parseFloat(localStorage.getItem('playbackPosition') || '0') : 0;
       
-      // Try to fetch from API first, but use fallback if it fails
-      fetch('/api/playlist')
-        .then(res => {
-          if (res.ok) return res.json();
-          throw new Error('API not available');
-        })
-        .then(data => {
-          if (data && data.songs && data.songs.length > 0) {
-            setPlaylist(data);
-            globalPlaylist = data;
-            const savedIndex = localStorage.getItem('currentSongIndex');
-            const startIndex = savedIndex ? parseInt(savedIndex) : (data.currentSongIndex || 0);
-            const validIndex = Math.min(startIndex, data.songs.length - 1);
-            startPlaying(validIndex, data);
-          } else {
-            throw new Error('No songs in API response');
-          }
-        })
-        .catch(err => {
-          console.log('Using fallback playlist:', err.message);
-          setPlaylist(fallbackPlaylist);
-          globalPlaylist = fallbackPlaylist;
-          const savedIndex = localStorage.getItem('currentSongIndex');
-          const startIndex = savedIndex ? parseInt(savedIndex) : 0;
-          const validIndex = Math.min(startIndex, fallbackPlaylist.songs.length - 1);
-          startPlaying(validIndex, fallbackPlaylist);
+      // Load video with saved position
+      try {
+        globalPlayer.loadVideoById({
+          videoId: song.videoId,
+          startSeconds: savedPosition
         });
-      
-      function startPlaying(index, playlistData) {
-        if (!globalAudio) {
-          console.error('Global audio not initialized');
-          return;
-        }
-        
-        setCurrentSongIndex(index);
-        globalCurrentIndex = index;
-        
-        if (playlistData.songs[index]) {
-          const audioPath = getAudioPath(playlistData.songs[index].audioUrl);
-          console.log('Loading audio:', audioPath, 'Homepage:', isHomepage());
-          
-          // Set volume based on mute state and page
-          const shouldBeMuted = isHomepage() 
-            ? (localStorage.getItem('musicMuted') === 'true')
-            : true;
-          globalAudio.volume = shouldBeMuted ? 0 : DEFAULT_VOLUME / 100;
-          globalIsMuted = shouldBeMuted;
-          setIsMuted(shouldBeMuted);
-          
-          // Set source and load
-          globalAudio.src = audioPath;
-          globalAudio.load();
-          
-          // Try to play when audio is ready
-          const tryPlay = () => {
-            // Auto-play only on homepage
-            if (isHomepage() && !shouldBeMuted) {
-              const playPromise = globalAudio.play();
-              if (playPromise !== undefined) {
-                playPromise
-                  .then(() => {
-                    console.log('✅ Music started playing successfully');
-                    globalIsPlaying = true;
-                  })
-                  .catch(error => {
-                    console.log('⚠️ Auto-play prevented, will try on user interaction:', error.name);
-                    // Try again on first user interaction
-                    const tryPlayOnInteraction = () => {
-                      globalAudio.play()
-                        .then(() => {
-                          console.log('✅ Music started after user interaction');
-                          globalIsPlaying = true;
-                        })
-                        .catch(e => console.log('❌ Still blocked:', e));
-                      document.removeEventListener('click', tryPlayOnInteraction);
-                      document.removeEventListener('touchstart', tryPlayOnInteraction);
-                    };
-                    document.addEventListener('click', tryPlayOnInteraction, { once: true });
-                    document.addEventListener('touchstart', tryPlayOnInteraction, { once: true });
-                  });
+
+        // Set volume and mute state after loading
+        setTimeout(() => {
+          if (globalPlayer) {
+            const volumeToSet = shouldBeMuted ? 0 : DEFAULT_VOLUME;
+            try {
+              if (globalPlayer.setVolume) {
+                globalPlayer.setVolume(volumeToSet);
+                console.log('✅ Volume set to:', volumeToSet, 'muted:', shouldBeMuted);
               }
-            } else {
-              console.log('ℹ️ Not on homepage or muted - music loaded but not playing');
+              // YouTube has a separate mute state - ensure it's set correctly
+              if (shouldBeMuted && globalPlayer.mute) {
+                globalPlayer.mute();
+              } else if (!shouldBeMuted && globalPlayer.unMute) {
+                globalPlayer.unMute();
+              }
+            } catch (e) {
+              console.error('Error setting volume/mute:', e);
+            }
+          }
+        }, 100);
+
+        // Start saving playback position periodically
+        if (playbackPositionInterval) {
+          clearInterval(playbackPositionInterval);
+        }
+        playbackPositionInterval = setInterval(() => {
+          if (globalPlayer && globalPlayer.getCurrentTime) {
+            try {
+              const currentTime = globalPlayer.getCurrentTime();
+              localStorage.setItem('playbackPosition', currentTime.toString());
+            } catch (e) {
+              // Ignore errors
+            }
+          }
+        }, 2000); // Save every 2 seconds
+
+        // Auto-play logic - be aggressive about it
+        const shouldAutoPlay = isHomepage() ? !shouldBeMuted : userManuallyUnmuted;
+        
+        if (shouldAutoPlay) {
+          // Multiple attempts to play - browsers can be finicky
+          const tryPlay = (attempt = 1) => {
+            if (!globalPlayer) return;
+            
+            try {
+              const state = globalPlayer.getPlayerState ? globalPlayer.getPlayerState() : -1;
+              console.log(`Play attempt ${attempt}, state:`, state);
+              
+              // Try to play if video is ready (CUED, PAUSED, or even UNSTARTED)
+              if (state === window.YT.PlayerState.CUED || 
+                  state === window.YT.PlayerState.PAUSED || 
+                  state === window.YT.PlayerState.UNSTARTED ||
+                  state === -1) {
+                
+                if (globalPlayer.playVideo) {
+                  globalPlayer.playVideo();
+                  console.log(`✅ Play command sent (attempt ${attempt})`);
+                }
+                
+                // Keep trying if not playing yet
+                if (attempt < 10 && !globalIsPlaying) {
+                  setTimeout(() => tryPlay(attempt + 1), 500);
+                }
+              } else if (state === window.YT.PlayerState.BUFFERING) {
+                // Still buffering, wait a bit
+                if (attempt < 10) {
+                  setTimeout(() => tryPlay(attempt + 1), 500);
+                }
+              }
+            } catch (error) {
+              console.error(`Error on play attempt ${attempt}:`, error);
+              if (attempt < 10) {
+                setTimeout(() => tryPlay(attempt + 1), 500);
+              }
             }
           };
           
-          // Try to play when audio can play
-          globalAudio.addEventListener('canplay', tryPlay, { once: true });
+          // Start trying immediately and keep retrying
+          setTimeout(() => tryPlay(1), 300);
+          setTimeout(() => tryPlay(2), 800);
+          setTimeout(() => tryPlay(3), 1500);
+          setTimeout(() => tryPlay(4), 2500);
+          setTimeout(() => tryPlay(5), 4000);
           
-          // Also try immediately (might work if already cached)
-          setTimeout(tryPlay, 100);
+          // Also try on ANY user interaction
+          const tryPlayOnInteraction = (e) => {
+            if (globalPlayer && globalPlayer.playVideo && !globalIsPlaying) {
+              try {
+                globalPlayer.playVideo();
+                console.log('✅ Video play triggered by user interaction:', e.type);
+              } catch (e) {
+                console.log('Error playing on interaction:', e);
+              }
+            }
+          };
           
-          // Error handling
-          globalAudio.addEventListener('error', (e) => {
-            console.error('❌ Audio error:', e);
-            console.error('Failed to load:', audioPath);
-            console.error('Error details:', globalAudio.error);
+          // Listen to multiple interaction types
+          ['click', 'touchstart', 'mousedown', 'keydown', 'scroll'].forEach(eventType => {
+            document.addEventListener(eventType, tryPlayOnInteraction, { once: true, passive: true });
           });
+        } else {
+          // On other pages or if muted, just load but don't play
+          const reason = !isHomepage() ? 'not homepage' : 'muted';
+          console.log(`Video loaded but not playing (${reason})`);
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading video:', error);
+        setIsLoading(false);
+      }
+    };
+
+    // Initialize YouTube Player
+    useEffect(() => {
+      async function setupPlayer() {
+        try {
+          // Wait for YouTube API to be ready
+          await initYouTubeAPI();
+          
+          if (!youtubeAPIReady || !window.YT || !window.YT.Player) {
+            console.error('YouTube API not ready');
+            setIsLoading(false);
+            return;
+          }
+
+          // Create hidden iframe container if it doesn't exist
+          if (!playerContainerRef.current) {
+            const container = document.createElement('div');
+            container.id = 'youtube-player-container';
+            container.style.display = 'none';
+            document.body.appendChild(container);
+            playerContainerRef.current = container;
+          }
+
+          // Initialize or get global player
+          if (!globalPlayer) {
+            globalPlayer = new window.YT.Player('youtube-player-container', {
+              height: '0',
+              width: '0',
+              playerVars: {
+                autoplay: 1, // Try to autoplay
+                controls: 0,
+                disablekb: 1,
+                enablejsapi: 1,
+                fs: 0,
+                iv_load_policy: 3,
+                modestbranding: 1,
+                playsinline: 1,
+                rel: 0,
+                mute: 0 // Don't start muted
+              },
+              events: {
+                onReady: (event) => {
+                  console.log('✅ YouTube player ready');
+                  globalPlayer = event.target;
+                  
+                  // Set initial volume
+                  try {
+                    globalPlayer.setVolume(DEFAULT_VOLUME);
+                    console.log('✅ Volume set to:', DEFAULT_VOLUME);
+                  } catch (e) {
+                    console.error('Error setting volume:', e);
+                  }
+                  
+                  // Load playlist and start playing
+                  loadPlaylist();
+                },
+                onStateChange: (event) => {
+                  // YT.PlayerState.ENDED = 0, PLAYING = 1, PAUSED = 2, BUFFERING = 3, CUED = 5, UNSTARTED = -1
+                  const state = event.data;
+                  console.log('YouTube player state changed:', state);
+                  
+                  if (state === window.YT.PlayerState.ENDED) {
+                    // Clear saved position when song ends
+                    localStorage.removeItem('playbackPosition');
+                    // Only advance if not already advancing
+                    if (!isAdvancing) {
+                      isAdvancing = true;
+                      setTimeout(() => {
+                        playNextSong();
+                        isAdvancing = false;
+                      }, 500);
+                    }
+                  } else if (state === window.YT.PlayerState.PLAYING) {
+                    globalIsPlaying = true;
+                    console.log('✅ Video is now playing - AUDIO SHOULD BE HEARABLE');
+                    // Force unmute when playing starts
+                    if (globalPlayer && globalPlayer.unMute) {
+                      try {
+                        globalPlayer.unMute();
+                        console.log('✅ Player unmuted');
+                      } catch (e) {
+                        console.log('Error unmuting:', e);
+                      }
+                    }
+                  } else if (state === window.YT.PlayerState.PAUSED) {
+                    globalIsPlaying = false;
+                  } else if (state === window.YT.PlayerState.CUED) {
+                    // Video is cued and ready - try to play if we should
+                    const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+                    const shouldBeMuted = isHomepage() 
+                      ? (localStorage.getItem('musicMuted') === 'true')
+                      : !userManuallyUnmuted;
+                    const shouldAutoPlay = isHomepage() ? !shouldBeMuted : userManuallyUnmuted;
+                    
+                    if (shouldAutoPlay && !globalIsPlaying) {
+                      setTimeout(() => {
+                        if (globalPlayer && globalPlayer.playVideo) {
+                          try {
+                            globalPlayer.playVideo();
+                            console.log('✅ Video play triggered after CUED state');
+                          } catch (e) {
+                            console.log('Error playing after CUED:', e);
+                          }
+                        }
+                      }, 300);
+                    }
+                  }
+                },
+                onError: (event) => {
+                  const errorCode = event.data;
+                  console.error('YouTube player error:', errorCode);
+                  
+                  // Error codes: 2=invalid ID, 5=HTML5 error, 100=not found, 101/150=embedding disabled
+                  let errorMessage = 'Unknown error';
+                  if (errorCode === 2) errorMessage = 'Invalid video ID';
+                  else if (errorCode === 5) errorMessage = 'HTML5 player error';
+                  else if (errorCode === 100) errorMessage = 'Video not found';
+                  else if (errorCode === 101 || errorCode === 150) errorMessage = 'Video embedding disabled - cannot play this video';
+                  
+                  console.error(`❌ ${errorMessage} (Error ${errorCode})`);
+                  
+                  // Try fallback audio if embedding is disabled
+                  if ((errorCode === 101 || errorCode === 150) && globalPlaylist && globalPlaylist.songs[globalCurrentIndex]) {
+                    const currentSong = globalPlaylist.songs[globalCurrentIndex];
+                    const fallbackAudio = FALLBACK_AUDIO_MAP[currentSong.videoId];
+                    
+                    if (fallbackAudio) {
+                      console.log('🔄 Trying fallback audio file:', fallbackAudio);
+                      playFallbackAudio(fallbackAudio, currentSong);
+                      return; // Don't skip to next song, use fallback instead
+                    } else {
+                      console.log('⚠️ No fallback audio found for this video. Add it to FALLBACK_AUDIO_MAP in music-player.js');
+                    }
+                  }
+                  
+                  // Try next song on error, but only if not already advancing
+                  if (!isAdvancing) {
+                    isAdvancing = true;
+                    setTimeout(() => {
+                      console.log('⏭️ Skipping to next song due to error');
+                      playNextSong();
+                      isAdvancing = false;
+                    }, 1000);
+                  }
+                }
+              }
+            });
+          } else {
+            // Player already exists, just load playlist
+            loadPlaylist();
+          }
+        } catch (error) {
+          console.error('Error setting up YouTube player:', error);
+          setIsLoading(false);
         }
       }
+
+      async function loadPlaylist() {
+        try {
+          setIsLoading(true);
+          
+          // Check if API key and playlist ID are configured
+          if (YOUTUBE_API_KEY === 'YOUR_YOUTUBE_API_KEY_HERE' || YOUTUBE_PLAYLIST_ID === 'YOUR_PLAYLIST_ID_HERE') {
+            console.error('⚠️ Please configure YOUTUBE_API_KEY and YOUTUBE_PLAYLIST_ID in music-player.js');
+            setIsLoading(false);
+            return;
+          }
+
+          // Fetch playlist from YouTube
+          const playlistData = await fetchYouTubePlaylist(YOUTUBE_PLAYLIST_ID, YOUTUBE_API_KEY);
+          
+          setPlaylist(playlistData);
+          globalPlaylist = playlistData;
+          
+          // Get saved index or start at 0
+          const savedIndex = localStorage.getItem('currentSongIndex');
+          const startIndex = savedIndex ? parseInt(savedIndex) : 0;
+          const validIndex = Math.min(startIndex, playlistData.songs.length - 1);
+          
+          setCurrentSongIndex(validIndex);
+          globalCurrentIndex = validIndex;
+          
+          // Start playing and restore position
+          startPlaying(validIndex, true);
+        } catch (error) {
+          console.error('Error loading playlist:', error);
+          setIsLoading(false);
+        }
+      }
+
+      setupPlayer();
     }, []);
+
 
     // Update mute state
     useEffect(() => {
-      if (globalAudio) {
-        globalIsMuted = isMuted;
+      globalIsMuted = isMuted;
+      
+      // Update YouTube player
+      if (globalPlayer && !usingFallback) {
+        try {
+          if (globalPlayer.setVolume) {
+            globalPlayer.setVolume(isMuted ? 0 : DEFAULT_VOLUME);
+          }
+          // YouTube has a separate mute state
+          if (isMuted && globalPlayer.mute) {
+            globalPlayer.mute();
+          } else if (!isMuted && globalPlayer.unMute) {
+            globalPlayer.unMute();
+          }
+        } catch (e) {
+          console.error('Error updating YouTube mute state:', e);
+        }
+      }
+      
+      // Update fallback audio
+      if (globalAudio && usingFallback) {
         globalAudio.volume = isMuted ? 0 : DEFAULT_VOLUME / 100;
-        if (!isHomepage()) {
-          // On non-homepage, save mute state
-          localStorage.setItem('musicMuted', isMuted.toString());
+      }
+        
+      // Save mute state
+      localStorage.setItem('musicMuted', isMuted.toString());
+      
+      // Track if user manually unmuted (for non-homepage pages)
+      if (!isHomepage()) {
+        if (!isMuted) {
+          // User manually unmuted on non-homepage - remember this preference
+          localStorage.setItem('userManuallyUnmuted', 'true');
+        }
+        // Note: We don't clear userManuallyUnmuted when muting, 
+        // so it persists across page navigation
+      } else {
+        // On homepage, if user manually mutes, clear the userManuallyUnmuted flag
+        // so that other pages will be auto-muted again
+        if (isMuted) {
+          localStorage.removeItem('userManuallyUnmuted');
+        }
+      }
+      
+      // If unmuted and not playing, try to play
+      if (!isMuted && !globalIsPlaying) {
+        if (usingFallback && globalAudio) {
+          globalAudio.play().catch(e => console.log('Could not resume fallback audio:', e));
+        } else if (globalPlayer && globalPlayer.playVideo) {
+          try {
+            globalPlayer.playVideo();
+            console.log('✅ Resuming playback after unmute');
+          } catch (e) {
+            console.log('Could not resume playback:', e);
+          }
         }
       }
     }, [isMuted]);
 
-    // Update current song index in backend
-    const updateCurrentSongIndex = (index) => {
-      fetch('/api/playlist/current-song', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ songIndex: index })
-      }).catch(err => console.error('Error updating song index:', err));
-    };
-
     // Handle click with double-click detection
     const handleIconClick = (e) => {
       if (clickTimeoutRef.current) {
-        // Double click detected
         clearTimeout(clickTimeoutRef.current);
         clickTimeoutRef.current = null;
         handleDoubleClick();
       } else {
-        // Single click - wait to see if double click
         clickTimeoutRef.current = setTimeout(() => {
           clickTimeoutRef.current = null;
           setIsOpen(!isOpen);
@@ -252,75 +652,54 @@
     const handleDoubleClick = () => {
       const newMutedState = !isMuted;
       setIsMuted(newMutedState);
-      globalIsMuted = newMutedState;
-      
-      if (globalAudio) {
-        globalAudio.volume = newMutedState ? 0 : DEFAULT_VOLUME / 100;
-      }
-      
-      localStorage.setItem('musicMuted', newMutedState.toString());
     };
 
-    // Skip song (remove from queue)
-    const skipSong = async (songId, index) => {
-      if (!playlist || !globalAudio) return;
-      
-      // Create updated playlist first (remove the song)
-      const newSongs = playlist.songs.filter((_, i) => i !== index);
-      const updatedPlaylist = { ...playlist, songs: newSongs };
+    // Skip song (remove from queue and play next)
+    const skipSong = (songId, index) => {
+      if (!playlist || !globalPlayer) return;
       
       // If skipping current song, play next one
       if (index === currentSongIndex) {
-        if (newSongs.length > 0) {
-          // Find next song (could be same index or 0 if we removed the last one)
-          const nextIndex = index < newSongs.length ? index : 0;
-          globalCurrentIndex = nextIndex;
-          setCurrentSongIndex(nextIndex);
-          localStorage.setItem('currentSongIndex', nextIndex.toString());
-          
-          const audioPath = getAudioPath(newSongs[nextIndex].audioUrl);
-          globalAudio.src = audioPath;
-          globalAudio.volume = globalIsMuted ? 0 : DEFAULT_VOLUME / 100;
-          globalAudio.load();
-          globalAudio.play().catch(e => console.log('Play error:', e));
-          globalIsPlaying = true;
-          updateCurrentSongIndex(nextIndex);
+        if (playlist.songs.length > 1) {
+          const nextIndex = (index + 1) % playlist.songs.length;
+          startPlaying(nextIndex);
         } else {
           // No more songs
-          globalAudio.pause();
+          if (globalPlayer.stopVideo) {
+            globalPlayer.stopVideo();
+          }
           globalIsPlaying = false;
         }
-      } else if (index < currentSongIndex) {
-        // Adjust current index if we removed a song before the current one
+      }
+      
+      // Remove song from playlist
+      const newSongs = playlist.songs.filter((_, i) => i !== index);
+      const updatedPlaylist = { ...playlist, songs: newSongs };
+      
+      setPlaylist(updatedPlaylist);
+      globalPlaylist = updatedPlaylist;
+      
+      // Adjust current index if needed
+      if (index < currentSongIndex) {
         const newIndex = currentSongIndex - 1;
         setCurrentSongIndex(newIndex);
         globalCurrentIndex = newIndex;
         localStorage.setItem('currentSongIndex', newIndex.toString());
       }
-      
-      // Update playlist state immediately for UI
-      setPlaylist(updatedPlaylist);
-      globalPlaylist = updatedPlaylist;
-      
-      // Try to remove from backend (non-blocking)
-      try {
-        const response = await fetch(`/api/playlist/songs/${songId}`, {
-          method: 'DELETE'
-        });
-        if (response.ok) {
-          const backendPlaylist = await response.json();
-          setPlaylist(backendPlaylist);
-          globalPlaylist = backendPlaylist;
-        }
-      } catch (err) {
-        console.error('Error removing song from backend:', err);
-        // Already updated local state, so continue
-      }
     };
 
     const currentSong = playlist?.songs[currentSongIndex];
     const isPlaying = globalIsPlaying && !globalIsMuted;
-
+    
+    // Add visual status indicator
+    useEffect(() => {
+      if (globalPlayer && isPlaying) {
+        console.log('🎵 MUSIC IS PLAYING - Check your speakers/headphones!');
+      } else if (globalPlayer && !isPlaying && !isMuted) {
+        console.log('⏸️ Music loaded but not playing (may be blocked by browser)');
+      }
+    }, [isPlaying, isMuted]);
+    
     // Create SVG icon
     const createSVGIcon = (pathData) => {
       return React.createElement('svg', { viewBox: '0 0 24 24', fill: 'currentColor' },
@@ -329,7 +708,28 @@
     };
 
     return React.createElement(React.Fragment, null,
-      // Fixed Music Icon - Bottom Left (with fade-in after 10s)
+      // Status indicator (for debugging)
+      React.createElement('div', {
+        id: 'music-status-indicator',
+        style: {
+          position: 'fixed',
+          bottom: '90px',
+          left: '20px',
+          zIndex: 1002,
+          padding: '8px 12px',
+          background: isPlaying ? 'rgba(0, 255, 0, 0.2)' : 'rgba(255, 255, 0, 0.2)',
+          border: `2px solid ${isPlaying ? '#00ff00' : '#ffff00'}`,
+          borderRadius: '8px',
+          color: '#fff',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          fontFamily: 'monospace',
+          pointerEvents: 'none',
+          opacity: 0.8
+        }
+      }, isPlaying ? '🎵 PLAYING' : (isMuted ? '🔇 MUTED' : '⏸️ LOADING')),
+      
+      // Fixed Music Icon - Bottom Left
       React.createElement('div', {
         className: `music-player-icon ${isPlaying ? 'playing' : ''} ${isMuted ? 'muted' : ''} music-player-icon--fade-in`,
         style: {
@@ -337,10 +737,12 @@
           bottom: '20px',
           left: '20px',
           zIndex: 1001,
-          cursor: 'pointer'
+          cursor: 'pointer',
+          border: isPlaying ? '3px solid #00ff00' : '2px solid rgba(255, 215, 0, 1)',
+          boxShadow: isPlaying ? '0 0 20px rgba(0, 255, 0, 0.6)' : '0 8px 24px rgba(255, 215, 0, 0.4)'
         },
         onClick: handleIconClick,
-        title: "Starlord's Playlist - Click to open queue, Double-click to mute/unmute"
+        title: isPlaying ? "🎵 Playing - Click to open queue, Double-click to mute" : "⏸️ Click to play, Double-click to unmute"
       },
         createSVGIcon('M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'),
         isMuted && React.createElement('div', {
@@ -422,6 +824,7 @@
         // Next Up
         React.createElement('div', { className: 'next-up' },
           React.createElement('div', { className: 'next-up-label' }, 'NEXT UP FROM: SPOTLIGHTED UPLOADS'),
+          isLoading && React.createElement('div', { style: { padding: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.6)' } }, 'Loading playlist...'),
           React.createElement('ul', { className: 'queue-list' },
             playlist?.songs.map((song, index) => {
               if (index === currentSongIndex) return null;
@@ -470,7 +873,6 @@
   function initMusicPlayer() {
     if (!window.React || !window.ReactDOM) {
       console.error('❌ React or ReactDOM not loaded - music player cannot initialize');
-      // Retry after a short delay
       setTimeout(() => {
         if (window.React && window.ReactDOM) {
           console.log('✅ React loaded, initializing music player...');
@@ -480,7 +882,6 @@
       return;
     }
 
-    // Check if root already exists
     let root = document.getElementById('music-player-root');
     if (!root) {
       root = document.createElement('div');
@@ -506,7 +907,6 @@
         initMusicPlayer();
       }
     } else {
-      // React not loaded yet, wait a bit and try again
       setTimeout(waitForReact, 100);
     }
   }

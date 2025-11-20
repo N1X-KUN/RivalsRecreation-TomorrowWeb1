@@ -25,27 +25,21 @@
   const mobileLoginBtn = document.getElementById('mobile-login-btn');
   const loginClose = document.querySelector('.login-close');
   const loginOverlay = document.querySelector('.login-overlay');
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const tabContents = document.querySelectorAll('.tab-content');
 
   function openLoginPopup() {
-    loginPopup.toggleAttribute('hidden', false);
-    loginPopup.toggleAttribute('open', true);
-    document.body.style.overflow = 'hidden';
+    if (loginPopup) {
+      loginPopup.toggleAttribute('hidden', false);
+      loginPopup.toggleAttribute('open', true);
+      document.body.style.overflow = 'hidden';
+    }
   }
 
   function closeLoginPopup() {
-    loginPopup.toggleAttribute('hidden', true);
-    loginPopup.toggleAttribute('open', false);
-    document.body.style.overflow = '';
-  }
-
-  function switchTab(tabName) {
-    tabBtns.forEach(btn => btn.classList.remove('active'));
-    tabContents.forEach(content => content.classList.remove('active'));
-    
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-    document.getElementById(`${tabName}-tab`).classList.add('active');
+    if (loginPopup) {
+      loginPopup.toggleAttribute('hidden', true);
+      loginPopup.toggleAttribute('open', false);
+      document.body.style.overflow = '';
+    }
   }
 
   if (loginBtn) loginBtn.addEventListener('click', (e) => { e.preventDefault(); openLoginPopup(); });
@@ -53,19 +47,210 @@
   if (loginClose) loginClose.addEventListener('click', closeLoginPopup);
   if (loginOverlay) loginOverlay.addEventListener('click', closeLoginPopup);
 
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabName = btn.getAttribute('data-tab');
-      switchTab(tabName);
-    });
-  });
-
   // Close popup with Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && loginPopup && loginPopup.hasAttribute('open')) {
       closeLoginPopup();
     }
   });
+
+  // Generate random captcha for popup
+  let popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
+  const popupCaptchaText = document.getElementById('popup-captcha-text');
+  if (popupCaptchaText) {
+    popupCaptchaText.textContent = popupCaptcha.toString();
+  }
+
+  // Refresh captcha
+  const popupRefreshCaptcha = document.getElementById('popup-refreshCaptcha');
+  if (popupRefreshCaptcha) {
+    popupRefreshCaptcha.addEventListener('click', () => {
+      popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
+      if (popupCaptchaText) popupCaptchaText.textContent = popupCaptcha.toString();
+      const captchaInput = document.getElementById('popup-reg-captcha');
+      if (captchaInput) captchaInput.value = '';
+    });
+  }
+
+  // Enable/disable registration button
+  function checkPopupRegistrationForm() {
+    const submitBtn = document.getElementById('popup-reg-submit-btn');
+    if (!submitBtn) return;
+    
+    const email = document.getElementById('popup-reg-email')?.value;
+    const nickname = document.getElementById('popup-reg-nickname')?.value;
+    const password = document.getElementById('popup-reg-password')?.value;
+    const passwordRepeat = document.getElementById('popup-reg-password-repeat')?.value;
+    const captcha = document.getElementById('popup-reg-captcha')?.value;
+    const terms = document.getElementById('popup-reg-terms')?.checked;
+
+    const isValid = 
+        email && 
+        nickname && 
+        password && 
+        password === passwordRepeat && 
+        captcha === popupCaptcha.toString() && 
+        terms;
+
+    submitBtn.disabled = !isValid;
+  }
+
+  // Add event listeners for registration form validation
+  ['popup-reg-email', 'popup-reg-nickname', 'popup-reg-password', 'popup-reg-password-repeat', 'popup-reg-captcha', 'popup-reg-terms'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', checkPopupRegistrationForm);
+      el.addEventListener('change', checkPopupRegistrationForm);
+    }
+  });
+
+  // Password match validation
+  const popupPasswordRepeat = document.getElementById('popup-reg-password-repeat');
+  if (popupPasswordRepeat) {
+    popupPasswordRepeat.addEventListener('input', function() {
+      const password = document.getElementById('popup-reg-password')?.value;
+      const passwordRepeat = this.value;
+      
+      if (passwordRepeat && password !== passwordRepeat) {
+        this.setCustomValidity('Passwords do not match');
+      } else {
+        this.setCustomValidity('');
+      }
+      checkPopupRegistrationForm();
+    });
+  }
+
+  // Registration Form Submission
+  const popupRegistrationForm = document.getElementById('popup-registrationForm');
+  if (popupRegistrationForm) {
+    popupRegistrationForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('popup-reg-email').value;
+      const nickname = document.getElementById('popup-reg-nickname').value;
+      const password = document.getElementById('popup-reg-password').value;
+      const passwordRepeat = document.getElementById('popup-reg-password-repeat').value;
+      const captcha = document.getElementById('popup-reg-captcha').value;
+      
+      // Validate captcha
+      if (captcha !== popupCaptcha.toString()) {
+        alert('Invalid captcha code. Please try again.');
+        popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
+        if (popupCaptchaText) popupCaptchaText.textContent = popupCaptcha.toString();
+        document.getElementById('popup-reg-captcha').value = '';
+        return;
+      }
+      
+      // Validate password match
+      if (password !== passwordRepeat) {
+        alert('Passwords do not match.');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            name: nickname, 
+            email: email, 
+            password: password 
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert('Account created successfully! Please log in.');
+          // Expand login section
+          const expandContent = document.getElementById('popup-expandContent');
+          const expandBtn = document.getElementById('popup-expandLink');
+          if (expandContent && expandBtn) {
+            expandContent.hidden = false;
+            expandBtn.setAttribute('aria-expanded', 'true');
+          }
+          // Pre-fill email
+          const loginEmail = document.getElementById('popup-login-email');
+          if (loginEmail) loginEmail.value = email;
+        } else {
+          alert(data.error || 'Registration failed. Please try again.');
+        }
+      } catch (error) {
+        alert('Network error. Please make sure the server is running.');
+        console.error('Registration error:', error);
+      }
+    });
+  }
+
+  // Login Form Submission
+  const popupLoginForm = document.getElementById('popup-loginForm');
+  if (popupLoginForm) {
+    popupLoginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('popup-login-email').value;
+      const password = document.getElementById('popup-login-password').value;
+      
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          alert('Login successful!');
+          closeLoginPopup();
+          window.location.reload();
+        } else {
+          alert(data.error || 'Invalid email or password.');
+        }
+      } catch (error) {
+        alert('Network error. Please make sure the server is running.');
+        console.error('Login error:', error);
+      }
+    });
+  }
+
+  // Switch to Login Section
+  const popupSwitchToLogin = document.getElementById('popup-switchToLogin');
+  if (popupSwitchToLogin) {
+    popupSwitchToLogin.addEventListener('click', () => {
+      const expandContent = document.getElementById('popup-expandContent');
+      const expandBtn = document.getElementById('popup-expandLink');
+      if (expandContent && expandBtn) {
+        expandContent.hidden = false;
+        expandBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  // Artstorm Login Button
+  const popupArtstormLogin = document.getElementById('popup-artstormLogin');
+  if (popupArtstormLogin) {
+    popupArtstormLogin.addEventListener('click', () => {
+      alert('Artstorm login integration coming soon!');
+    });
+  }
+
+  // Expandable Section Toggle
+  const popupExpandLink = document.getElementById('popup-expandLink');
+  if (popupExpandLink) {
+    popupExpandLink.addEventListener('click', function() {
+      const expandContent = document.getElementById('popup-expandContent');
+      if (expandContent) {
+        const isExpanded = !expandContent.hidden;
+        expandContent.hidden = isExpanded;
+        this.setAttribute('aria-expanded', !isExpanded);
+      }
+    });
+  }
 
   // Scroll reveal
   const revealables = Array.from(document.querySelectorAll('[data-reveal]'));
@@ -476,7 +661,7 @@
         health: '450',
         stats: [
           { label: 'Difficulty', value: '★★★★' },
-          { label: 'Attack Type', value: 'Jab,Block,Charge' },
+          { label: 'Team', value: 'Odinsons, Guardians of the Galaxy' },
           { label: 'Mobility', value: 'Flight/Ground' },
           { label: 'Passive', value: 'Wingblade Ascent' }
         ],
@@ -503,7 +688,7 @@
         health: '575',
         stats: [
           { label: 'Difficulty', value: '★★★' },
-          { label: 'Attack Type', value: 'Melee Bonking' },
+          { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Alot of Mobility' },
           { label: 'Passive', value: 'Captains Spirit' }
         ],
@@ -529,7 +714,7 @@
         health: '650',
         stats: [
           { label: 'Difficulty', value: '★' },
-          { label: 'Attack Type', value: 'Tentacle Touchy' },
+          { label: 'Team', value: 'Vigilante' },
           { label: 'Mobility', value: 'Swing' },
           { label: 'Passive', value: 'Alien Biology' }
         ],
@@ -557,7 +742,7 @@
         health: '600',
         stats: [
           { label: 'Difficulty', value: '★★★★' },
-          { label: 'Attack Type', value: 'Shazam' },
+          { label: 'Team', value: 'Odinsons, Avengers, Guardians of the Galaxy' },
           { label: 'Mobility', value: 'Charge Ram' },
           { label: 'Passive', value: 'Thorforce' }
         ],
@@ -584,7 +769,7 @@
         health: '700',
         stats: [
           { label: 'Difficulty', value: '★★★' },
-          { label: 'Attack Type', value: 'Left, Right, Goodnight' },
+          { label: 'Team', value: 'Fantastic Four' },
           { label: 'Mobility', value: 'Running' },
           { label: 'Passive', value: 'Unyielding Will' }
         ],
@@ -610,7 +795,7 @@
         health: '750',
         stats: [
           { label: 'Difficulty', value: '★★★' },
-          { label: 'Attack Type', value: 'Web, Place Mine, Web again.' },
+          { label: 'Team', value: 'SpiderVerse' },
           { label: 'Mobility', value: 'Webs' },
           { label: 'Passive', value: 'Wall Crawl' }
         ],
@@ -637,7 +822,7 @@
         health: '650',
         stats: [
           { label: 'Difficulty', value: '★★★' },
-          { label: 'Attack Type', value: 'Throws Metal and Shields Metal' },
+          { label: 'Team', value: 'X-Men' },
           { label: 'Mobility', value: 'Air Decend' },
           { label: 'Passive', value: 'Ace Greatswords Fired' }
         ],
@@ -660,12 +845,10 @@
         accent: '#04ff00',
         realName: 'Bruce Banner',
         attackType: 'Melee Heroes',
-        health: '200 (Human Form)',
-        health: '650 (Hero Hulk Form)',
-        health: '1400 (Monster Hulk Form)',
+        health: '200 (Human Form) \n 650 (Hero Hulk Form) \n 1400 (Monster Hulk Form)',
         stats: [
           { label: 'Difficulty', value: '★★★★' },
-          { label: 'Attack Type', value: 'Smash, Punch, and Throw' },
+          { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Jump...Smash' },
           { label: 'Passive', value: 'Puny Banner' }
         ],
@@ -694,7 +877,7 @@
         health: '700',
         stats: [
           { label: 'Difficulty', value: '★★' },
-          { label: 'Attack Type', value: 'Sticks' },
+          { label: 'Team', value: 'Guardians of the Galaxy' },
           { label: 'Mobility', value: 'Walking' },
           { label: 'Passive', value: 'Flora Colossus' }
         ],
@@ -721,7 +904,7 @@
         health: '550',
         stats: [
           { label: 'Difficulty', value: '★★★' },
-          { label: 'Attack Type', value: 'Mind Laser' },
+          { label: 'Team', value: 'X-Men' },
           { label: 'Mobility', value: 'Walking' },
           { label: 'Passive', value: 'Diamond Form' }
         ],
@@ -731,7 +914,35 @@
           { name: 'Carbon Crush', description: 'In Diamond Form, lunge forward to grab an enemy, then execute a back slam to inflict damage.' },
           { name: 'Psionic Seduction', description: 'Project a forward psychic assault that stuns foes and prevents them from unleashing their Ultimate Abilities; if the effect lingers, it gradually commandeers their mind, forcing them to move toward Emma Frost.' },
         ]
-      }
+      },
+      {
+        id: 'doctor-strange',
+        category: 'vanguard',
+        name: 'Doctor Strange',
+        tagline: 'Im Opening a Portal to your heart,Type Shift',
+        summary: 'BY THE POWER OF GREYSKUL- wait wrong spell, ABRACADABRA!',
+        lore: 'As the Sorcerer Supreme, Dr. Stephen Strange gracefully wields ancient spells to turn the tide of even the most impossible battle. However, magic always comes at a cost, and each use of his arcane abilities gradually awakens the darkness within him.',
+        portrait: 'Images/StrangeStory.png',
+        background: 'Images/StrangeSilhouette.png',
+        card: 'Images/Doctor.png',
+        accent: '#ff4800',
+        realName: 'Doctor Strange',
+        attackType: 'Projectile Heroes',
+        health: '575',
+        stats: [
+          { label: 'Difficulty', value: '★★' },
+          { label: 'Team', value: 'Avengers' },
+          { label: 'Mobility', value: 'Walking' },
+          { label: 'Passive', value: 'Price Of Magic' }
+        ],
+        abilities: [
+          { name: 'Shield Of The Seraphim', description: 'Create a protective barrier against damage.' },
+          { name: 'Maelstrom Of Madness', description: 'Release Dark Magic to deal damage to nearby enemies.' },
+          { name: 'Pentagram Of Farallah', description: 'Open portals between two locations, enabling all units to travel through them.' },
+          { name: 'Cloak Of Levitation', description: 'Ascend and then enter a brief state of sustained flight.' },
+          { name: 'Eye Of Agamotto', description: 'Separate nearby enemies\' Souls from their bodies. Damage dealt to these Souls is transferred to their physical bodies.' }
+        ]
+      },
     ];
 
     const duelistHeroes = [
@@ -739,57 +950,100 @@
         id: 'black-panther',
         category: 'duelist',
         name: 'Black Panther',
-        tagline: 'Vibranium Duelist',
-        summary: 'Slashes with kinetic blades, weaves through shadows, and pounces for lethal single-target bursts.',
-        lore: 'King T’Challa blends ancestral insight with modern tech to surgically remove enemy anchors before they know he is there.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New3.jpg',
-        accent: '#3cc7b6',
-        realName: "T'Challa"
+        tagline: '2Fast4You',
+        summary: 'Now you saw me, now your back to spawn screen. Mreoww~',
+        lore: 'TChalla, King of Wakanda, wields the perfect blend of the cutting-edge Vibranium technology and ancestral power drawn from the Panther God, Bast. The Black Panther bides his time until elegantly infiltrating enemy lines and commencing his hunt.',
+        portrait: 'Images/BPStory.png',
+        background: 'Images/BPSilhouette.png',
+        card: 'Images/BP.png',
+        accent: '#560c63',
+        realName: "T'Challa",
+        health: '275',
+        attackType: 'Melee Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★★★' },
+          { label: 'Team', value: 'Avengers, Illuminati' },
+          { label: 'Mobility', value: 'Dashes' },
+          { label: 'Passive', value: 'Panthers Cunning' } ],
+        abilities: [
+          { name: 'Spear Toss', description: 'Toss a Vibranium energy spear forward and attach a Vibranium Mark to enemies in its radius.' },
+          { name: 'Spirit Rend', description: 'Lunge forward and deal damage to enemies. Vibranium Mark produces Bonus Health and refreshes the ability.' },
+          { name: 'Spinning Kick', description: 'Spiral forward and attach a Vibranium Mark to hit enemies.' },
+          { name: 'Basts Descent', description: 'Summon Bast, pouncing forward, dealing damage and attaching a Vibranium Mark to hit enemies, while refreshing Spirit Rend.' }
+        ]
       },
       {
         id: 'blade',
         category: 'duelist',
         name: 'Blade',
-        tagline: 'Daywalker Duelist',
-        summary: 'Stacks bleed effects, slips through enemy lines with shadow dashes, and detonates stored sunfire for massive finishers.',
-        lore: 'Eric Brooks hunts the Nexus night, carving out space for allies by isolating high-priority threats.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New6.jpg',
-        accent: '#ff5e5e',
-        realName: 'Eric Brooks'
+        tagline: 'Virgil Reincarnated But In The Hood...',
+        summary: 'I am the Night, I am the Blood, I am the Blade.',
+        lore: 'Half-human and half-vampire, Eric Brooks walks between worlds, craving the very life force of his enemies. As night falls, Blade\'s hunt begins as he wields the Sword of Dracula to become the nightmare of any foe who dares to bare their fangs.',
+        portrait: 'Images/BladeStory.png',
+        background: 'Images/BladeSilhouette.png',
+        card: 'Images/Blade.png',
+        accent: '#910000',
+        realName: 'Eric Brooks',
+        health: '350',
+        attackType: 'Melee Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★★★' },
+          { label: 'Team', value: 'Midnight Suns, Vigilante' },
+          { label: 'Mobility', value: 'Dash then Beyblade' },
+          { label: 'Passive', value: 'Bloodline Awakening' }
+        ],
+        abilities: [
+          { name: 'Daywalker Dash', description: 'Dash forward. If wielding your gun, shoot at enemies upon impact, applying a Healing Reduction effect. If wielding your sword, deliver a cleaving strike that inflicts Slow.' },
+          { name: 'Scarlet Shroud', description: 'Parry with Ancestral Sword to become Unstoppable for a brief period, reducing damage taken from the front and decreasing the cooldown of Daywalker Dash.' },
+          { name: 'Thousand-fold Slash', description: 'Charge power and swiftly draw the Sword of Dracula, executing a powerful Iaido strike as you dash forward, leaving behind a slashing zone where the sword automatically strikes enemies. Enemies hit suffer Reduced Healing.' },
+        ]
       },
       {
         id: 'black-widow',
         category: 'duelist',
         name: 'Black Widow',
-        tagline: 'Tactical Duelist',
-        summary: 'Links targets with grapples, fires electro-bursts, and executes finishers on exposed foes.',
-        lore: 'Natasha Romanoff turns intelligence into takedowns—when Widow paints the target, the target disappears.',
-        portrait: 'Images/PEmma.jpg',
-        background: 'Images/New2.jpg',
-        accent: '#ff8d8d',
-        realName: 'Natasha Romanoff'
+        tagline: 'Sniper Spoiler Alert',
+        summary: 'Admire me from afar, but dont get too close or youll get a Widow\'s Kiss.',
+        lore: 'Natasha Romanova is the world\'s most elite spy in any era. Her mastery of the sniper rifle eliminates targets from afar, while her shock batons neutralize close-range threats. Black Widow is locked, loaded, and ready to deliver a fatal bite!',
+        portrait: 'Images/WidowStory.png',
+        background: 'Images/WidowSilhouette.png',
+        card: 'Images/Widow.png',
+        accent: '#a83838',
+        realName: 'Natasha Romanoff',
+        attackType: 'Hitscan Heroes',
+        health: '250',
+        stats: [
+          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Team', value: 'Avengers' },
+          { label: 'Mobility', value: 'Run and Gun' },
+          { label: 'Passive', value: 'Infra-detector' }
+        ],
+        abilities: [
+          { name: 'Fleet Foot', description: 'Dash forward and enable a powerful jump.' },
+          { name: 'Straight Shooter', description: 'Switch the Red Room Rifle to Sniper mode to fire high-energy rounds.' },
+          { name: 'Edge Dancer', description: 'Unleash a spinning kick to Launch Up enemies. Landing the hit will allow her to zip to the target with a grappling hook for a second kick.' },
+          { name: 'Electro-plasma Explosion', description: 'Switch the Red Room Rifle to Destruction mode and unleash an electro-plasma blast, damaging enemies within range and inflicting them with Vulnerability.' }
+        ]
       },
       {
         id: 'moon-knight',
         category: 'duelist',
         name: 'Moon Knight',
-        tagline: 'Vigilante Duelist',
+        tagline: 'Not schizophrenic at all, you just dont see it...',
         summary: 'If you see an enemy that others cannot see... TAKE IT DOWN! What Konshu wants, Konshu gets.',
         lore: 'As the avatar of the Egyptian God of Vengeance, Marc Spectors body has been enhanced by Khonshu himself. Bathed in a luminous aura that pierces the darkness, Moon Knight glides through the night, ready to sear his enemies with his masters sacred Ankhs.',
         portrait: 'Images/MoonStory.png',
         background: 'Images/MoonSilhouette.png',
         card: 'Images/Moon.png',
-        accent: '#b7c7ff',
+        accent: '#ffffff',
         realName: 'Marc Spector, Jake Lockley, Steven Grant',
-        health: '250',
+        health: '999',
         attackType: 'Projectile Heroes',
         stats: [
           { label: 'Difficulty', value: '★★★★★' },
-          { label: 'Durability', value: 'High' },
+          { label: 'Team', value: 'Midnight Suns, Vigilante' },
           { label: 'Mobility', value: 'Limited' },
-          { label: 'Utility', value: 'Moonlight Hook' } ],
+          { label: 'Passive', value: 'Bouncing Projectiles' } ],
           abilities: [
             { name: 'Moon Blade', description: 'Bounce between enemies and Ankhs, dealing damage to enemies while granting Bonus Health.' },
             { name: 'Ancient Ankh', description: 'Fire an Ankh to Knock enemies within its radius airborne towards the center.' },
@@ -801,241 +1055,137 @@
         id: 'magik',
         category: 'duelist',
         name: 'Magik',
-        tagline: 'Limbo Duelist',
-        summary: 'Slices portals into combat, teleports enemies into demonic traps, and fuels her Soulsword for critical bursts.',
-        lore: 'Illyana Rasputina weaponizes Limbo’s dark gifts, teleporting allies and enemies alike to control the tempo.',
-        portrait: 'Images/PMajik.jpg',
-        background: 'Images/New11.jpg',
-        accent: '#ff8be8',
-        realName: 'Illyana Rasputina'
-      },
-      {
-        id: 'daredevil',
-        category: 'duelist',
-        name: 'Daredevil',
-        tagline: 'Man Without Fear',
-        summary: 'Radar sense predicts incoming fire, letting him slip through blind spots and finish enemies with baton combos.',
-        lore: 'Matt Murdock reads the battlefield in heartbeats, punishing every overextension with surgical strikes.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/new9.jpg',
-        accent: '#ff645b',
-        realName: 'Matt Murdock'
-      },
-      {
-        id: 'punisher',
-        category: 'duelist',
-        name: 'Punisher',
-        tagline: 'Relentless Duelist',
-        summary: 'Swaps between heavy ordnance and brutal close-quarter takedowns, executing marked targets instantly.',
-        lore: 'Frank Castle brings uncompromising justice to the Nexus; once he marks a foe, the war is already over.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New8.png',
-        accent: '#ffd86f',
-        realName: 'Frank Castle'
-      },
-      {
-        id: 'gamora',
-        category: 'duelist',
-        name: 'Gamora',
-        tagline: 'Deadliest Woman',
-        summary: 'Dashes through enemies with Godslayer sabers, chaining executions that refresh evasion cooldowns.',
-        lore: 'Trained as the galaxy’s premier assassin, Gamora dismantles the opposition’s backline in seconds.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New7.png',
-        accent: '#71ff8d'
-      },
-      {
-        id: 'starlord',
-        category: 'duelist',
-        name: 'Star-Lord',
-        tagline: 'Jet-Boost Duelist',
-        summary: 'Combines aerial strafes, element guns, and jukebox tempo buffs to outpace grounded enemies.',
-        lore: 'Peter Quill plays the field like a mixtape, remixing midair routes and blasting anyone off-beat.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/New10.jpg',
-        accent: '#7ed0ff',
-        realName: 'Peter Quill'
-      },
-      {
-        id: 'psylocke',
-        category: 'duelist',
-        name: 'Psylocke',
-        tagline: 'Psionic Duelist',
-        summary: 'Weaves psychic blades, teleports through shadows, and detonates mind traps for burst damage.',
-        lore: 'Betsy Braddock threads the mindscape into every slash, forcing opponents to fight their own doubts.',
-        portrait: 'Images/PMajik.jpg',
-        background: 'Images/New12.jpg',
-        accent: '#ff80c6',
-        realName: 'Betsy Braddock'
-      },
-      {
-        id: 'wolverine',
-        category: 'duelist',
-        name: 'Wolverine',
-        tagline: 'Berserker Duelist',
-        summary: 'Bleeds targets with feral flurries, self-heals through adamantium grit, and lunges to close distance instantly.',
-        lore: 'Logan barrels straight through the frontline, healing as fast as he is hit while shredding anything in claw range.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New1.jpg',
-        accent: '#ffdf6c',
-        realName: 'Logan'
-      },
-      {
-        id: 'deadpool',
-        category: 'duelist',
-        name: 'Deadpool',
-        tagline: 'Fourth-Wall Duelist',
-        summary: 'Mixes swordplay, gunplay, and meta hijinks to burst targets while sustaining through regenerative punchlines.',
-        lore: 'Wade Wilson rewrites the patch notes mid-fight, winning through chaos, comedy, and copious chimichangas.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New5.png',
-        accent: '#ff5f7a',
-        realName: 'Wade Wilson'
+        tagline: 'I have two sides...',
+        summary: 'Easiest Demon Goth Girl to Play, Dunno why users like "Nana" has low KDA.',
+        lore: 'Trained in dark arts and wielding her mighty Soulsword, Magik leaps through portals to navigate the arena with ease. Once Illyana transforms into the demonic Darkchild, all those who dare stand against her will fall before her merciless blade.',
+        portrait: 'Images/MagikStory.webp',
+        background: 'Images/MagikSilhouette.png',
+        card: 'Images/Magik.png',
+        accent: '#efb509',
+        realName: 'Illyana Rasputina',
+        health: '250',
+        attackType: 'Melee Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★' },
+          { label: 'Team', value: 'Midnight Suns' },
+          { label: 'Mobility', value: 'Limited' },
+          { label: 'Passive', value: 'Limbos Might' } ],
+        abilities: [
+          { name: 'Magik Slash', description: 'Strike forward an air slash. Each enemy hit reduces the cooldown of Stepping Discs.' },
+          { name: 'Stepping Discs', description: 'Jump through a Stepping Disc, teleporting a short distance in the direction of movement. Become Invincible while teleporting.' },
+          { name: 'Eldritch Whirl', description: 'Spin while swinging the Soulsword after exiting a Stepping Disc.' },
+          { name: 'Demons Rage', description: 'Summon a Limbo demon that attacks enemies after exiting a Stepping Disc.' },
+          { name: 'Darkchild', description: 'Transform into the demonic Darkchild, gaining increased damage, health, and invincibility frames.' }
+        ]
       },
       {
         id: 'hawkeye',
         category: 'duelist',
         name: 'Hawkeye',
-        tagline: 'Precision Duelist',
-        summary: 'Uses trick arrows to control lanes, chaining crit-stacked volleys for single-target annihilation.',
-        lore: 'Clint Barton turns every skirmish into a highlight reel, threading shots through the tiniest sightlines.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/New2.jpg',
-        accent: '#c5a5ff',
-        realName: 'Clint Barton'
+        tagline: 'One Shot, One Kill. One Miss, One Rank Down.',
+        summary: 'Yes stop giving this guy a bow and arrow, this gives temu hanzo vibes.',
+        lore: 'Despite his lack of superpowers, Hawkeyes unparalleled skills as a marksman have earned him a spot alongside earth\'s mightiest heroes. With a cool head and steady hand, Clint Barton never misses a target… so enemies best stay out of his sights!',
+        portrait: 'Images/HawkeyeStory.png',
+        background: 'Images/HawkeyeSilhouette.png',
+        card: 'Images/Hawkeye.png',
+        accent: '#51108f',
+        realName: 'Clint Barton',
+        attackType: 'Hitscan Heroes', 
+        health: '270',
+        stats: [
+          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Team', value: 'Avengers' },
+          { label: 'Mobility', value: 'Double Jump' },
+          { label: 'Passive', value: 'Archers Focus' }
+        ],
+        abilities: [
+          { name: 'Hypersonic Arrow', description: 'Fire an arrow dealing two instances of damage to enemies in its path and inflicting them with Slow. This ability can Knock Down flying heroes.' },
+          { name: 'Blast Arrow', description: 'Shoot three explosive arrows.' },
+          { name: 'Crescent Slash', description: 'Unsheathe a katana and slash forward, Launching Up hit enemies.' },
+          { name: 'Hunters Sight', description: 'Capture Afterimages of enemies in his view. Damage dealt to an Afterimage is transferred to the corresponding enemy.' }
+        ]
       },
       {
-        id: 'winter-soldier',
+        id: 'starlord',
         category: 'duelist',
-        name: 'Winter Soldier',
-        tagline: 'Infiltration Duelist',
-        summary: 'Swaps arms between sniper precision and cybernetic melee, locking targets with shock rounds.',
-        lore: 'Bucky Barnes infiltrates lines with ghost protocols, finishing fights before alarms even sound.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New3.jpg',
-        accent: '#90d0ff',
-        realName: 'James "Bucky" Barnes'
+        name: 'Star-Lord',
+        tagline: 'Useless without the Ult',
+        summary: 'LLLEEEEGGGEEEENNNNDDDAAAARRRRYYY!',
+        lore: 'Peter Quill lives to dazzle his foes on the battlefield with his signature swagger. As his element guns paint arcs of devastation, his acrobatic moves sail through the sky with unrivaled style. With performances this spectacular, its no wonder that Star-Lord is so legendary!',
+        portrait: 'Images/StarLordStory.png',
+        background: 'Images/StarLordSilhouette.png',
+        card: 'Images/StarLord.png',
+        accent: '#00a8ff',
+        realName: 'Peter Quill',
+        attackType: 'Hitscan Heroes',
+        health: '250',
+        stats: [
+          { label: 'Difficulty', value: '★★' },
+          { label: 'Team', value: 'Guardians of the Galaxy' },
+          { label: 'Mobility', value: 'Flexible' },
+          { label: 'Passive', value: 'Rocket Boots' }
+        ],
+        abilities: [
+          { name: 'Rocket Propulsion', description: 'Consume energy to gain a Movement Boost and soar forward.' },
+          { name: 'Stellar Shift', description: 'Dodge in the direction of movement and swiftly reload. Become Unstoppable and Invincible while dodging.' },
+          { name: 'Blaster Barrage', description: 'Fire a frenzy of shots, causing damage to enemies within range.' },
+          { name: 'Galactic Legend', description: 'AIMBOT.' }
+        ]
+      },
+      {
+        id: 'hela',
+        category: 'duelist',
+        name: 'Hela',
+        tagline: 'The Queen of the Underworld',
+        summary: 'Headshot, Headshot, Headshot. Not a fan of this character.',
+        lore: 'As the Goddess of Death, Hela wields supreme control over the fallen souls residing in Hel. With a haunting whisper and a murder of crows, the queen of the underworld gracefully reaps the souls of her enemies without an ounce of mercy.',
+        portrait: 'Images/HelStory.png',
+        background: 'Images/HelSilhouette.png',
+        card: 'Images/Hel.png',
+        accent: '#135426',
+        realName: 'Hela',
+        attackType: 'Hitscan Heroes',
+        health: '250',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Team', value: 'Odinsons' },
+          { label: 'Mobility', value: 'Im a bird caw caw!' },
+          { label: 'Passive', value: 'Nastrond Crowstorm' }
+        ],
+        abilities: [
+          { name: 'Piercing Night', description: 'Fire multiple Nightsword Thorns that detonate after a delay.' },
+          { name: 'Soul Drainer', description: 'Project an explosive Hel sphere to Stun nearby enemies and pull them into the blast zone.' },
+          { name: 'Goddess Of Death', description: 'Soar into the sky and unleash Nastrond Crows from each hand at will.' }
+        ]
       },
       {
         id: 'iron-fist',
         category: 'duelist',
         name: 'Iron Fist',
-        tagline: 'Chi-Forged Duelist',
-        summary: 'Channels chi into explosive punches, parries projectiles, and executes dragon-finisher combos.',
-        lore: 'Danny Rand ignites the dragon within, delivering pinpoint strikes that dismantle even armored foes.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/KunLun.jpg',
-        accent: '#ffe76d',
-        realName: 'Danny Rand'
+        tagline: 'OraOraOraORaOraORaORa!',
+        summary: 'CHEAPER TOWN HALL!',
+        lore: 'Lin Lie is a master of Chinese martial arts who once wielded the shattered Sword of Fu Xi. After fusing its pieces with the mighty Chi of Shou-Lao, he is poised to strike his foes with the grace and force of a soaring dragon as the latest immortal Iron Fist.',
+        portrait: 'Images/FistStory.png',
+        background: 'Images/FistSilhouette.png',
+        card: 'Images/Fist.png',
+        accent: '#ffd700',
+        realName: 'Danny Rand',
+        attackType: 'Melee Heroes',
+        health: '300',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Team', value: 'Vigilante' },
+          { label: 'Mobility', value: 'Kungfu' },
+          { label: 'Passive', value: 'Wall Runner Detection' }
+        ],
+        abilities: [
+          { name: 'Dragons Defense', description: 'Assume a defensive stance with a boost of Chi to block incoming attacks and gain Damage Reduction. ' },
+          { name: 'Yat Jee Chung Kuen', description: 'Dash forward to pursue the targeted enemy and unleash a flurry of attacks.' },
+          { name: 'Harmony Recovery', description: 'Cross legs and channel Chi, recovering health. Excess healing converts to Bonus Health.' },
+          { name: 'Kun-lun Kick', description: 'Dash forward, delivering a flying kick when hitting an enemy or reaching full range.' },
+          { name: 'Living Chi', description: 'Become living Chi to boost his speed, damage, and attack range, delivering stronger punches while reducing the cooldown of Dragons Defense.' }
+        ]
       },
-      {
-        id: 'x-23',
-        category: 'duelist',
-        name: 'X-23',
-        tagline: 'Clone Duelist',
-        summary: 'Leverages feral agility, bleed stacks, and clone feints to overwhelm priority targets.',
-        lore: 'Laura Kinney stalks the field with calculated ferocity, cutting through lines before support can respond.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/new9.jpg',
-        accent: '#ff8d9d',
-        realName: 'Laura Kinney'
-      },
-      {
-        id: 'silk',
-        category: 'duelist',
-        name: 'Silk',
-        tagline: 'Webweaver Duelist',
-        summary: 'Slings silk to reposition midair, binding foes and delivering rapid-fire kicks.',
-        lore: 'Cindy Moon’s spider-sense tunes into the Nexus, letting her flow effortlessly through vertical firefights.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/SpiderMap.jpg',
-        accent: '#ffa0d8',
-        realName: 'Cindy Moon'
-      },
-      {
-        id: 'elektra',
-        category: 'duelist',
-        name: 'Elektra',
-        tagline: 'Shadow Duelist',
-        summary: 'Sais slice through magical wards, while smoke veils amplify her lethal finishers.',
-        lore: 'Elektra Natchios glides with assassin grace, eliminating targets before they can blink.',
-        portrait: 'Images/PMajik.jpg',
-        background: 'Images/New4.png',
-        accent: '#ff6676',
-        realName: 'Elektra Natchios'
-      },
-      {
-        id: 'spider-man',
-        category: 'duelist',
-        name: 'Spider-Man',
-        tagline: 'Friendly Duelist',
-        summary: 'Webs enemies into walls, swings for aerial combos, and quips them into mistakes.',
-        lore: 'Peter Parker mixes heart, humor, and heroism—when he sticks a landing, the crowd roars.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/SpiderMap.jpg',
-        accent: '#ff6363',
-        realName: 'Peter Parker'
-      },
-      {
-        id: 'ms-marvel',
-        category: 'duelist',
-        name: 'Ms. Marvel',
-        tagline: 'Polymorph Duelist',
-        summary: 'Embigened fists, elastic dodges, and crowd-friendly hype that powers her ultimate.',
-        lore: 'Kamala Khan brings optimism and oversized haymakers, turning every duel into a fan-favorite story.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/New8.png',
-        accent: '#ffd66b',
-        realName: 'Kamala Khan'
-      },
-      {
-        id: 'quicksilver',
-        category: 'duelist',
-        name: 'Quicksilver',
-        tagline: 'Velocity Duelist',
-        summary: 'Runs rings around opponents, freezing them in time snapshots for team follow-ups.',
-        lore: 'Pietro Maximoff weaponizes speed to create impossible flanks and unavoidable takedowns.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/New10.jpg',
-        accent: '#9de2ff',
-        realName: 'Pietro Maximoff'
-      },
-      {
-        id: 'nova',
-        category: 'duelist',
-        name: 'Nova',
-        tagline: 'Human Rocket',
-        summary: 'Charges Nova energy to divebomb the map, vaporizing targets with pinpoint starbursts.',
-        lore: 'Richard Rider streaks overhead as a blazing comet, turning momentum into meteoric impact.',
-        portrait: 'Images/PTorch.jpg',
-        background: 'Images/New12.jpg',
-        accent: '#ffe26d',
-        realName: 'Richard Rider'
-      },
-      {
-        id: 'ghost-spider',
-        category: 'duelist',
-        name: 'Ghost-Spider',
-        tagline: 'Beat Drop Duelist',
-        summary: 'Combines drumline rhythm with web tricks, gaining damage spikes in sync with the soundtrack.',
-        lore: 'Gwen Stacy fights like she plays: stylish, syncopated, and impossible to track.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/SpiderMap.jpg',
-        accent: '#ffd4f6',
-        realName: 'Gwen Stacy'
-      },
-      {
-        id: 'shang-chi',
-        category: 'duelist',
-        name: 'Shang-Chi',
-        tagline: 'Ten-Ring Duelist',
-        summary: 'Channels ten ring combos, parries projectiles, and unleashes cinematic finishers.',
-        lore: 'Master of Kung Fu, Shang-Chi uses perfect form to dismantle foes, teaching them respect with every strike.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/KunLun.jpg',
-        accent: '#ffaf5d',
-        realName: 'Shang-Chi'
-      }
     ];
 
     const strategistHeroes = [
@@ -1051,11 +1201,11 @@
         card: 'Images/Adam.png',
         accent: '#f6d95f',
         realName: 'Adam',
-        attackType: 'Projectile Heroes',
+        attackType: 'Hitscan Heroes',
         health: '250',
         stats: [
           { label: 'Difficulty', value: '★★☆☆☆' },
-          { label: 'Attack Type', value: 'Hitscan' },
+          { label: 'Team', value: 'Guardian of the Galaxy' },
           { label: 'Mobility', value: 'Nerf Movement MORE' },
           { label: 'Passive', value: 'Regenerative Cocoon' }
         ],
@@ -1066,102 +1216,27 @@
         ]
       },
       {
-        id: 'doctor-strange',
-        category: 'strategist',
-        name: 'Doctor Strange',
-        tagline: 'Sorcerer Strategist',
-        summary: 'Manipulates space, conjures shields, and rewinds cooldowns for allies.',
-        lore: 'Stephen Strange orchestrates battles like a grand illusionist, placing every ally and enemy precisely where he needs them.',
-        portrait: 'Images/PMajik.jpg',
-        background: 'Images/New11.jpg',
-        accent: '#6fddff',
-        realName: 'Stephen Strange',
-        attackType: 'Mystic Support'
-      },
-      {
-        id: 'sue-storm',
-        category: 'strategist',
-        name: 'Invisible Woman',
-        tagline: 'Field Architect',
-        summary: 'Shapes force fields into ramps, barriers, and reflectors to control objectives.',
-        lore: 'Sue Storm bends light and pressure to sculpt perfect opportunities for the team.',
-        portrait: 'Images/PEmma.jpg',
-        background: 'Images/New8.png',
-        accent: '#9bd0ff',
-        realName: 'Sue Storm'
-      },
-      {
-        id: 'nick-fury',
-        category: 'strategist',
-        name: 'Nick Fury',
-        tagline: 'Director Strategist',
-        summary: 'Calls in strike teams, recon drones, and orbital bombardments with impeccable timing.',
-        lore: 'The director sees every angle. Fury’s command uplink keeps squads informed, supplied, and dominant.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New6.jpg',
-        accent: '#ffaa4f',
-        realName: 'Nick Fury'
-      },
-      {
-        id: 'cyclops',
-        category: 'strategist',
-        name: 'Cyclops',
-        tagline: 'Tactical Conductor',
-        summary: 'Co-ordinates the team with ricochet beams, sightline markers, and formation calls.',
-        lore: 'Scott Summers leads like a living targeting laser, ensuring every blast finds its mark.',
-        portrait: 'Images/PBlade.jpg',
-        background: 'Images/New3.jpg',
-        accent: '#ff796d',
-        realName: 'Scott Summers'
-      },
-      {
-        id: 'vision',
-        category: 'strategist',
-        name: 'Vision',
-        tagline: 'Synth Strategist',
-        summary: 'Phases through terrain, analyzes threats, and beams support matrices across the map.',
-        lore: 'The synthezoid calculates victory in real time, adjusting shields and beams to whatever the Nexus demands.',
-        portrait: 'Images/PUltron.jpg',
-        background: 'Images/New10.jpg',
-        accent: '#8fffe0',
-        realName: 'Vision',
-        attackType: 'Hybrid Support'
-      },
-      {
         id: 'scarlet-witch',
         category: 'strategist',
         name: 'Scarlet Witch',
-        tagline: 'Chaos Strategist',
-        summary: 'Warps probability zones, hexes objectives, and conjures protective wards for allies.',
-        lore: 'Wanda Maximoff bends fate itself, ensuring outcomes align with her team’s victory.',
+        tagline: '',
+        summary: '',
+        lore: 'Wanda Maximoff bends fate itself, ensuring outcomes align with her teams victory. Scarlet Witch warps probability zones, hexes objectives, and conjures protective wards for allies with chaos magic.',
         portrait: 'Images/PMajik.jpg',
         background: 'Images/New4.png',
-        accent: '#ff6f9d',
-        realName: 'Wanda Maximoff'
+        card: 'Images/ScarletWitch.png',
+        accent: '#ff1493',
+        realName: 'Wanda Maximoff',
+        attackType: '',
+        health: '240',
+        stats: [
+          { label: 'Difficulty', value: '★★★★☆' },
+          { label: 'Attack Type', value: '' },
+          { label: 'Mobility', value: '' },
+          { label: 'Passive', value: 'Chaos Magic' }
+        ],
+        abilities: []
       },
-      {
-        id: 'ultron',
-        category: 'strategist',
-        name: 'Ultron',
-        tagline: 'Swarm Strategist',
-        summary: 'Commands sentry waves, hacking nodes and overwhelming with adaptable drones.',
-        lore: 'The rogue AI micromanages every skirmish from above, unleashing drones tailored to counter whatever stands in his way.',
-        portrait: 'Images/PUltron.jpg',
-        background: 'Images/New6.jpg',
-        accent: '#9ed3ff'
-      },
-      {
-        id: 'mister-fantastic',
-        category: 'strategist',
-        name: 'Mister Fantastic',
-        tagline: 'Inventive Strategist',
-        summary: 'Stretches across objectives, deploys gadgets, and repositions allies with elastic slings.',
-        lore: 'Reed Richards prototypes on the fly, turning every skirmish into a lab experiment the team inevitably wins.',
-        portrait: 'Images/PJeff.jpg',
-        background: 'Images/New12.jpg',
-        accent: '#9fd4ff',
-        realName: 'Reed Richards'
-      }
     ];
 
     function createHero(config, order) {
@@ -1346,7 +1421,11 @@
       }
       if (featureAttack) featureAttack.textContent = hero.attackType;
       if (featureRealName) featureRealName.textContent = hero.realName;
-      if (featureHealth) featureHealth.textContent = hero.health;
+      if (featureHealth) {
+        // Replace \n with actual line breaks for display
+        featureHealth.textContent = hero.health;
+        // CSS white-space: pre-line will handle the \n characters
+      }
       if (featureDifficulty) featureDifficulty.textContent = hero.difficulty;
       if (featureBgImg) {
         featureBgImg.src = hero.backgroundImage;

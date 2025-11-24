@@ -1,6 +1,81 @@
 (function() {
   const root = document.documentElement;
 
+  // Page Loader - Show on navigation (except when going back to home or returning from external sites)
+  (function initPageLoader() {
+    const pageLoader = document.getElementById('page-loader');
+    if (!pageLoader) return;
+
+    // Check if returning from external site (like YouTube)
+    const referrer = document.referrer;
+    const isReturningFromExternal = referrer && !referrer.includes(window.location.hostname) && !referrer.includes('localhost') && !referrer.includes('127.0.0.1');
+    
+    // Check if we're navigating away from home page
+    const currentPage = window.location.pathname.split('/').pop() || '';
+    const isHomePage = currentPage === 'Rivals.html' || currentPage === '' || currentPage === 'index.html';
+    const previousPage = sessionStorage.getItem('previousPage') || '';
+    const isReturningToHome = isHomePage && previousPage && previousPage !== 'Rivals.html' && previousPage !== '' && previousPage !== 'index.html';
+
+    // Store current page for next navigation
+    sessionStorage.setItem('previousPage', currentPage);
+
+    // Don't show loader if returning from external site or returning to home
+    if (isReturningFromExternal || isReturningToHome || isHomePage) {
+      pageLoader.classList.remove('active');
+      return;
+    }
+
+    // Show loader only for internal page navigation
+    if (!isHomePage) {
+      pageLoader.classList.add('active');
+      
+      // Hide loader after page loads
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          pageLoader.classList.remove('active');
+        }, 3000); // 3 seconds
+      });
+    } else {
+      pageLoader.classList.remove('active');
+    }
+
+    // Intercept link clicks to show loader (only for internal links)
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href]');
+      if (!link) return;
+      
+      const href = link.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      
+      // Don't show loader for external links
+      if (href.startsWith('http://') || href.startsWith('https://')) {
+        // Check if it's an external link
+        try {
+          const url = new URL(href, window.location.origin);
+          if (url.hostname !== window.location.hostname && url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
+            return; // External link, don't show loader
+          }
+        } catch (e) {
+          // Invalid URL, skip
+          return;
+        }
+      }
+      
+      const targetPage = href.split('/').pop() || '';
+      const isHomeLink = targetPage === 'Rivals.html' || targetPage === '' || targetPage === 'index.html';
+      const currentPageName = window.location.pathname.split('/').pop() || '';
+      const isCurrentlyHome = currentPageName === 'Rivals.html' || currentPageName === '' || currentPageName === 'index.html';
+      
+      // Show loader if:
+      // 1. Going from home to another page, OR
+      // 2. Going from one page to another page
+      // BUT NOT if going back to home
+      if ((isCurrentlyHome && !isHomeLink) || (!isCurrentlyHome && !isHomeLink)) {
+        pageLoader.classList.add('active');
+      }
+    });
+  })();
+
   // Mobile drawer
   const hamburger = document.querySelector('.hamburger');
   const drawer = document.getElementById('mobile-drawer');
@@ -25,20 +100,32 @@
   const mobileLoginBtn = document.getElementById('mobile-login-btn');
   const loginClose = document.querySelector('.login-close');
   const loginOverlay = document.querySelector('.login-overlay');
+  
+  // Ensure popup starts closed
+  if (loginPopup) {
+    loginPopup.setAttribute('hidden', 'true');
+    loginPopup.removeAttribute('open');
+    sessionStorage.setItem('loginPopupOpen', 'false');
+  }
 
-  function openLoginPopup() {
+  window.openLoginPopup = function openLoginPopup() {
     if (loginPopup) {
-      loginPopup.toggleAttribute('hidden', false);
-      loginPopup.toggleAttribute('open', true);
+      loginPopup.removeAttribute('hidden');
+      loginPopup.setAttribute('open', 'true');
+      loginPopup.style.display = '';
       document.body.style.overflow = 'hidden';
+      sessionStorage.setItem('loginPopupOpen', 'true');
+      // Check guest status when popup opens
+      setTimeout(checkGuestStatus, 100);
     }
   }
 
   function closeLoginPopup() {
     if (loginPopup) {
-      loginPopup.toggleAttribute('hidden', true);
-      loginPopup.toggleAttribute('open', false);
+      loginPopup.setAttribute('hidden', 'true');
+      loginPopup.removeAttribute('open');
       document.body.style.overflow = '';
+      sessionStorage.setItem('loginPopupOpen', 'false');
     }
   }
 
@@ -47,12 +134,264 @@
   if (loginClose) loginClose.addEventListener('click', closeLoginPopup);
   if (loginOverlay) loginOverlay.addEventListener('click', closeLoginPopup);
 
+  // YouTube Trailer Modal
+  const trailerModal = document.getElementById('trailer-modal');
+  const watchTrailerBtn = document.getElementById('watch-trailer-btn');
+  const trailerModalClose = document.getElementById('trailer-modal-close');
+  const trailerModalBackdrop = document.getElementById('trailer-modal-backdrop');
+  let trailerPlayer = null;
+  const TRAILER_VIDEO_ID = '67FVMNGMFXU'; // Marvel Rivals trailer video ID
+
+  // Store original music mute state before video plays
+  let musicMutedBeforeVideo = null;
+  let activeVideos = new Set(); // Track all playing videos
+  
+  function muteBackgroundMusic() {
+    // Store current mute state only once
+    if (musicMutedBeforeVideo === null) {
+      musicMutedBeforeVideo = localStorage.getItem('musicMuted') === 'true';
+    }
+    // Mute music
+    localStorage.setItem('musicMuted', 'true');
+    // Trigger music player update if available
+    if (window.globalIsMuted !== undefined) {
+      window.globalIsMuted = true;
+    }
+    // Dispatch custom event for music player to listen
+    window.dispatchEvent(new CustomEvent('musicMuteRequest', { detail: { mute: true } }));
+  }
+  
+  function unmuteBackgroundMusic() {
+    // Only unmute if no videos are playing
+    if (activeVideos.size > 0) {
+      return; // Still have videos playing
+    }
+    
+    // Restore original mute state
+    if (musicMutedBeforeVideo !== null) {
+      localStorage.setItem('musicMuted', musicMutedBeforeVideo.toString());
+      musicMutedBeforeVideo = null;
+    } else {
+      // If no stored state, check if user had it unmuted
+      const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+      if (userManuallyUnmuted) {
+        localStorage.setItem('musicMuted', 'false');
+      }
+    }
+    // Trigger music player update if available
+    if (window.globalIsMuted !== undefined) {
+      window.globalIsMuted = localStorage.getItem('musicMuted') === 'true';
+    }
+    // Dispatch custom event for music player to listen
+    window.dispatchEvent(new CustomEvent('musicMuteRequest', { detail: { mute: localStorage.getItem('musicMuted') === 'true' } }));
+  }
+  
+  // Monitor all HTML5 video elements on the page
+  function setupVideoMonitoring() {
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+      // Skip muted/autoplay videos (like hero background video)
+      if (video.muted && video.hasAttribute('autoplay')) {
+        return; // Don't monitor background videos
+      }
+      
+      const videoId = video.id || `video-${Math.random()}`;
+      
+      video.addEventListener('play', () => {
+        activeVideos.add(videoId);
+        muteBackgroundMusic();
+      });
+      
+      video.addEventListener('pause', () => {
+        activeVideos.delete(videoId);
+        unmuteBackgroundMusic();
+      });
+      
+      video.addEventListener('ended', () => {
+        activeVideos.delete(videoId);
+        unmuteBackgroundMusic();
+      });
+    });
+  }
+  
+  // Setup video monitoring when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupVideoMonitoring);
+  } else {
+    setupVideoMonitoring();
+  }
+  
+  // Also monitor dynamically added videos
+  const videoObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) { // Element node
+          if (node.tagName === 'VIDEO') {
+            setupVideoMonitoring();
+          } else if (node.querySelectorAll) {
+            const videos = node.querySelectorAll('video');
+            if (videos.length > 0) {
+              setupVideoMonitoring();
+            }
+          }
+        }
+      });
+    });
+  });
+  
+  videoObserver.observe(document.body, { childList: true, subtree: true });
+
+  function initializeTrailerPlayer() {
+    if (!trailerPlayer && window.YT && window.YT.Player) {
+      const playerContainer = document.getElementById('trailer-player');
+      if (playerContainer) {
+        trailerPlayer = new window.YT.Player('trailer-player', {
+          videoId: TRAILER_VIDEO_ID,
+          playerVars: {
+            autoplay: 1,
+            controls: 1,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1
+          },
+          events: {
+            onReady: function(event) {
+              event.target.playVideo();
+            },
+            onStateChange: function(event) {
+              // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0
+              const videoId = 'youtube-trailer';
+              if (event.data === window.YT.PlayerState.PLAYING) {
+                // Video started playing - mute background music
+                activeVideos.add(videoId);
+                muteBackgroundMusic();
+              } else if (event.data === window.YT.PlayerState.PAUSED || 
+                         event.data === window.YT.PlayerState.ENDED) {
+                // Video paused or ended - unmute background music
+                activeVideos.delete(videoId);
+                unmuteBackgroundMusic();
+              }
+            }
+          }
+        });
+      }
+    }
+  }
+
+  function openTrailerModal() {
+    if (trailerModal) {
+      trailerModal.toggleAttribute('hidden', false);
+      document.body.style.overflow = 'hidden';
+      
+      // Wait for YouTube API to be ready, then initialize player
+      if (window.YT && window.YT.Player) {
+        initializeTrailerPlayer();
+      } else if (window.onYouTubeIframeAPIReady) {
+        // API is loading, wait for it
+        const originalReady = window.onYouTubeIframeAPIReady;
+        window.onYouTubeIframeAPIReady = function() {
+          if (originalReady) originalReady();
+          setTimeout(initializeTrailerPlayer, 100);
+        };
+      } else {
+        window.onYouTubeIframeAPIReady = function() {
+          setTimeout(initializeTrailerPlayer, 100);
+        };
+      }
+    }
+  }
+
+  function closeTrailerModal() {
+    if (trailerModal) {
+      trailerModal.toggleAttribute('hidden', true);
+      document.body.style.overflow = '';
+      
+      // Remove YouTube video from active videos
+      activeVideos.delete('youtube-trailer');
+      
+      // Unmute music when closing modal
+      unmuteBackgroundMusic();
+      
+      // Stop and destroy YouTube player
+      if (trailerPlayer) {
+        try {
+          if (trailerPlayer.stopVideo) {
+            trailerPlayer.stopVideo();
+          }
+          if (trailerPlayer.destroy) {
+            trailerPlayer.destroy();
+          }
+        } catch (e) {
+          console.error('Error stopping trailer player:', e);
+        }
+        trailerPlayer = null;
+        
+        // Clear the player container
+        const playerContainer = document.getElementById('trailer-player');
+        if (playerContainer) {
+          playerContainer.innerHTML = '';
+        }
+      }
+    }
+  }
+
+  if (watchTrailerBtn) {
+    watchTrailerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openTrailerModal();
+    });
+  }
+
+  if (trailerModalClose) {
+    trailerModalClose.addEventListener('click', closeTrailerModal);
+  }
+
+  if (trailerModalBackdrop) {
+    trailerModalBackdrop.addEventListener('click', closeTrailerModal);
+  }
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && trailerModal && !trailerModal.hasAttribute('hidden')) {
+      closeTrailerModal();
+    }
+  });
+
   // Close popup with Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && loginPopup && loginPopup.hasAttribute('open')) {
       closeLoginPopup();
     }
   });
+
+  // Switch between registration and login in split-screen design
+  const popupSwitchToLogin = document.getElementById('popup-switchToLogin');
+  const popupExpandLink = document.getElementById('popup-expandLink');
+  const popupExpandContent = document.getElementById('popup-expandContent');
+  
+  if (popupSwitchToLogin) {
+    popupSwitchToLogin.addEventListener('click', () => {
+      if (popupExpandContent) {
+        popupExpandContent.removeAttribute('hidden');
+        if (popupExpandLink) {
+          popupExpandLink.setAttribute('aria-expanded', 'true');
+        }
+      }
+    });
+  }
+  
+  if (popupExpandLink && popupExpandContent) {
+    popupExpandLink.addEventListener('click', () => {
+      const isCurrentlyExpanded = popupExpandLink.getAttribute('aria-expanded') === 'true';
+      if (isCurrentlyExpanded) {
+        popupExpandContent.setAttribute('hidden', '');
+        popupExpandLink.setAttribute('aria-expanded', 'false');
+      } else {
+        popupExpandContent.removeAttribute('hidden');
+        popupExpandLink.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
 
   // Generate random captcha for popup
   let popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
@@ -218,39 +557,88 @@
     });
   }
 
-  // Switch to Login Section
-  const popupSwitchToLogin = document.getElementById('popup-switchToLogin');
-  if (popupSwitchToLogin) {
-    popupSwitchToLogin.addEventListener('click', () => {
-      const expandContent = document.getElementById('popup-expandContent');
-      const expandBtn = document.getElementById('popup-expandLink');
-      if (expandContent && expandBtn) {
-        expandContent.hidden = false;
-        expandBtn.setAttribute('aria-expanded', 'true');
+  // Check if user is logged in as guest on page load
+  function checkGuestStatus() {
+    const isGuest = localStorage.getItem('isGuest') === 'true' || sessionStorage.getItem('isGuest') === 'true';
+    const guestStatus = document.getElementById('guest-status');
+    const loginDescription = document.getElementById('login-description');
+    const popupGuestLogin = document.getElementById('popup-guestLogin');
+    
+    if (isGuest && guestStatus) {
+      guestStatus.style.display = 'block';
+      if (loginDescription) loginDescription.style.display = 'none';
+      if (popupGuestLogin) popupGuestLogin.style.display = 'none';
+    } else {
+      if (guestStatus) guestStatus.style.display = 'none';
+      if (loginDescription) loginDescription.style.display = 'block';
+      if (popupGuestLogin) popupGuestLogin.style.display = 'flex';
+    }
+  }
+
+  // Guest Login Button (Continue As Guest)
+  const popupGuestLogin = document.getElementById('popup-guestLogin');
+  if (popupGuestLogin) {
+    popupGuestLogin.addEventListener('click', async () => {
+      // Create guest user locally (no MongoDB required)
+      const guestUser = {
+        name: 'Guest User',
+        email: `guest_${Date.now()}@anonymous.local`,
+        id: `guest_${Date.now()}`,
+        isGuest: true
+      };
+      
+      // Store guest session in browser storage (no server needed)
+      sessionStorage.setItem('guestUser', JSON.stringify(guestUser));
+      sessionStorage.setItem('isGuest', 'true');
+      localStorage.setItem('isGuest', 'true');
+      localStorage.setItem('guestUser', JSON.stringify(guestUser));
+      
+      // Update UI to show guest status
+      checkGuestStatus();
+      
+      // Show success message
+      alert('Logged in as Guest! Welcome to Rival!');
+      
+      // Optionally try to save to server in background (non-blocking)
+      try {
+        const response = await fetch('/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: guestUser.name,
+            email: guestUser.email,
+            password: null
+          })
+        });
+        // Don't wait for response - guest login works regardless
+      } catch (error) {
+        // Ignore server errors - guest login works offline
+        console.log('Guest user saved locally (server unavailable)');
       }
     });
   }
 
-  // Artstorm Login Button
-  const popupArtstormLogin = document.getElementById('popup-artstormLogin');
-  if (popupArtstormLogin) {
-    popupArtstormLogin.addEventListener('click', () => {
-      alert('Artstorm login integration coming soon!');
+  // Guest Logout Button
+  const guestLogoutBtn = document.getElementById('guest-logout-btn');
+  if (guestLogoutBtn) {
+    guestLogoutBtn.addEventListener('click', () => {
+      // Clear guest session
+      sessionStorage.removeItem('guestUser');
+      sessionStorage.removeItem('isGuest');
+      localStorage.removeItem('isGuest');
+      localStorage.removeItem('guestUser');
+      
+      // Update UI
+      checkGuestStatus();
+      
+      alert('Logged out as Guest');
     });
   }
 
-  // Expandable Section Toggle
-  const popupExpandLink = document.getElementById('popup-expandLink');
-  if (popupExpandLink) {
-    popupExpandLink.addEventListener('click', function() {
-      const expandContent = document.getElementById('popup-expandContent');
-      if (expandContent) {
-        const isExpanded = !expandContent.hidden;
-        expandContent.hidden = isExpanded;
-        this.setAttribute('aria-expanded', !isExpanded);
-      }
-    });
-  }
+  // Check on page load
+  checkGuestStatus();
 
   // Scroll reveal
   const revealables = Array.from(document.querySelectorAll('[data-reveal]'));
@@ -356,10 +744,120 @@
   }
 
   // Maps Roulette (mouse direction control with persistence)
+  // Maps Carousel - Redesigned with manual controls
+  const mapsCarousel = document.getElementById('maps-carousel');
+  const carouselTrack = document.getElementById('carousel-track');
+  const carouselContainer = mapsCarousel?.querySelector('.carousel-container');
+  const prevBtn = document.getElementById('carousel-prev');
+  const nextBtn = document.getElementById('carousel-next');
+  const dots = document.querySelectorAll('.carousel-dot');
+  const slides = document.querySelectorAll('.carousel-slide');
+  
+  if (mapsCarousel && carouselTrack && slides.length > 0) {
+    let currentSlide = 0;
+    let autoPlayInterval = null;
+    const autoPlayDelay = 5000; // 5 seconds
+    
+    // Function to update carousel
+    function updateCarousel(index) {
+      // Remove active class from all slides and dots
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+      
+      // Update track position
+      carouselTrack.style.transform = `translateX(-${index * 100}%)`;
+      currentSlide = index;
+    }
+    
+    // Next slide
+    function nextSlide() {
+      const next = (currentSlide + 1) % slides.length;
+      updateCarousel(next);
+    }
+    
+    // Previous slide
+    function prevSlide() {
+      const prev = (currentSlide - 1 + slides.length) % slides.length;
+      updateCarousel(prev);
+    }
+    
+    // Auto-play
+    function startAutoPlay() {
+      stopAutoPlay();
+      autoPlayInterval = setInterval(nextSlide, autoPlayDelay);
+      if (carouselContainer) {
+        carouselContainer.classList.remove('paused');
+      }
+    }
+    
+    function stopAutoPlay() {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+      }
+      if (carouselContainer) {
+        carouselContainer.classList.add('paused');
+      }
+    }
+    
+    // Event listeners
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        startAutoPlay(); // Restart auto-play after manual navigation
+      });
+    }
+    
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        startAutoPlay(); // Restart auto-play after manual navigation
+      });
+    }
+    
+    // Dot navigation
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        updateCarousel(index);
+        startAutoPlay(); // Restart auto-play after manual navigation
+      });
+    });
+    
+    // Pause on hover
+    if (carouselContainer) {
+      carouselContainer.addEventListener('mouseenter', stopAutoPlay);
+      carouselContainer.addEventListener('mouseleave', startAutoPlay);
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (mapsCarousel && !mapsCarousel.hasAttribute('hidden')) {
+        if (e.key === 'ArrowLeft') {
+          prevSlide();
+          startAutoPlay();
+        } else if (e.key === 'ArrowRight') {
+          nextSlide();
+          startAutoPlay();
+        }
+      }
+    });
+    
+    // Start auto-play
+    startAutoPlay();
+    
+    // Initialize first slide
+    updateCarousel(0);
+  }
+  
+  // Old roulette code (disabled - keeping for reference)
   const mapsRoulette = document.getElementById('maps-roulette');
   const rouletteTrack = document.getElementById('roulette-track');
   
-  if (mapsRoulette && rouletteTrack) {
+  if (mapsRoulette && rouletteTrack && false) { // Disabled old carousel
     let mouseX = 0;
     let isHovering = false;
     let lastDirection = 'right'; // Default direction
@@ -506,19 +1004,19 @@
     const wrapper = document.createElement('div');
     wrapper.className = 'social-sidebar';
     wrapper.innerHTML = `
-      <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+      <a href="https://www.facebook.com/marvelrivals" target="_blank" rel="noopener" aria-label="Facebook">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.9v-7h-2.3V12h2.3V9.8c0-2.27 1.35-3.53 3.43-3.53.99 0 2.03.18 2.03.18v2.22h-1.14c-1.12 0-1.47.69-1.47 1.4V12h2.5l-.4 2.9h-2.1v7A10 10 0 0 0 22 12z"/></svg>
       </a>
-      <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+      <a href="https://www.instagram.com/marvelrivals/?hl=en" target="_blank" rel="noopener" aria-label="Instagram">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2A2.8 2.8 0 1 0 12 16.8 2.8 2.8 0 0 0 12 9.2zM17.5 6.5a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4z"/></svg>
       </a>
-      <a href="https://x.com" target="_blank" rel="noopener" aria-label="X">
+      <a href="https://x.com/MarvelRivals" target="_blank" rel="noopener" aria-label="X">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3 3h3.7l5.1 7 5.5-7H21l-7.3 9.3L21 21h-3.7l-5.5-7.6L6 21H3l7.8-9.9L3 3z"/></svg>
       </a>
-      <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube">
+      <a href="https://www.youtube.com/@MarvelRivals" target="_blank" rel="noopener" aria-label="YouTube">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a3 3 0 0 0-2.1-2.1C17.7 4.5 12 4.5 12 4.5s-5.7 0-7.5.6A3 3 0 0 0 2.4 7.2C1.8 9 1.8 12 1.8 12s0 3 .6 4.8a3 3 0 0 0 2.1 2.1c1.8.6 7.5.6 7.5.6s5.7 0 7.5-.6a3 3 0 0 0 2.1-2.1c.6-1.8.6-4.8.6-4.8s0-3-.6-4.8zM10 15.3V8.7l6 3.3-6 3.3z"/></svg>
       </a>
-      <a href="https://discord.com" target="_blank" rel="noopener" aria-label="Discord">
+      <a href="https://discord.gg/marvelrivals" target="_blank" rel="noopener" aria-label="Discord">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.8 19.8 0 0 0-4.885-1.515c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25A19.74 19.74 0 0 0 3.677 4.37C.533 9.046-.32 13.58.099 18.057a19.9 19.9 0 0 0 5.993 3.03c.462-.63.874-1.295 1.226-1.994a12.9 12.9 0 0 1-1.872-.892 10.2 10.2 0 0 0 .372-.292c3.928 1.793 8.18 1.793 12.062 0 .12.098.246.198.373.292-.56.324-1.2.635-1.873.892.36.698.772 1.362 1.225 1.993a19.84 19.84 0 0 0 6.002-3.03c.5-5.177-.838-9.674-3.549-13.66z"/></svg>
       </a>
     `;

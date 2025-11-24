@@ -101,11 +101,17 @@
     const [isMuted, setIsMuted] = useState(() => {
       // Check if user manually unmuted (this persists across pages)
       const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+      const savedMuteState = localStorage.getItem('musicMuted');
       
       if (isHomepage()) {
         // On homepage: check if user manually muted
-        return localStorage.getItem('musicMuted') === 'true';
+        // If no saved state, default to unmuted (auto-play on first load)
+        if (savedMuteState === null) {
+          return false; // Start unmuted (playing) on first load
+        }
+        return savedMuteState === 'true';
       } else {
+        // On other pages: auto-mute only if user hasn't manually unmuted
         return !userManuallyUnmuted;
       }
     });
@@ -195,12 +201,12 @@
     // Play next song - defined outside useEffect so it's accessible to callbacks
     const playNextSong = () => {
       if (!globalPlaylist || globalPlaylist.songs.length === 0) {
-        console.log('No playlist or empty playlist');
+        console.log('⚠️ No playlist or empty playlist');
         return;
       }
       
       if (isAdvancing) {
-        console.log('Already advancing, skipping');
+        console.log('⚠️ Already advancing, skipping');
         return;
       }
       
@@ -214,7 +220,20 @@
       localStorage.removeItem('playbackPosition');
       
       const nextIndex = (globalCurrentIndex + 1) % globalPlaylist.songs.length;
-      console.log('Advancing to next song, index:', nextIndex);
+      console.log('⏭️ Advancing to next song, index:', nextIndex, 'song:', globalPlaylist.songs[nextIndex]?.title);
+      
+      // Ensure we're not muted if we should be playing
+      const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+      const shouldBeMuted = isHomepage() 
+        ? (localStorage.getItem('musicMuted') === 'true')
+        : !userManuallyUnmuted;
+      
+      // If we should be playing, make sure we're not muted
+      if (isHomepage() && !shouldBeMuted) {
+        globalIsMuted = false;
+        setIsMuted(false);
+      }
+      
       startPlaying(nextIndex, false); // Don't restore position for new song
     };
 
@@ -243,11 +262,11 @@
         shouldBeMuted = savedMuteState === 'true';
         console.log('🏠 Homepage detected - mute state:', shouldBeMuted, 'saved:', savedMuteState);
         
-        // If this is the first load and no mute state is saved, default to unmuted
+        // If this is the first load and no mute state is saved, default to unmuted (auto-play)
         if (savedMuteState === null && !restorePosition) {
           shouldBeMuted = false;
           localStorage.setItem('musicMuted', 'false');
-          console.log('🏠 First load on homepage - setting to unmuted');
+          console.log('🏠 First load on homepage - setting to unmuted (auto-play)');
         }
       } else {
         // On other pages: auto-mute only if user hasn't manually unmuted
@@ -307,20 +326,29 @@
         // Auto-play logic - be aggressive about it
         const shouldAutoPlay = isHomepage() ? !shouldBeMuted : userManuallyUnmuted;
         
+        console.log('🎵 Auto-play check:', { shouldAutoPlay, isHomepage: isHomepage(), shouldBeMuted, userManuallyUnmuted });
+        
         if (shouldAutoPlay) {
           // Multiple attempts to play - browsers can be finicky
           const tryPlay = (attempt = 1) => {
-            if (!globalPlayer) return;
+            if (!globalPlayer) {
+              console.log(`⚠️ Player not ready on attempt ${attempt}`);
+              if (attempt < 20) {
+                setTimeout(() => tryPlay(attempt + 1), 300);
+              }
+              return;
+            }
             
             try {
               const state = globalPlayer.getPlayerState ? globalPlayer.getPlayerState() : -1;
-              console.log(`Play attempt ${attempt}, state:`, state);
+              console.log(`🎵 Play attempt ${attempt}, state:`, state, 'isPlaying:', globalIsPlaying);
               
               // Try to play if video is ready (CUED, PAUSED, or even UNSTARTED)
               if (state === window.YT.PlayerState.CUED || 
                   state === window.YT.PlayerState.PAUSED || 
                   state === window.YT.PlayerState.UNSTARTED ||
-                  state === -1) {
+                  state === -1 ||
+                  state === window.YT.PlayerState.BUFFERING) {
                 
                 if (globalPlayer.playVideo) {
                   globalPlayer.playVideo();
@@ -328,29 +356,29 @@
                 }
                 
                 // Keep trying if not playing yet
-                if (attempt < 10 && !globalIsPlaying) {
+                if (attempt < 20 && !globalIsPlaying) {
                   setTimeout(() => tryPlay(attempt + 1), 500);
                 }
-              } else if (state === window.YT.PlayerState.BUFFERING) {
-                // Still buffering, wait a bit
-                if (attempt < 10) {
-                  setTimeout(() => tryPlay(attempt + 1), 500);
-                }
+              } else if (state === window.YT.PlayerState.PLAYING) {
+                // Already playing, stop trying
+                globalIsPlaying = true;
+                console.log('✅ Video is already playing!');
               }
             } catch (error) {
               console.error(`Error on play attempt ${attempt}:`, error);
-              if (attempt < 10) {
+              if (attempt < 20) {
                 setTimeout(() => tryPlay(attempt + 1), 500);
               }
             }
           };
           
-          // Start trying immediately and keep retrying
-          setTimeout(() => tryPlay(1), 300);
-          setTimeout(() => tryPlay(2), 800);
-          setTimeout(() => tryPlay(3), 1500);
-          setTimeout(() => tryPlay(4), 2500);
-          setTimeout(() => tryPlay(5), 4000);
+          // Start trying immediately and keep retrying more aggressively
+          setTimeout(() => tryPlay(1), 100);
+          setTimeout(() => tryPlay(2), 500);
+          setTimeout(() => tryPlay(3), 1000);
+          setTimeout(() => tryPlay(4), 2000);
+          setTimeout(() => tryPlay(5), 3500);
+          setTimeout(() => tryPlay(6), 5000);
           
           // Also try on ANY user interaction
           const tryPlayOnInteraction = (e) => {
@@ -365,7 +393,7 @@
           };
           
           // Listen to multiple interaction types
-          ['click', 'touchstart', 'mousedown', 'keydown', 'scroll'].forEach(eventType => {
+          ['click', 'touchstart', 'mousedown', 'keydown', 'scroll', 'mousemove'].forEach(eventType => {
             document.addEventListener(eventType, tryPlayOnInteraction, { once: true, passive: true });
           });
         } else {
@@ -447,10 +475,11 @@
                     // Only advance if not already advancing
                     if (!isAdvancing) {
                       isAdvancing = true;
+                      console.log('🎵 Song ended, advancing to next song...');
                       setTimeout(() => {
                         playNextSong();
                         isAdvancing = false;
-                      }, 500);
+                      }, 100); // Reduced delay for faster transition
                     }
                   } else if (state === window.YT.PlayerState.PLAYING) {
                     globalIsPlaying = true;
@@ -574,6 +603,19 @@
     }, []);
 
 
+    // Listen for video mute requests
+    useEffect(() => {
+      const handleMuteRequest = (e) => {
+        const shouldMute = e.detail.mute;
+        setIsMuted(shouldMute);
+      };
+      
+      window.addEventListener('musicMuteRequest', handleMuteRequest);
+      return () => {
+        window.removeEventListener('musicMuteRequest', handleMuteRequest);
+      };
+    }, []);
+
     // Update mute state
     useEffect(() => {
       globalIsMuted = isMuted;
@@ -622,13 +664,34 @@
       // If unmuted and not playing, try to play
       if (!isMuted && !globalIsPlaying) {
         if (usingFallback && globalAudio) {
-          globalAudio.play().catch(e => console.log('Could not resume fallback audio:', e));
+          globalAudio.play()
+            .then(() => {
+              globalIsPlaying = true;
+              console.log('✅ Resumed fallback audio playback after unmute');
+            })
+            .catch(e => console.log('Could not resume fallback audio:', e));
         } else if (globalPlayer && globalPlayer.playVideo) {
           try {
             globalPlayer.playVideo();
+            globalIsPlaying = true;
             console.log('✅ Resuming playback after unmute');
           } catch (e) {
             console.log('Could not resume playback:', e);
+          }
+        }
+      }
+      
+      // If muted and playing, pause
+      if (isMuted && globalIsPlaying) {
+        if (usingFallback && globalAudio) {
+          globalAudio.pause();
+          globalIsPlaying = false;
+        } else if (globalPlayer && globalPlayer.pauseVideo) {
+          try {
+            globalPlayer.pauseVideo();
+            globalIsPlaying = false;
+          } catch (e) {
+            console.log('Could not pause playback:', e);
           }
         }
       }
@@ -654,15 +717,27 @@
       setIsMuted(newMutedState);
     };
 
-    // Skip song (remove from queue and play next)
+    // Skip song (move to bottom of playlist and play next)
     const skipSong = (songId, index) => {
       if (!playlist || !globalPlayer) return;
       
-      // If skipping current song, play next one
+      // If skipping current song, play next one and move current to bottom
       if (index === currentSongIndex) {
         if (playlist.songs.length > 1) {
-          const nextIndex = (index + 1) % playlist.songs.length;
-          startPlaying(nextIndex);
+          // Get the current song
+          const currentSong = playlist.songs[index];
+          
+          // Create new playlist: remove current song, then add it to the end
+          const newSongs = [...playlist.songs];
+          newSongs.splice(index, 1);
+          newSongs.push(currentSong);
+          
+          const updatedPlaylist = { ...playlist, songs: newSongs };
+          setPlaylist(updatedPlaylist);
+          globalPlaylist = updatedPlaylist;
+          
+          // Play the next song (which is now at the same index)
+          startPlaying(index);
         } else {
           // No more songs
           if (globalPlayer.stopVideo) {
@@ -670,21 +745,24 @@
           }
           globalIsPlaying = false;
         }
-      }
-      
-      // Remove song from playlist
-      const newSongs = playlist.songs.filter((_, i) => i !== index);
-      const updatedPlaylist = { ...playlist, songs: newSongs };
-      
-      setPlaylist(updatedPlaylist);
-      globalPlaylist = updatedPlaylist;
-      
-      // Adjust current index if needed
-      if (index < currentSongIndex) {
-        const newIndex = currentSongIndex - 1;
-        setCurrentSongIndex(newIndex);
-        globalCurrentIndex = newIndex;
-        localStorage.setItem('currentSongIndex', newIndex.toString());
+      } else {
+        // If skipping a future song, just move it to the bottom
+        const skippedSong = playlist.songs[index];
+        const newSongs = [...playlist.songs];
+        newSongs.splice(index, 1);
+        newSongs.push(skippedSong);
+        
+        const updatedPlaylist = { ...playlist, songs: newSongs };
+        setPlaylist(updatedPlaylist);
+        globalPlaylist = updatedPlaylist;
+        
+        // Adjust current index if needed
+        if (index < currentSongIndex) {
+          const newIndex = currentSongIndex - 1;
+          setCurrentSongIndex(newIndex);
+          globalCurrentIndex = newIndex;
+          localStorage.setItem('currentSongIndex', newIndex.toString());
+        }
       }
     };
 
@@ -708,38 +786,20 @@
     };
 
     return React.createElement(React.Fragment, null,
-      // Status indicator (for debugging)
-      React.createElement('div', {
-        id: 'music-status-indicator',
-        style: {
-          position: 'fixed',
-          bottom: '90px',
-          left: '20px',
-          zIndex: 1002,
-          padding: '8px 12px',
-          background: isPlaying ? 'rgba(0, 255, 0, 0.2)' : 'rgba(255, 255, 0, 0.2)',
-          border: `2px solid ${isPlaying ? '#00ff00' : '#ffff00'}`,
-          borderRadius: '8px',
-          color: '#fff',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          fontFamily: 'monospace',
-          pointerEvents: 'none',
-          opacity: 0.8
-        }
-      }, isPlaying ? '🎵 PLAYING' : (isMuted ? '🔇 MUTED' : '⏸️ LOADING')),
-      
       // Fixed Music Icon - Bottom Left
       React.createElement('div', {
-        className: `music-player-icon ${isPlaying ? 'playing' : ''} ${isMuted ? 'muted' : ''} music-player-icon--fade-in`,
+        className: `music-player-icon ${isPlaying && !isMuted ? 'playing' : ''} ${isMuted ? 'muted' : ''} music-player-icon--fade-in`,
         style: {
           position: 'fixed',
           bottom: '20px',
           left: '20px',
           zIndex: 1001,
           cursor: 'pointer',
-          border: isPlaying ? '3px solid #00ff00' : '2px solid rgba(255, 215, 0, 1)',
-          boxShadow: isPlaying ? '0 0 20px rgba(0, 255, 0, 0.6)' : '0 8px 24px rgba(255, 215, 0, 0.4)'
+          border: isPlaying && !isMuted ? '3px solid #00ff00' : '2px solid rgba(255, 215, 0, 1)',
+          boxShadow: isPlaying && !isMuted ? '0 0 20px rgba(0, 255, 0, 0.6)' : '0 8px 24px rgba(255, 215, 0, 0.4)',
+          opacity: '1',
+          visibility: 'visible',
+          transform: 'translateY(0) scale(1)'
         },
         onClick: handleIconClick,
         title: isPlaying ? "🎵 Playing - Click to open queue, Double-click to mute" : "⏸️ Click to play, Double-click to unmute"

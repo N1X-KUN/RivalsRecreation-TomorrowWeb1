@@ -5,16 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <meta name="theme-color" content="#0f0f16" />
-  <meta name="description" content="Rivals Nexus — a fast, cinematic hero shooter showcase with dynamic UI, parallax hero, scroll reveals, tilt cards, and a smooth maps carousel." />
-  <title>Rivals Nexus</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs/%3E%3Ccircle cx='32' cy='32' r='30' fill='%230b0b12'/%3E%3Cpath d='M16 44 L32 12 L48 44 L40 44 L32 28 L24 44 Z' fill='%23e93d54'/%3E%3C/svg%3E" />
+  <meta name="description" content="Marvel Rivals — a fast, cinematic hero shooter showcase with dynamic UI, parallax hero, scroll reveals, tilt cards, and a smooth maps carousel." />
+  <title>Marvel Rivals</title>
+  <link rel="icon" href="Images/Rival.png" type="image/x-icon" />
   <link rel="stylesheet" href="Rivals.css" />
 </head>
 <body>
+  <!-- Page Loader -->
+  <div id="page-loader" class="page-loader">
+    <div class="loader-content">
+      <div class="loader-logo">
+        <img src="Images/Icon Logo.svg" alt="Marvel Rivals" />
+      </div>
+      <div class="loader-text">
+        RIVALING<span class="loader-dots"></span>
+      </div>
+      <div class="loader-progress">
+        <div class="loader-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
   <a class="sr-only" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="container nav">
-      <a class="brand" href="Rivals.html" aria-label="Rivals Nexus Home">
+      <a class="brand" href="Rivals.html" aria-label="Marvel Rivals Home">
         <img src="Images/Icon Logo.svg" alt="Brand" style="height:28px;width:auto" />
       </a>
       <nav class="nav-links" aria-label="Primary">
@@ -59,7 +74,7 @@
         <p class="subhead">Enter a cinematic clash across timelines. Master team-up abilities, reshape the battlefield, and write your legend in a world forged by power, style, and momentum.</p>
         <div class="hero-cta">
           <a class="cta" data-magnetic href="#download"><span class="shine" aria-hidden="true"></span>Download</a>
-          <a class="btn" href="#trailer">Watch Trailer</a>
+          <a class="btn" href="#trailer" id="watch-trailer-btn">Watch Trailer</a>
         </div>
       </div>
     </section>
@@ -102,53 +117,59 @@
         <h2 id="maps-title">Maps Showcase</h2>
         <p> Yappa Yapppa</p>
       </div>
-      <div class="maps-roulette" data-reveal id="maps-roulette">
-        <div class="roulette-track" id="roulette-track">
-          <figure class="roulette-slide" data-map="kunlun">
-            <img src="Images/KunLun.jpg" alt="Golden palace under vast tree roots" />
-            <figcaption class="roulette-meta">
-              <h4>K'un-Lun Heart of Heaven</h4>
-              <p>Sanctuary paths and royal battlements entwined with the World Tree.</p>
-            </figcaption>
-          </figure>
-          <figure class="roulette-slide" data-map="empire">
-            <img src="Images/DraculaCastle.jpg" alt="Gothic city park shrouded in moonless night" />
-            <figcaption class="roulette-meta">
-              <h4>Empire of Night</h4>
-              <p>Midtown under eclipse—siege routes, shadow vaults, and arcane wards.</p>
-            </figcaption>
-          </figure>
-          <figure class="roulette-slide" data-map="klyntar">
-            <img src="Images/KlynTar.jpg" alt="Alien landscape with colossal husk and vivid clouds" />
-            <figcaption class="roulette-meta">
-              <h4>Celestial Husk</h4>
-              <p>Shifting terrain over ancient remains—adapt or be swallowed whole.</p>
-            </figcaption>
-          </figure>
-          <figure class="roulette-slide" data-map="skyline">
-            <img src="Images/SpiderMap.jpg" alt="Neon megacity skyline at night" />
-            <figcaption class="roulette-meta">
-              <h4>Skyline 2099</h4>
-              <p>Sleek rooftops and cable lines—vertical play with momentum lanes.</p>
-            </figcaption>
-          </figure>
-          <!-- Duplicate slides for seamless looping -->
-          <figure class="roulette-slide" data-map="kunlun">
-            <img src="Images/KunLun.jpg" alt="Golden palace under vast tree roots" />
-            <figcaption class="roulette-meta">
-              <h4>K'un-Lun Heart of Heaven</h4>
-              <p>Sanctuary paths and royal battlements entwined with the World Tree.</p>
-            </figcaption>
-          </figure>
-          <figure class="roulette-slide" data-map="empire">
-            <img src="Images/DraculaCastle.jpg" alt="Gothic city park shrouded in moonless night" />
-            <figcaption class="roulette-meta">
-              <h4>Empire of Night</h4>
-              <p>Midtown under eclipse—siege routes, shadow vaults, and arcane wards.</p>
-            </figcaption>
-          </figure>
+      <div class="maps-carousel" data-reveal id="maps-carousel">
+        <div class="carousel-container">
+          <div class="carousel-track" id="carousel-track">
+            <div class="carousel-slide active" data-slide="0">
+              <img src="Images/KunLun.jpg" alt="Golden palace under vast tree roots" />
+              <div class="carousel-meta">
+                <h4>K'un-Lun Heart of Heaven</h4>
+                <p>Sanctuary paths and royal battlements entwined with the World Tree.</p>
+              </div>
+            </div>
+            <div class="carousel-slide" data-slide="1">
+              <img src="Images/DraculaCastle.jpg" alt="Gothic city park shrouded in moonless night" />
+              <div class="carousel-meta">
+                <h4>Empire of Night</h4>
+                <p>Midtown under eclipse—siege routes, shadow vaults, and arcane wards.</p>
+              </div>
+            </div>
+            <div class="carousel-slide" data-slide="2">
+              <img src="Images/KlynTar.jpg" alt="Alien landscape with colossal husk and vivid clouds" />
+              <div class="carousel-meta">
+                <h4>Celestial Husk</h4>
+                <p>Shifting terrain over ancient remains—adapt or be swallowed whole.</p>
+              </div>
+            </div>
+            <div class="carousel-slide" data-slide="3">
+              <img src="Images/SpiderMap.jpg" alt="Neon megacity skyline at night" />
+              <div class="carousel-meta">
+                <h4>Skyline 2099</h4>
+                <p>Sleek rooftops and cable lines—vertical play with momentum lanes.</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Navigation Controls -->
+          <button class="carousel-btn carousel-prev" id="carousel-prev" aria-label="Previous map">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <button class="carousel-btn carousel-next" id="carousel-next" aria-label="Next map">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+          
+          <!-- Dot Indicators -->
+          <div class="carousel-dots" id="carousel-dots">
+            <button class="carousel-dot active" data-slide="0" aria-label="Go to slide 1"></button>
+            <button class="carousel-dot" data-slide="1" aria-label="Go to slide 2"></button>
+            <button class="carousel-dot" data-slide="2" aria-label="Go to slide 3"></button>
+            <button class="carousel-dot" data-slide="3" aria-label="Go to slide 4"></button>
+          </div>
         </div>
-        <div class="roulette-separator"></div>
       </div>
     </section>
 
@@ -231,11 +252,15 @@
           <h2 id="download-title">Join The Rivals Now</h2>
           <p class="subhead">Choose your platform. Dude start working on your links haha.</p>
           <div class="platforms">
-            <a href="#">Steam</a>
-            <a href="#">Epic Games</a>
-            <a href="#">PlayStation</a>
-            <a href="#">Xbox</a>
-            <a href="#">Windows</a>
+            <a href="https://store.steampowered.com/app/2767030/Marvel_Rivals" target="_blank" rel="noopener" class="platform-link">
+              <img src="Images/steam.png" alt="Steam" />
+            </a>
+            <a href="https://store.epicgames.com/en-US/p/marvel-rivals-182004" target="_blank" rel="noopener" class="platform-link">
+              <img src="Images/epicgames.png" alt="Epic Games" />
+            </a>
+            <a href="https://store.loadingbay.com/detail/marvel-rivals" target="_blank" rel="noopener" class="platform-link">
+              <img src="Images/windows.png" alt="Windows" />
+            </a>
           </div>
         </div>
       </div>
@@ -252,7 +277,7 @@
           <a href="https://act.neteasegames.com/activity/3sSWzy">Perks</a><span class="sep">|</span>
           <a href="https://www.marvelrivals.com/creator_program.html">PartnerHub</a>
         </div>
-        <div class="foot-meta">Copyright © 2025 Rivals Nexus. All rights reserved.</div>
+        <div class="foot-meta">Copyright © 2025 Marvel Rivals. All rights reserved.</div>
         <div class="foot-badges">
           <img src="Images/NetEase.png" alt="Compliance badge" class="badge-img" />
           <img src="Images/Marvel Logo.png" alt="Age rating" class="badge-img" />
@@ -278,10 +303,10 @@
         <div class="login-section registration-section">
           <div class="login-section-header">
             <div class="login-logo-container">
-              <div class="login-logo-icon">R</div>
+              <img src="Images/Rival.png" alt="Marvel Rivals" class="login-logo-image" />
               <div class="login-logo-text">
                 <span class="login-logo-brand">Account</span>
-                <span class="login-logo-name">Rivals Nexus</span>
+                <span class="login-logo-name">Marvel Rivals</span>
               </div>
             </div>
           </div>
@@ -326,25 +351,24 @@
           </form>
 
           <div class="login-switch-auth">
-            <span>Already got a Rivals Nexus account?</span>
+            <span>Already got a Rival account?</span>
             <button class="login-switch-btn" id="popup-switchToLogin">LOG IN</button>
           </div>
         </div>
 
         <!-- Right Section: Login -->
         <div class="login-section login-right-section">
-          <div class="login-section-header">
-            <div class="login-brand-logo">
-              <div class="login-brand-icon">R</div>
-              <div class="login-brand-text">RIVALS NEXUS</div>
-            </div>
-          </div>
-
           <div class="login-right-content">
-            <p class="login-description">Already played Rivals Nexus? Save your progress!</p>
-            <button class="login-social-login-btn" id="popup-artstormLogin">
-              <div class="login-social-icon">A</div>
-              <span>Log in via Artstorm</span>
+            <!-- Guest login status display -->
+            <div id="guest-status" class="guest-status" style="display: none;">
+              <p class="guest-status-text">Currently logged in as <strong>Guest</strong></p>
+              <button class="guest-logout-btn" id="guest-logout-btn">Logout Guest</button>
+            </div>
+            
+            <p class="login-description" id="login-description">Already played Rival? Save your progress!</p>
+            <button class="login-social-login-btn" id="popup-guestLogin">
+              <div class="login-social-icon">👤</div>
+              <span>Continue As Guest</span>
             </button>
             <div class="login-expandable-section">
               <button class="login-expand-btn" id="popup-expandLink">
@@ -377,6 +401,21 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   
+  <!-- YouTube Video Popup Modal -->
+  <div id="trailer-modal" class="trailer-modal" hidden>
+    <div class="trailer-modal-backdrop" id="trailer-modal-backdrop"></div>
+    <div class="trailer-modal-content">
+      <button class="trailer-modal-close" id="trailer-modal-close" aria-label="Close trailer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="trailer-video-container">
+        <div id="trailer-player"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- YouTube IFrame Player API -->
   <script src="https://www.youtube.com/iframe_api"></script>
   

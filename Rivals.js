@@ -140,8 +140,7 @@
   const trailerModalClose = document.getElementById('trailer-modal-close');
   const trailerModalBackdrop = document.getElementById('trailer-modal-backdrop');
   let trailerPlayer = null;
-  const TRAILER_VIDEO_ID = '67FVMNGMFXU'; // Marvel Rivals trailer video ID
-
+  const TRAILER_VIDEO_ID = '67FVMNGMFXU'; 
   // Store original music mute state before video plays
   let musicMutedBeforeVideo = null;
   let activeVideos = new Set(); // Track all playing videos

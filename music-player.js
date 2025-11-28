@@ -21,13 +21,15 @@
   let isAdvancing = false; 
   let playbackPositionInterval = null; 
   let usingFallback = false;
+  let stuckPlaybackTimeout = null;
 
-  // This checks if current page is homepage
+  // This checks if current page should auto-play music (hero + main pages)
   function isHomepage() {
     const path = window.location.pathname;
     const filename = path.split('/').pop() || '';
     const href = window.location.href;
-    return filename === 'Rivals.html' || filename === '' || filename === 'index.html' || href.endsWith('/') || href.includes('Rivals.html');
+    const autoPlayPages = ['Rivals.html', 'Hero.html', 'Patch.html', 'Community.html', '', 'index.html'];
+    return autoPlayPages.includes(filename) || href.endsWith('/') || href.includes('Rivals.html');
   }
 
   // Initialize YouTube IFrame API
@@ -120,6 +122,8 @@
     
     const playerContainerRef = useRef(null);
     const clickTimeoutRef = useRef(null);
+    const panelRef = useRef(null);
+    const iconRef = useRef(null);
 
     // Play fallback audio (local file) when YouTube embedding fails
     const playFallbackAudio = (audioPath, song) => {
@@ -234,6 +238,11 @@
         setIsMuted(false);
       }
       
+      if (stuckPlaybackTimeout) {
+        clearTimeout(stuckPlaybackTimeout);
+        stuckPlaybackTimeout = null;
+      }
+      
       startPlaying(nextIndex, false); // Don't restore position for new song
     };
 
@@ -250,6 +259,10 @@
       setCurrentSongIndex(index);
       globalCurrentIndex = index;
       localStorage.setItem('currentSongIndex', index.toString());
+      if (stuckPlaybackTimeout) {
+        clearTimeout(stuckPlaybackTimeout);
+        stuckPlaybackTimeout = null;
+      }
 
       // Determine mute state
       const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
@@ -396,6 +409,17 @@
           ['click', 'touchstart', 'mousedown', 'keydown', 'scroll', 'mousemove'].forEach(eventType => {
             document.addEventListener(eventType, tryPlayOnInteraction, { once: true, passive: true });
           });
+          
+          stuckPlaybackTimeout = setTimeout(() => {
+            const currentState = globalPlayer && typeof globalPlayer.getPlayerState === 'function'
+              ? globalPlayer.getPlayerState()
+              : null;
+            const playingState = window.YT && window.YT.PlayerState ? window.YT.PlayerState.PLAYING : 1;
+            if (!globalIsMuted && currentState !== playingState) {
+              console.warn('⚠️ Current track is stuck, automatically skipping...');
+              playNextSong();
+            }
+          }, 8000);
         } else {
           // On other pages or if muted, just load but don't play
           const reason = !isHomepage() ? 'not homepage' : 'muted';
@@ -472,6 +496,10 @@
                   if (state === window.YT.PlayerState.ENDED) {
                     // Clear saved position when song ends
                     localStorage.removeItem('playbackPosition');
+                    if (stuckPlaybackTimeout) {
+                      clearTimeout(stuckPlaybackTimeout);
+                      stuckPlaybackTimeout = null;
+                    }
                     // Only advance if not already advancing
                     if (!isAdvancing) {
                       isAdvancing = true;
@@ -483,6 +511,10 @@
                     }
                   } else if (state === window.YT.PlayerState.PLAYING) {
                     globalIsPlaying = true;
+                    if (stuckPlaybackTimeout) {
+                      clearTimeout(stuckPlaybackTimeout);
+                      stuckPlaybackTimeout = null;
+                    }
                     console.log('✅ Video is now playing - AUDIO SHOULD BE HEARABLE');
                     // Force unmute when playing starts
                     if (globalPlayer && globalPlayer.unMute) {
@@ -520,6 +552,10 @@
                 onError: (event) => {
                   const errorCode = event.data;
                   console.error('YouTube player error:', errorCode);
+                  if (stuckPlaybackTimeout) {
+                    clearTimeout(stuckPlaybackTimeout);
+                    stuckPlaybackTimeout = null;
+                  }
                   
                   // Error codes: 2=invalid ID, 5=HTML5 error, 100=not found, 101/150=embedding disabled
                   let errorMessage = 'Unknown error';
@@ -717,6 +753,27 @@
       setIsMuted(newMutedState);
     };
 
+    // Close panel when clicking outside or pressing Escape
+    useEffect(() => {
+      if (!isOpen) return;
+      const handlePointerDown = (event) => {
+        if (panelRef.current?.contains(event.target)) return;
+        if (iconRef.current?.contains(event.target)) return;
+        setIsOpen(false);
+      };
+      const handleKeyDown = (event) => {
+        if (event.key === 'Escape') {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener('pointerdown', handlePointerDown);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('pointerdown', handlePointerDown);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }, [isOpen]);
+
     // Skip song (move to bottom of playlist and play next)
     const skipSong = (songId, index) => {
       if (!playlist || !globalPlayer) return;
@@ -801,6 +858,7 @@
           visibility: 'visible',
           transform: 'translateY(0) scale(1)'
         },
+        ref: iconRef,
         onClick: handleIconClick,
         title: isPlaying ? "🎵 Playing - Click to open queue, Double-click to mute" : "⏸️ Click to play, Double-click to unmute"
       },
@@ -824,7 +882,8 @@
       
       // Playlist Panel
       React.createElement('div', {
-        className: `playlist-panel left ${isOpen ? 'open' : ''}`
+        className: `playlist-panel left ${isOpen ? 'open' : ''}`,
+        ref: panelRef
       },
         // Header with close button
         React.createElement('div', { className: 'playlist-header' },

@@ -214,14 +214,17 @@
 
     <!-- Patch Updates -->
     <section class="patch-section" aria-labelledby="patch-heading">
-      <div class="section-head">
-        <h2 id="patch-heading">Patch Updates</h2>
-        <p class="section-sub">Season 4.5 -- Nutshell Hero Buffs & Nerfs</p>
+      <div class="section-head patch-head">
+        <div>
+          <h2 id="patch-heading">Patch Updates</h2>
+          <p class="section-sub">Season 4.5 -- Nutshell Hero Buffs & Nerfs</p>
+        </div>
+        <p class="patch-tagline">Who rose, who fell, and why.</p>
       </div>
 
-      <div class="hero-grid">
+      <div class="hero-grid patch-grid">
         <!-- Buff Card -->
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="buff" data-href="">
           <figure class="hero-media" aria-label="Venom artwork">
             <img src="Images/PVenom.jpg" alt="VenomWin" />
           </figure>
@@ -234,7 +237,7 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="buff" data-href="">
           <figure class="hero-media" aria-label="Angela artwork">
             <img src="Images/PAngela.jpg" alt="AngelaWin" />
           </figure>
@@ -247,7 +250,20 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="buff" data-href="">
+          <figure class="hero-media" aria-label="Bucky artwork">
+            <img src="Images/PWinter.jpg" alt="WinterWin" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Winter Soldier</h3>
+              <span class="badge buff" aria-label="Buffed">Buff</span>
+            </div>
+            <p class="hero-desc">Therapist Said Be Kind... Again!</p>
+          </div>
+        </article>
+
+        <article class="hero-card" data-state="buff" data-href="">
           <figure class="hero-media" aria-label="Blade artwork">
             <img src="Images/PBlade.jpg" alt="BladeWin" />
           </figure>
@@ -261,7 +277,7 @@
         </article>
 
         <!-- Nerf Card -->
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="nerf" data-href="">
           <figure class="hero-media" aria-label="Emma artwork">
             <img src="Images/PEmma.jpg" alt="EmmaLose" />
           </figure>
@@ -274,7 +290,7 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="buff" data-href="">
           <figure class="hero-media" aria-label="Moon artwork">
             <img src="Images/PMoon.jpg" alt="MoonWin" />
           </figure>
@@ -287,7 +303,7 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="nerf" data-href="">
           <figure class="hero-media" aria-label="Torch artwork">
             <img src="Images/PTorch.jpg" alt="TorchL" />
           </figure>
@@ -300,7 +316,7 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="nerf" data-href="">
           <figure class="hero-media" aria-label="CND artwork">
             <img src="Images/PClok.jpg" alt="CNDL" />
           </figure>
@@ -313,7 +329,7 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="nerf" data-href="">
           <figure class="hero-media" aria-label="Jeff artwork">
             <img src="Images/PJeff.jpg" alt="JeffL" />
           </figure>
@@ -326,7 +342,7 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="nerf" data-href="">
           <figure class="hero-media" aria-label="Ultron artwork">
             <img src="Images/PUltron.jpg" alt="UltronL" />
           </figure>
@@ -339,7 +355,20 @@
           </div>
         </article>
 
-        <article class="hero-card" data-href="">
+        <article class="hero-card" data-state="nerf" data-href="">
+          <figure class="hero-media" aria-label="Frank Reed artwork">
+            <img src="Images/PFantastic.jpg" alt="ReedL" />
+          </figure>
+          <div class="hero-body">
+            <div class="hero-header">
+              <h3 class="hero-name">Mr.Fantastic</h3>
+              <span class="badge nerf" aria-label="Nerfed">Nerf</span>
+            </div>
+            <p class="hero-desc">Stretching is no longer a thing...</p>
+          </div>
+        </article>
+
+        <article class="hero-card" data-state="buff" data-href="">
           <figure class="hero-media" aria-label="Majik artwork">
             <img src="Images/PMajik.jpg" alt="MajikWin" />
           </figure>

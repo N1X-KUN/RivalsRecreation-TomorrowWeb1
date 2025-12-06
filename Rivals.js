@@ -1523,6 +1523,114 @@
         ]
       },
       {
+        id: 'daredevil',
+        category: 'duelist',
+        name: 'Daredevil',
+        tagline: 'I- ... I See You...',
+        summary: 'When darkness falls, Daredevil wields his billy clubs in place of a gavel, doling out justice and purging the world of evil!',
+        lore: 'A tragic accident transformed Matt Murdock, blinding him, but awakening his incredible Radar Sense. When darkness falls, Daredevil wields his billy clubs in place of a gavel, doling out justice and purging the world of evil!',
+        portrait: 'Images/DareStory.png',
+        background: 'Images/DaredevilSilhouette.png',
+        card: 'Images/Dare.webp',
+        accent: '#8f2236',
+        realName: 'Matt Murdock',
+        health: '300',
+        attackType: 'Melee Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Team', value: 'Vigilante' },
+          { label: 'Mobility', value: 'Combo Forward' },
+          { label: 'Passive', value: 'Radar Sense' }
+        ],
+        abilities: [
+          { name: 'Righteous Cross', description: 'Cross Billy Clubs and surge forward. Gain Fury on hit.' },
+          { name: 'Objection!', description: 'Block frontal damage and reflect projectiles, becoming immune to all incoming harm during this stance and gain Fury.' },
+          { name: 'Devils Latch', description: 'Fire a grappling line that reels Daredevil and his target toward each other. On completion' },
+          { name: 'Let The Devil Out', description: ' Enemies with Daredevil in their line of sight take damage and suffer a ramping Blind effect. Continually gain Fury while active.' }
+        ]
+      },
+      {
+        id: 'humantorch',
+        category: 'duelist',
+        name: 'Human Torch',
+        tagline: 'Flying Shotgun Gooner',
+        summary: 'Ladies! Ladies! Ya like fire? I can make you hotter!',
+        lore: 'The Fantastic Four resident heartthrob, Johnny Storm, adds an intense flare to every battle he fights. Shrouded in roaring flames, the Human Torch always manages to look cool while turning up the heat!',
+        portrait: 'Images/TorchStory.png',
+        background: 'Images/TorchSilhouette.webp',
+        card: 'Images/Torch.webp',
+        accent: 'Yellow',
+        realName: 'Johnny Storm',
+        health: '250',
+        attackType: 'Projectile Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Team', value: 'Fantastic Four' },
+          { label: 'Mobility', value: 'Plasma Body' },
+          { label: 'Passive', value: 'Flame Fist' }
+        ],
+        abilities: [
+          { name: 'Blazing Blast', description: 'Launch a fireball to deal damage or create a Flame Field at the targeted area, dealing damage to enemies within.' },
+          { name: 'Flaming Meteor', description: 'Dive towards the ground, dealing damage to enemies. This will also detonate any Flame Fields hit and grant you Bonus Health.' },
+          { name: 'Pyro-prison', description: 'When 2 or more Flame Fields exist, connect them to form a fire wall that deals one-off high damage to enemies that pass through the wall.' },
+          { name: 'Supernova', description: 'Explode with cosmic fire to deal damage to enemies within range and enter Supernova state. While in Supernova state, Blazing Blast will transform into Flame Tornado, and Plasma Body can be activated without any cost.' }
+        ]
+      },
+      {
+        id: 'iron-man',
+        category: 'duelist',
+        name: 'Iron Man',
+        tagline: 'Genius, Billionaire, Playboy, Philanthropist.',
+        summary: 'Jarvis... Nuke that Family of Four. *Affirmative*',
+        lore: 'Armed with superior intellect and a nanotech battlesuit of his own design, Tony Stark stands alongside gods as the Invincible Iron Man. His state of the art armor turns any battlefield into his personal playground, allowing him to steal the spotlight he so desperately desires.',
+        portrait: 'Images/IronStory.png',
+        background: 'Images/IronSilhouette.webp',
+        card: 'Images/Iron.webp',
+        accent: '#ff0000',
+        realName: 'Tony Stark',
+        health: '250',
+        attackType: 'Projectile Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★' },
+          { label: 'Team', value: 'Avengers' },
+          { label: 'Mobility', value: 'Hyper-velocity' },
+          { label: 'Passive', value: 'Fusion Boost' }
+        ],
+        abilities: [
+          { name: 'Repulsor Blast', description: 'Fire nano pulse cannons forward.' },
+          { name: 'Unibeam', description: 'Fire a beam of energy forward, dealing damage to enemies in its path.' },
+          { name: 'Armor Overdrive', description: 'Activate Armor Overdrive state, enhancing damage of Repulsor Blast and Unibeam, while also granting Bonus Health.' },
+          { name: 'MAXIMUM PULSE', description: 'Fire a devastating pulse cannon in the targeted direction, delivering catastrophic damage to the targeted area upon impact.' }
+        ],
+      },
+      {
+        id: 'mr-fantastic',
+        category: 'duelist',
+        name: 'Mr. Fantastic',
+        tagline: 'Im gettin anxious... Let me stretch.',
+        summary: 'The Smartest Guy In The Room',
+        lore: 'Reed Richards believes that true strength comes from remaining flexible, both mentally and physically. Mister Fantastic\'s elastic body, which can twist and stretch into any form with ease, is almost as impressive as his brilliant mind.',
+        portrait: 'Images/FantasticStory.png',
+        background: 'Images/FantasticSilhouette.webp',
+        card: 'Images/Fantastic.webp',
+        accent: '#00a8ff',
+        realName: 'Reed Richards',
+        health: '375',
+        attackType: 'Melee Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Team', value: 'Fantastic Four' },
+          { label: 'Mobility', value: 'Stretch' },
+          { label: 'Passive', value: 'Elastic Strength' }
+        ],
+        abilities: [
+          { name: 'Flexible Elongation', description: 'Gain a Shield, select a target, and dash towards them, dealing damage to enemies and granting a Shield to allies.' },
+          { name: 'Distended Grip', description: 'Pull the hit enemy toward you, or select and yank another enemy, knocking them airborne against each other.' },
+          { name: 'Reflexive Rubber', description: 'Stretch body to absorb damage before launching stored damage in the targeted direction.' },
+          { name: 'Brainiac Bounce', description: 'Leap upward and smash the ground, slowing enemies within range. Can leap again upon landing a hit.' }
+        ],
+      },
+      {
         id: 'moon-knight',
         category: 'duelist',
         name: 'Moon Knight',
@@ -1549,6 +1657,108 @@
           ]
       },
       {
+        id: 'namor',
+        category: 'duelist',
+        name: 'Namor',
+        tagline: 'Broken Teamup Merchant, Wha Da Flark is dev idea of teamups..',
+        summary: 'When ancient horns of war blare, devastation soon follows as deadly waters engulf the arena.',
+        lore: 'The unrivaled King of the Seas, Namor surfs into battle on a mighty wave with an army of fierce aquatic creatures in his wake. When ancient horns of war blare, devastation soon follows as deadly waters engulf the arena.',
+        portrait: 'Images/NamorStory.png',
+        background: 'Images/NamorSilhouette.webp',
+        card: 'Images/Namor.webp',
+        accent: '#00b894',
+        realName: 'Namor Mckenzie',
+        health: '275',
+        attackType: 'Projectile Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★' },
+          { label: 'Team', value: 'Illuminati' },
+          { label: 'Mobility', value: 'Blessing Of The Deep' },
+          { label: 'Passive', value: 'Tide Fall' } ],
+        abilities: [
+          { name: 'Wrath Of The Seven Seas', description: 'When the trident hits an enemy, Monstro Spawn to enter a berserk state, gaining increased Attack Speed.' },
+          { name: 'Aquatic Dominion', description: 'Summon a Monstro Spawn that can autonomously attack enemies.' },
+          { name: 'Horn Of Proteus', description: 'Summon Giganto to leap atop enemies within range, disabling their mobility abilities.' },
+        ]
+      },
+      {
+        id: 'spider-man',
+        category: 'duelist',
+        name: 'Spider-Man',
+        tagline: 'With Great Power Comes Great Responsibility...',
+        summary: 'With Great Power Comes With Great Fanfiction.',
+        lore: 'Swinging around the arena on his signature weblines, your friendly neighborhood SpiderMan, AKA Peter Parker, catches his rivals by surprise with sneaky, sticky bursts of webbing and unexpected attacks from above.',
+        portrait: 'Images/SpiderStory.png',
+        background: 'Images/SpidetSilhouette.webp',
+        card: 'Images/Spider.webp',
+        accent: '#03b7ff',
+        realName: 'Peter Parker',
+        health: '250',
+        attackType: 'Melee Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★★★' },
+          { label: 'Team', value: 'Avengers, SpiderVerse, Vigilante' },
+          { label: 'Mobility', value: 'Thwip And Flip' },
+          { label: 'Passive', value: 'Spider-Sense' } ],
+        abilities: [
+          { name: 'Web-cluster', description: 'Shoot a Web-Cluster that deals damage and attaches a Spider-Tracer to the hit enemy.' },
+          { name: 'Web-swing', description: 'Shoot a strand of webbing to swing.' },
+          { name: 'Get Over Here!', description: 'Shoot webbing to reel in the hit enemy. If the enemy is tagged with a Spider-Tracer, Spider-Man will get pulled to them instead.' },
+          { name: 'Spectacular Spin', description: 'Launch Web-Clusters all around to damage and Stun enemies.' }
+        ]
+      },  
+      {
+        id: 'phoenix',
+        category: 'duelist',
+        name: 'Phoenix',
+        tagline: 'Cha Cha',
+        summary: 'In the movies Im more broken, the game nerfs me with wifi issues.',
+        lore: 'Original X-Man Jean Grey boasted immense psychic power even before becoming host to the unbridled Phoenix Force, embodiment of life and psionic energy across the universe. ',
+        portrait: 'Images/PhoenixStory.png',
+        background: 'Images/PhoenixSilhouette.webp',
+        card: 'Images/Phoenix.webp',
+        accent: '#b5ff21',
+        realName: 'Jean Grey',
+        health: '250',
+        attackType: 'Hitscan Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Team', value: 'X-Men' },
+          { label: 'Mobility', value: 'Limited' },
+          { label: 'Passive', value: 'Phoenix Force' } ],
+        abilities: [
+          { name: 'Psionic Detonation', description: 'Mark a targeted area with psionic energy, followed by a series of fiery explosions. ' },
+          { name: 'Dark Ascent', description: 'Merge with the Phoenix, entering a state of free flight. Gain a Movement Boost.' },
+          { name: 'Telepathic Illusion', description: 'Leave behind an illusion and instantly teleport in the desired direction, followed by detonating the illusion.' },
+          { name: 'Endsong Inferno', description: 'Soar into the sky with the Phoenix and crash down onto a selected area, dealing devastating damage to enemies while creating a shockwave that destroys enemy Summons, Shields, and any Bonus Health. ' }
+        ]
+      },
+      {
+        id: 'squirrel-girl',
+        category: 'duelist',
+        name: 'Squirrel Girl',
+        tagline: 'Im The Best DPS that takes alot of skills and lineups.',
+        summary: 'It Takes Skill To Be A Squirrel Girl Main, Or Atleast a good DPS.',
+        lore: 'Possessing only the powers of a common squirrel, somehow Doreen Green manages to defeat seemingly invincible enemies in the most unexpected ways. ',
+        portrait: 'Images/SquirrelStory.png',
+        background: 'Images/SquirrelSilhouette.webp',
+        card: 'Images/Squirrel.webp',
+        accent: '#b8860b',
+        realName: 'Doreen Green',
+        health: '275',
+        attackType: 'Projectile Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★' },
+          { label: 'Team', value: 'Vigilante' },
+          { label: 'Mobility', value: 'Tail Bounce' },
+          { label: 'Passive', value: 'Acorn Launcher' } ],
+        abilities: [
+          { name: 'Squirrel Blockade', description: 'Launch an acorn to unleash Squirrel Guards, Imprisoning the first hit enemy.' },
+          { name: 'Mammal Bond', description: 'Reload Burst Acorns and can use an ability without cooldown once in a short duration.' },
+          { name: 'Unbeatable Squirrel Tsunami', description: 'Summon a horde of squirrels to charge forward, dealing damage while bouncing against structures.' }
+        ]
+      },
+      {
         id: 'magik',
         category: 'duelist',
         name: 'Magik',
@@ -1573,6 +1783,31 @@
           { name: 'Eldritch Whirl', description: 'Spin while swinging the Soulsword after exiting a Stepping Disc.' },
           { name: 'Demons Rage', description: 'Summon a Limbo demon that attacks enemies after exiting a Stepping Disc.' },
           { name: 'Darkchild', description: 'Transform into the demonic Darkchild, gaining increased damage, health, and invincibility frames.' }
+        ]
+      },
+      {
+        id: 'psylocke',
+        category: 'duelist',
+        name: 'Psylocke',
+        tagline: 'Now you see mee, now you wana stare at me~',
+        summary: 'The Pinnacle Of Gooners and Distractions Ingame.',
+        lore: 'The psychic warrior known as Sai has the Mutant ability to conjure a variety of weapons with the power of her mind. Gracefully gliding across the battlefield, this trained ninja can shatter the enemy defenses with a single thought.',
+        portrait: 'Images/PsyStory.png',
+        background: 'Images/PsySilhouette.webp',
+        card: 'Images/Psy.webp',
+        accent: '#ff00ae',
+        realName: 'Sai',
+        health: '250',
+        attackType: 'Hitscan Heroes',
+        stats: [
+          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Team', value: 'X-Men' },
+          { label: 'Mobility', value: 'Psi-blade Dash' },
+          { label: 'Passive', value: 'Psychic Echoes' } ],
+        abilities: [
+          { name: 'Wing Shurikens', description: 'Launch a volley of psionic shurikens that stick to enemies, dealing damage and granting herself Bonus Health.' },
+          { name: 'Psychic Stealth', description: 'Enter stealth and gain a Movement Boost.' },
+          { name: 'Dance Of The Butterfly', description: 'Slash nearby enemies with a psionic katana, dealing massive damage.' },
         ]
       },
       {
@@ -1630,6 +1865,32 @@
         ]
       },
       {
+        id: 'scarlet-witch',
+        category: 'duelist',
+        name: 'Scarlet Witch',
+        tagline: 'Reality Nuke Erasor 99999 Damage',
+        summary: 'PPPPPPPUUUUURRREEEE CCHHHHHAAAAAAOOOOSSS!',
+        lore: 'Wanda Maximoff is adept at harnessing formidable chaos magic, casting hexes with the power to twist and reshape reality itself. Energy, space, and matter are mere playthings in the hands of Scarlet Witch!',
+        portrait: 'Images/ScarletStory.png',
+        background: 'Images/ScarletSilhouette.webp',
+        card: 'Images/Scarlett.webp',
+        accent: '#6e3550',
+        realName: 'Wanda Maximoff',
+        attackType: 'Melee Heroes',
+        health: '250',
+        stats: [
+          { label: 'Difficulty', value: '★' },
+          { label: 'Team', value: 'Avengers, X-Men' },
+          { label: 'Mobility', value: 'Mystic Projection' },
+          { label: 'Passive', value: 'Chaos Control' }
+        ],
+        abilities: [
+          { name: 'Chthonian Burst', description: 'Consume Chaos Energy to fire explosive magic missiles, damaging enemies.' },
+          { name: 'Dark Seal', description: 'Land a hit on a target or the scene, or press again to generate a Force Field that periodically Stuns enemies within range.' },
+          { name: 'Reality Erasure', description: 'Stay closer to me and get erased lol.' }
+        ]
+      },
+      {
         id: 'hela',
         category: 'duelist',
         name: 'Hela',
@@ -1683,6 +1944,32 @@
           { name: 'Living Chi', description: 'Become living Chi to boost his speed, damage, and attack range, delivering stronger punches while reducing the cooldown of Dragons Defense.' }
         ]
       },
+      {
+        id: 'storm',
+        category: 'duelist',
+        name: 'Storm',
+        tagline: 'Literal Storm is Approaching',
+        summary: 'Todays Weather Forcast states that... its Category 7 Tornado.',
+        lore: 'An Omega-level Mutant ability to manipulate weather makes Ororo Munroe a force to be reckoned with. Rain or shine, thunder or lightning, nature itself bends to the command of the Goddess of the Storm!',
+        portrait: 'Images/StormStory.png',
+        background: 'Images/StormSilhouette.webp',
+        card: 'Images/Storm.webp',
+        accent: '#05eeff',
+        realName: 'Ororo Munroe',
+        attackType: 'Projectile Heroes',
+        health: '250',
+        stats: [
+          { label: 'Difficulty', value: '★★★' },
+          { label: 'Team', value: 'X-Men' },
+          { label: 'Mobility', value: 'Windrider' },
+          { label: 'Passive', value: 'Weather Control' }
+        ],
+        abilities: [
+          { name: 'Bolt Rush', description: 'Unleash a lightning bolt forward.' },
+          { name: 'Goddess Boost', description: 'Wind push you to moves faster, Electric empowers you to kill faster' },
+          { name: 'Omega Hurricane', description: 'Transform into a hurricane to draw in nearby enemies and deal damage.' }
+        ]
+      },
     ];
 
     const strategistHeroes = [
@@ -1711,28 +1998,6 @@
           { name: 'Soul Bond', description: 'Forge a soul bond with allies, granting Healing Over Time and distributing damage taken across the bond.' },
           { name: 'Karmic Revival', description: 'Awaken the karma of allies to revive them. Allies revived have lower health but enjoy a brief period of invincibility.' }
         ]
-      },
-      {
-        id: 'scarlet-witch',
-        category: 'strategist',
-        name: 'Scarlet Witch',
-        tagline: '',
-        summary: '',
-        lore: 'Wanda Maximoff bends fate itself, ensuring outcomes align with her teams victory. Scarlet Witch warps probability zones, hexes objectives, and conjures protective wards for allies with chaos magic.',
-        portrait: 'Images/PMajik.jpg',
-        background: 'Images/New4.png',
-        card: 'Images/ScarletWitch.png',
-        accent: '#ff1493',
-        realName: 'Wanda Maximoff',
-        attackType: '',
-        health: '240',
-        stats: [
-          { label: 'Difficulty', value: '★★★★☆' },
-          { label: 'Attack Type', value: '' },
-          { label: 'Mobility', value: '' },
-          { label: 'Passive', value: 'Chaos Magic' }
-        ],
-        abilities: []
       },
     ];
 

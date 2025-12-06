@@ -206,6 +206,7 @@
     const playNextSong = () => {
       if (!globalPlaylist || globalPlaylist.songs.length === 0) {
         console.log('⚠️ No playlist or empty playlist');
+        isAdvancing = false; // Reset flag
         return;
       }
       
@@ -213,6 +214,9 @@
         console.log('⚠️ Already advancing, skipping');
         return;
       }
+      
+      // Set flag to prevent multiple simultaneous calls
+      isAdvancing = true;
       
       // Stop fallback audio if playing
       if (usingFallback && globalAudio) {
@@ -243,7 +247,14 @@
         stuckPlaybackTimeout = null;
       }
       
+      // Start playing the next song
       startPlaying(nextIndex, false); // Don't restore position for new song
+      
+      // Reset flag after a short delay to allow the song to start
+      setTimeout(() => {
+        isAdvancing = false;
+        console.log('✅ Next song started, isAdvancing reset');
+      }, 500);
     };
 
     // Start playing a song - defined outside useEffect so it's accessible
@@ -267,19 +278,19 @@
       // Determine mute state
       const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
       const isOnHomepage = isHomepage();
+      const savedMuteState = localStorage.getItem('musicMuted');
       let shouldBeMuted;
       
       if (isOnHomepage) {
         // On homepage: check if user manually muted
-        const savedMuteState = localStorage.getItem('musicMuted');
-        shouldBeMuted = savedMuteState === 'true';
-        console.log('🏠 Homepage detected - mute state:', shouldBeMuted, 'saved:', savedMuteState);
-        
-        // If this is the first load and no mute state is saved, default to unmuted (auto-play)
+        // If this is the first load (savedMuteState === null), default to unmuted (auto-play)
         if (savedMuteState === null && !restorePosition) {
           shouldBeMuted = false;
           localStorage.setItem('musicMuted', 'false');
           console.log('🏠 First load on homepage - setting to unmuted (auto-play)');
+        } else {
+          shouldBeMuted = savedMuteState === 'true';
+          console.log('🏠 Homepage detected - mute state:', shouldBeMuted, 'saved:', savedMuteState);
         }
       } else {
         // On other pages: auto-mute only if user hasn't manually unmuted
@@ -290,9 +301,29 @@
       globalIsMuted = shouldBeMuted;
       setIsMuted(shouldBeMuted);
       
+      // Determine if we should auto-play (userManuallyUnmuted already defined above)
+      const shouldAutoPlay = isHomepage() ? !shouldBeMuted : userManuallyUnmuted;
+      
       // Get saved playback position
       const savedPosition = restorePosition ? parseFloat(localStorage.getItem('playbackPosition') || '0') : 0;
       
+      // Set volume and mute state BEFORE loading video (for immediate effect)
+      try {
+        if (globalPlayer.setVolume) {
+          const volumeToSet = shouldBeMuted ? 0 : DEFAULT_VOLUME;
+          globalPlayer.setVolume(volumeToSet);
+          console.log('✅ Volume set to:', volumeToSet, 'muted:', shouldBeMuted);
+        }
+        // YouTube has a separate mute state - ensure it's set correctly
+        if (shouldBeMuted && globalPlayer.mute) {
+          globalPlayer.mute();
+        } else if (!shouldBeMuted && globalPlayer.unMute) {
+          globalPlayer.unMute();
+        }
+      } catch (e) {
+        console.error('Error setting volume/mute:', e);
+      }
+
       // Load video with saved position
       try {
         globalPlayer.loadVideoById({
@@ -300,26 +331,48 @@
           startSeconds: savedPosition
         });
 
-        // Set volume and mute state after loading
+        // Also set volume/mute again after loading (in case it didn't stick)
         setTimeout(() => {
           if (globalPlayer) {
             const volumeToSet = shouldBeMuted ? 0 : DEFAULT_VOLUME;
             try {
               if (globalPlayer.setVolume) {
                 globalPlayer.setVolume(volumeToSet);
-                console.log('✅ Volume set to:', volumeToSet, 'muted:', shouldBeMuted);
               }
-              // YouTube has a separate mute state - ensure it's set correctly
               if (shouldBeMuted && globalPlayer.mute) {
                 globalPlayer.mute();
               } else if (!shouldBeMuted && globalPlayer.unMute) {
                 globalPlayer.unMute();
               }
             } catch (e) {
-              console.error('Error setting volume/mute:', e);
+              console.error('Error setting volume/mute after load:', e);
             }
           }
         }, 100);
+
+        // Immediate play attempt after loading (especially important for first song)
+        if (shouldAutoPlay) {
+          // Try to play immediately after a short delay (video needs time to load)
+          setTimeout(() => {
+            if (globalPlayer && globalPlayer.playVideo) {
+              try {
+                const state = globalPlayer.getPlayerState ? globalPlayer.getPlayerState() : -1;
+                console.log('🎵 Immediate play attempt after loadVideoById, state:', state);
+                
+                // Ensure unmuted
+                if (!shouldBeMuted && globalPlayer.unMute) {
+                  globalPlayer.unMute();
+                }
+                
+                // Try to play regardless of state (YouTube will handle it)
+                globalPlayer.playVideo();
+                console.log('✅ Immediate playVideo() called after loadVideoById');
+              } catch (e) {
+                console.log('Error in immediate play attempt:', e);
+              }
+            }
+          }, 500); // Give video time to start loading
+        }
 
         // Start saving playback position periodically
         if (playbackPositionInterval) {
@@ -337,17 +390,20 @@
         }, 2000); // Save every 2 seconds
 
         // Auto-play logic - be aggressive about it
-        const shouldAutoPlay = isHomepage() ? !shouldBeMuted : userManuallyUnmuted;
+        // shouldAutoPlay is already defined above
+        const isFirstLoad = savedMuteState === null && isHomepage();
         
-        console.log('🎵 Auto-play check:', { shouldAutoPlay, isHomepage: isHomepage(), shouldBeMuted, userManuallyUnmuted });
+        console.log('🎵 Auto-play check:', { shouldAutoPlay, isHomepage: isHomepage(), shouldBeMuted, userManuallyUnmuted, isFirstLoad });
         
         if (shouldAutoPlay) {
           // Multiple attempts to play - browsers can be finicky
+          // On first load, be even more aggressive
+          const maxAttempts = isFirstLoad ? 30 : 20;
           const tryPlay = (attempt = 1) => {
             if (!globalPlayer) {
               console.log(`⚠️ Player not ready on attempt ${attempt}`);
-              if (attempt < 20) {
-                setTimeout(() => tryPlay(attempt + 1), 300);
+              if (attempt < maxAttempts) {
+                setTimeout(() => tryPlay(attempt + 1), 200);
               }
               return;
             }
@@ -355,6 +411,15 @@
             try {
               const state = globalPlayer.getPlayerState ? globalPlayer.getPlayerState() : -1;
               console.log(`🎵 Play attempt ${attempt}, state:`, state, 'isPlaying:', globalIsPlaying);
+              
+              // Ensure unmuted before trying to play
+              if (!shouldBeMuted && globalPlayer.unMute) {
+                try {
+                  globalPlayer.unMute();
+                } catch (e) {
+                  // Ignore
+                }
+              }
               
               // Try to play if video is ready (CUED, PAUSED, or even UNSTARTED)
               if (state === window.YT.PlayerState.CUED || 
@@ -369,8 +434,8 @@
                 }
                 
                 // Keep trying if not playing yet
-                if (attempt < 20 && !globalIsPlaying) {
-                  setTimeout(() => tryPlay(attempt + 1), 500);
+                if (attempt < maxAttempts && !globalIsPlaying) {
+                  setTimeout(() => tryPlay(attempt + 1), isFirstLoad ? 300 : 500);
                 }
               } else if (state === window.YT.PlayerState.PLAYING) {
                 // Already playing, stop trying
@@ -379,19 +444,31 @@
               }
             } catch (error) {
               console.error(`Error on play attempt ${attempt}:`, error);
-              if (attempt < 20) {
-                setTimeout(() => tryPlay(attempt + 1), 500);
+              if (attempt < maxAttempts) {
+                setTimeout(() => tryPlay(attempt + 1), isFirstLoad ? 300 : 500);
               }
             }
           };
           
           // Start trying immediately and keep retrying more aggressively
-          setTimeout(() => tryPlay(1), 100);
-          setTimeout(() => tryPlay(2), 500);
-          setTimeout(() => tryPlay(3), 1000);
-          setTimeout(() => tryPlay(4), 2000);
-          setTimeout(() => tryPlay(5), 3500);
-          setTimeout(() => tryPlay(6), 5000);
+          // On first load, start even sooner and more frequently
+          if (isFirstLoad) {
+            setTimeout(() => tryPlay(1), 50);
+            setTimeout(() => tryPlay(2), 200);
+            setTimeout(() => tryPlay(3), 400);
+            setTimeout(() => tryPlay(4), 700);
+            setTimeout(() => tryPlay(5), 1100);
+            setTimeout(() => tryPlay(6), 1600);
+            setTimeout(() => tryPlay(7), 2200);
+            setTimeout(() => tryPlay(8), 2900);
+          } else {
+            setTimeout(() => tryPlay(1), 100);
+            setTimeout(() => tryPlay(2), 500);
+            setTimeout(() => tryPlay(3), 1000);
+            setTimeout(() => tryPlay(4), 2000);
+            setTimeout(() => tryPlay(5), 3500);
+            setTimeout(() => tryPlay(6), 5000);
+          }
           
           // Also try on ANY user interaction
           const tryPlayOnInteraction = (e) => {
@@ -477,12 +554,38 @@
                   console.log('✅ YouTube player ready');
                   globalPlayer = event.target;
                   
-                  // Set initial volume
+                  // On first load of homepage, ensure player is unmuted and ready to play
+                  const savedMuteState = localStorage.getItem('musicMuted');
+                  const isFirstLoad = savedMuteState === null && isHomepage();
+                  
+                  // Set initial volume and unmute state immediately
                   try {
-                    globalPlayer.setVolume(DEFAULT_VOLUME);
-                    console.log('✅ Volume set to:', DEFAULT_VOLUME);
+                    if (isFirstLoad) {
+                      // First load on homepage - start unmuted and playing
+                      globalPlayer.setVolume(DEFAULT_VOLUME);
+                      globalPlayer.unMute();
+                      globalIsMuted = false;
+                      setIsMuted(false);
+                      localStorage.setItem('musicMuted', 'false');
+                      console.log('🏠 First load - player unmuted and ready to play');
+                    } else {
+                      // Subsequent loads - respect saved state
+                      const shouldBeMuted = isHomepage() 
+                        ? (savedMuteState === 'true')
+                        : !(localStorage.getItem('userManuallyUnmuted') === 'true');
+                      
+                      globalPlayer.setVolume(shouldBeMuted ? 0 : DEFAULT_VOLUME);
+                      if (shouldBeMuted) {
+                        globalPlayer.mute();
+                      } else {
+                        globalPlayer.unMute();
+                      }
+                      globalIsMuted = shouldBeMuted;
+                      setIsMuted(shouldBeMuted);
+                      console.log('✅ Volume and mute state set:', { volume: shouldBeMuted ? 0 : DEFAULT_VOLUME, muted: shouldBeMuted });
+                    }
                   } catch (e) {
-                    console.error('Error setting volume:', e);
+                    console.error('Error setting volume/mute:', e);
                   }
                   
                   // Load playlist and start playing
@@ -502,12 +605,13 @@
                     }
                     // Only advance if not already advancing
                     if (!isAdvancing) {
-                      isAdvancing = true;
                       console.log('🎵 Song ended, advancing to next song...');
+                      // Small delay to ensure clean transition
                       setTimeout(() => {
                         playNextSong();
-                        isAdvancing = false;
                       }, 100); // Reduced delay for faster transition
+                    } else {
+                      console.log('⚠️ Already advancing, skipping ENDED handler');
                     }
                   } else if (state === window.YT.PlayerState.PLAYING) {
                     globalIsPlaying = true;
@@ -527,25 +631,92 @@
                     }
                   } else if (state === window.YT.PlayerState.PAUSED) {
                     globalIsPlaying = false;
-                  } else if (state === window.YT.PlayerState.CUED) {
-                    // Video is cued and ready - try to play if we should
+                  } else if (state === window.YT.PlayerState.BUFFERING) {
+                    // Video is buffering - might be ready to play soon
                     const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+                    const savedMuteState = localStorage.getItem('musicMuted');
                     const shouldBeMuted = isHomepage() 
-                      ? (localStorage.getItem('musicMuted') === 'true')
+                      ? (savedMuteState === 'true')
                       : !userManuallyUnmuted;
                     const shouldAutoPlay = isHomepage() ? !shouldBeMuted : userManuallyUnmuted;
                     
                     if (shouldAutoPlay && !globalIsPlaying) {
+                      // Ensure unmuted
+                      if (!shouldBeMuted && globalPlayer && globalPlayer.unMute) {
+                        try {
+                          globalPlayer.unMute();
+                        } catch (e) {
+                          // Ignore
+                        }
+                      }
+                      // Try to play - buffering often means video is ready
+                      if (globalPlayer && globalPlayer.playVideo) {
+                        try {
+                          globalPlayer.playVideo();
+                          console.log('✅ Video play triggered during BUFFERING state');
+                        } catch (e) {
+                          // Ignore
+                        }
+                      }
+                    }
+                  } else if (state === window.YT.PlayerState.CUED) {
+                    // Video is cued and ready - try to play if we should
+                    const userManuallyUnmuted = localStorage.getItem('userManuallyUnmuted') === 'true';
+                    const savedMuteState = localStorage.getItem('musicMuted');
+                    const isFirstLoad = savedMuteState === null && isHomepage();
+                    const shouldBeMuted = isHomepage() 
+                      ? (savedMuteState === 'true')
+                      : !userManuallyUnmuted;
+                    const shouldAutoPlay = isHomepage() ? !shouldBeMuted : userManuallyUnmuted;
+                    
+                    console.log('🎵 Video CUED - shouldAutoPlay:', shouldAutoPlay, 'isFirstLoad:', isFirstLoad, 'globalIsPlaying:', globalIsPlaying);
+                    
+                    if (shouldAutoPlay && !globalIsPlaying) {
+                      // Ensure unmuted before playing
+                      if (!shouldBeMuted && globalPlayer && globalPlayer.unMute) {
+                        try {
+                          globalPlayer.unMute();
+                          console.log('✅ Player unmuted in CUED state');
+                        } catch (e) {
+                          console.log('Error unmuting in CUED:', e);
+                        }
+                      }
+                      
+                      // Try to play immediately when CUED (this is the best time)
+                      if (globalPlayer && globalPlayer.playVideo) {
+                        try {
+                          globalPlayer.playVideo();
+                          console.log('✅ Video play triggered immediately after CUED state');
+                        } catch (e) {
+                          console.log('Error playing immediately after CUED:', e);
+                        }
+                      }
+                      
+                      // Also try again after a short delay (in case first attempt didn't work)
                       setTimeout(() => {
-                        if (globalPlayer && globalPlayer.playVideo) {
+                        if (globalPlayer && globalPlayer.playVideo && !globalIsPlaying) {
                           try {
                             globalPlayer.playVideo();
-                            console.log('✅ Video play triggered after CUED state');
+                            console.log('✅ Second play attempt after CUED state');
                           } catch (e) {
-                            console.log('Error playing after CUED:', e);
+                            console.log('Error on second play attempt after CUED:', e);
                           }
                         }
-                      }, 300);
+                      }, isFirstLoad ? 200 : 500);
+                      
+                      // On first load, try a third time
+                      if (isFirstLoad) {
+                        setTimeout(() => {
+                          if (globalPlayer && globalPlayer.playVideo && !globalIsPlaying) {
+                            try {
+                              globalPlayer.playVideo();
+                              console.log('✅ Third play attempt after CUED (first load)');
+                            } catch (e) {
+                              console.log('Error on third play attempt:', e);
+                            }
+                          }
+                        }, 600);
+                      }
                     }
                   }
                 },
@@ -582,12 +753,12 @@
                   
                   // Try next song on error, but only if not already advancing
                   if (!isAdvancing) {
-                    isAdvancing = true;
                     setTimeout(() => {
                       console.log('⏭️ Skipping to next song due to error');
-                      playNextSong();
-                      isAdvancing = false;
+                      playNextSong(); // playNextSong() manages isAdvancing flag itself
                     }, 1000);
+                  } else {
+                    console.log('⚠️ Already advancing, skipping error handler');
                   }
                 }
               }

@@ -38,7 +38,7 @@
         <a href="#" aria-label="Log in" title="Log in" class="login-icon" id="login-btn">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </a>
-        <a class="cta" data-magnetic href="#Rivals.html"><span class="shine" aria-hidden="true"></span>Play Now</a>
+        <a class="cta" data-magnetic href="Videos/RivalsLaunchVid.mp4" download="MarvelRivals_Gameplay.mp4"><span class="shine" aria-hidden="true"></span>Play Now</a>
       </nav>
       <button class="hamburger" aria-controls="mobile-drawer" aria-expanded="false" aria-label="Open menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -52,7 +52,7 @@
         
         <a href="Community.html">Community Page</a>
         <a href="#" class="btn" id="mobile-login-btn">Log in</a>
-        <a class="cta" data-magnetic href="#download"><span class="shine" aria-hidden="true"></span>Play Now</a>
+        <a class="cta" data-magnetic href="Videos/RivalsLaunchVid.mp4" download="MarvelRivals_Gameplay.mp4"><span class="shine" aria-hidden="true"></span>Play Now</a>
       </div>
     </div>
   </header>
@@ -65,6 +65,36 @@
       </div>
 
       <aside class="hero-sidebar" aria-label="Hero categories">
+        <div class="hero-search-container">
+          <div class="hero-search-wrapper">
+            <input 
+              type="text" 
+              id="hero-search-input" 
+              class="hero-search-input" 
+              placeholder="Search Heroes (team, title, name...)" 
+              aria-label="Search heroes"
+              data-hero-search
+            />
+            <button type="button" class="hero-search-button" aria-label="Search" data-hero-search-btn>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="hero-search-no-results" data-hero-no-results hidden>
+            <p class="hero-search-error">Sorry, This Character Has Not Been Added</p>
+            <div class="hero-search-suggestions">
+              <span class="hero-search-suggestions-label">Suggestions:</span>
+              <button type="button" class="hero-search-suggestion" data-suggestion="avengers">Avengers</button>
+              <button type="button" class="hero-search-suggestion" data-suggestion="x-men">X-Men</button>
+              <button type="button" class="hero-search-suggestion" data-suggestion="illuminati">Illuminati</button>
+              <button type="button" class="hero-search-suggestion" data-suggestion="vigilante">Vigilante</button>
+              <button type="button" class="hero-search-suggestion" data-suggestion="fantastic four">Fantastic Four</button>
+              <button type="button" class="hero-search-suggestion" data-suggestion="guardians of the galaxy">Guardians of the Galaxy</button>
+            </div>
+          </div>
+        </div>
         <h2 id="hero-roster-title">Hero Index</h2>
         <div class="hero-sidebar__filters" role="tablist" aria-label="Hero role filters">
           <button class="hero-filter active" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
@@ -102,10 +132,10 @@
               <span class="hero-feature__meta-label">Health</span>
               <span class="hero-feature__meta-value" data-feature-health></span>
             </div>
-            <div class="hero-feature__meta-item">
-              <span class="hero-feature__meta-label">Difficulty</span>
-              <span class="hero-feature__meta-value" data-feature-difficulty></span>
-            </div>
+          <div class="hero-feature__meta-item">
+            <span class="hero-feature__meta-label">Difficulty</span>
+            <span class="hero-feature__meta-value" data-feature-difficulty></span>
+          </div>
           </div>
           <div class="hero-feature__actions">
             <button class="hero-feature__view-more" type="button">
@@ -147,7 +177,7 @@
         <div class="hero-roster__play-now-content">
           <h2>Ready to Battle?</h2>
           <p>Join millions of players in the ultimate hero showdown. Download now and claim your legend!</p>
-          <a href="https://www.marvelrivals.com/download" class="cta hero-roster__play-now-btn" target="_blank" rel="noopener noreferrer">
+          <a href="Videos/RivalsLaunchVid.mp4" class="cta hero-roster__play-now-btn" download="MarvelRivals_Gameplay.mp4">
             <span class="shine" aria-hidden="true"></span>Play Now
           </a>
         </div>

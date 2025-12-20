@@ -790,16 +790,19 @@
           setPlaylist(playlistData);
           globalPlaylist = playlistData;
           
-          // Get saved index or start at 0
-          const savedIndex = localStorage.getItem('currentSongIndex');
-          const startIndex = savedIndex ? parseInt(savedIndex) : 0;
-          const validIndex = Math.min(startIndex, playlistData.songs.length - 1);
+          // Always start from the first song in the playlist on each page load.
+          // Previously this used a saved index from localStorage, which could
+          // cause playback to begin in the middle of the playlist.
+          const startIndex = 0;
+          setCurrentSongIndex(startIndex);
+          globalCurrentIndex = startIndex;
+
+          // Clear any saved position so the first track starts at the beginning.
+          localStorage.removeItem('currentSongIndex');
+          localStorage.removeItem('playbackPosition');
           
-          setCurrentSongIndex(validIndex);
-          globalCurrentIndex = validIndex;
-          
-          // Start playing and restore position
-          startPlaying(validIndex, true);
+          // Start playing from the beginning without restoring position
+          startPlaying(startIndex, false);
         } catch (error) {
           console.error('Error loading playlist:', error);
           setIsLoading(false);

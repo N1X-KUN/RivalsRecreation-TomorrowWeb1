@@ -1122,19 +1122,19 @@
 
     const statTemplates = {
       vanguard: [
-        { label: 'Difficulty', value: '★★★☆☆' },
+        { label: 'Title', value: 'Hero' },
         { label: 'Attack Type', value: 'Very High' },
         { label: 'Mobility', value: 'Medium' },
         { label: 'Passive', value: 'Team Shields' }
       ],
       duelist: [
-        { label: 'Difficulty', value: '★★★★☆' },
+        { label: 'Title', value: 'Hero' },
         { label: 'Attack Type', value: 'Explosive' },
         { label: 'Mobility', value: 'High' },
         { label: 'Passive', value: 'Low' }
       ],
       strategist: [
-        { label: 'Difficulty', value: '★★★☆☆' },
+        { label: 'Title', value: 'Hero' },
         { label: 'Attack Type', value: 'Zone Denial' },
         { label: 'Support', value: 'High' },
         { label: 'Passive', value: 'Command Grid' }
@@ -1157,7 +1157,7 @@
         attackType: 'Melee Heroes',
         health: '450',
         stats: [
-          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Odinsons, Guardians of the Galaxy' },
           { label: 'Mobility', value: 'Flight/Ground' },
           { label: 'Passive', value: 'Wingblade Ascent' }
@@ -1166,7 +1166,7 @@
           { name: 'Shielded Stance', description: 'Transform Ichors into a shield, gaining Attack Charge when absorbing damage.' },
           { name: 'Assassins Charge', description: 'Enter an accelerated dash state. Enemies struck head-on are carried through the air for a short distance.' },
           { name: 'Divine Judgement', description: 'Dive downward to create a Divine Judgement Zone upon impact.' },
-          { name: 'Hevens Retribution', description: 'Upon impact, the ribbons bind nearby enemies. Angela can leap to the spears location, damaging surrounding enemies and creating a Divine Judgement Zone.' }
+          { name: 'Ultimate: Hevens Retribution', description: 'Upon impact, the ribbons bind nearby enemies. Angela can leap to the spears location, damaging surrounding enemies and creating a Divine Judgement Zone.' }
         ]
       },
       {
@@ -1184,7 +1184,7 @@
         attackType: 'Melee Heroes',
         health: '575',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Alot of Mobility' },
           { label: 'Passive', value: 'Captains Spirit' }
@@ -1192,7 +1192,7 @@
         abilities: [
           { name: 'Living Legend', description: 'Raise the shield to deflect incoming Projectiles, sending them ricocheting in random directions.' },
           { name: 'Vibranium Energy Saw', description: 'Hurl the energy-charged shield to strike enemies in a path.' },
-          { name: 'Freedom Charge', description: 'Shield held high, carve a path forward, granting both himself and allies along the path continuous Bonus Health and Movement Boosts.' }
+          { name: 'Ultimate: Freedom Charge', description: 'Shield held high, carve a path forward, granting both himself and allies along the path continuous Bonus Health and Movement Boosts.' }
         ]
       },
       {
@@ -1210,8 +1210,8 @@
         attackType: 'Melee Heroes',
         health: '650',
         stats: [
-          { label: 'Difficulty', value: '★' },
-          { label: 'Team', value: 'Vigilante' },
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: '' },
           { label: 'Mobility', value: 'Swing' },
           { label: 'Passive', value: 'Alien Biology' }
         ],
@@ -1220,7 +1220,7 @@
           { name: 'Frenzied Arrival', description: 'Dash to the target location from a certain height and launch them Up towards the landing point.' },
           { name: 'Divine Judgement', description: 'Dive downward to create a Divine Judgement Zone upon impact.' },
           { name: 'Cellular Corrosion', description: 'Unleash tentacles to Slow enemies within reach. Enemies unable to break free in time will suffer damage.' },
-          { name: 'Feast Of The Abyss', description: 'Burrow underground for free movement. Devour enemies above to deal damage based on the enemys current health and generate equivalent Bonus Health.' },
+          { name: 'Ultimate: Feast Of The Abyss', description: 'Burrow underground for free movement. Devour enemies above to deal damage based on the enemys current health and generate equivalent Bonus Health.' },
         ]
       },
       {
@@ -1238,7 +1238,7 @@
         attackType: 'Melee Heroes',
         health: '600',
         stats: [
-          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Odinsons, Avengers, Guardians of the Galaxy' },
           { label: 'Mobility', value: 'Charge Ram' },
           { label: 'Passive', value: 'Thorforce' }
@@ -1247,7 +1247,7 @@
           { name: 'Hammer Throw', description: 'Throw Mjolnir forward which then returns. Restore Thorforce upon hit.' },
           { name: 'Awakening Rune', description: 'Enter the Awakened state, granting Bonus Health and enhancing Mjölnir Bash. Gain Thorforce upon exiting the state.' },
           { name: 'Lightning Realm', description: 'Summon lightning to restore Thorforce based on the number of hit enemies. Enemies leaving the Lightning Realm will suffer Slow and Grounded effects.' },
-          { name: 'God Of Thunder', description: 'Soar upwards and smite the ground after charging for a duration, inflicting damage and stunning enemies within range.' }
+          { name: 'Ultimate: God Of Thunder', description: 'Soar upwards and smite the ground after charging for a duration, inflicting damage and stunning enemies within range.' }
         ]
       },
       {
@@ -1265,7 +1265,7 @@
         attackType: 'Melee Heroes',
         health: '700',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Fantastic Four' },
           { label: 'Mobility', value: 'Running' },
           { label: 'Passive', value: 'Unyielding Will' }
@@ -1291,7 +1291,7 @@
         attackType: 'Projectile Heroes',
         health: '750',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'SpiderVerse' },
           { label: 'Mobility', value: 'Webs' },
           { label: 'Passive', value: 'Wall Crawl' }
@@ -1318,7 +1318,7 @@
         attackType: 'Projectile Heroes',
         health: '650',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'X-Men' },
           { label: 'Mobility', value: 'Air Decend' },
           { label: 'Passive', value: 'Ace Greatswords Fired' }
@@ -1326,7 +1326,7 @@
         abilities: [
           { name: 'Metallic Curtain', description: 'Change the magnetic field around to form a metallic curtain, blocking all incoming Projectiles.' },
           { name: 'Metal Bulwark', description: 'Conjure a metal shield around a chosen ally. Damage taken will transform into rings on Magnetos back.' },
-          { name: 'Meteor M', description: 'Draw in all materials around to forge an iron meteor that deals massive damage upon impact. Absorbing enemy Projectiles can enhance the meteors power, yet overloading will cause it to self-destruct.' },
+          { name: 'Ultimate: Meteor M', description: 'Draw in all materials around to forge an iron meteor that deals massive damage upon impact. Absorbing enemy Projectiles can enhance the meteors power, yet overloading will cause it to self-destruct.' },
         ]
       },
       {
@@ -1344,7 +1344,7 @@
         attackType: 'Melee Heroes',
         health: '200 (Human Form) \n 650 (Hero Hulk Form) \n 1400 (Monster Hulk Form)',
         stats: [
-          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Jump...Smash' },
           { label: 'Passive', value: 'Puny Banner' }
@@ -1355,7 +1355,7 @@
           { name: 'Incredible Leap', description: 'THold to perform a charged leap that allows Hero Hulk to Knock Down flying enemies.' },
           { name: 'Indestructible Guard', description: 'Generate gamma shields for Hero Hulk and nearby allies, absorbing and converting damage into energy for HULK SMASH!' },
           { name: 'Hulk Smash', description: 'Unleash stored gamma energy, transforming from Hero Hulk into Monster Hulk for a limited time period.' },
-          { name: 'World Breaker', description: 'Gets loki treatment.' },
+          { name: 'Ultimate: World Breaker', description: 'Gets loki treatment.' },
         ]
       },
       {
@@ -1373,7 +1373,7 @@
         attackType: 'Melee Heroes',
         health: '700',
         stats: [
-          { label: 'Difficulty', value: '★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Guardians of the Galaxy' },
           { label: 'Mobility', value: 'Walking' },
           { label: 'Passive', value: 'Flora Colossus' }
@@ -1382,7 +1382,7 @@
           { name: 'Thornlash Wall', description: 'Im Groot..' },
           { name: 'Ironwood Wall', description: 'I am Groot?' },
           { name: 'Spore Bomb', description: 'Im GRROOOT!' },
-          { name: 'Strangling Prison', description: 'I. AM. GROOOT!' },
+          { name: 'Ultimate: Strangling Prison', description: 'I. AM. GROOOT!' },
         ]
       },
       {
@@ -1400,7 +1400,7 @@
         attackType: 'Hitscan Heroes',
         health: '550',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'X-Men' },
           { label: 'Mobility', value: 'Walking' },
           { label: 'Passive', value: 'Diamond Form' }
@@ -1409,7 +1409,7 @@
           { name: 'Minds Aegis', description: 'Create a levitating barrier at the designated location.' },
           { name: 'Crystal Kick', description: 'In Diamond Form, unleash a flying kick forward and knock back enemies; extra damage is dealt if theyre propelled into a wall.' },
           { name: 'Carbon Crush', description: 'In Diamond Form, lunge forward to grab an enemy, then execute a back slam to inflict damage.' },
-          { name: 'Psionic Seduction', description: 'Project a forward psychic assault that stuns foes and prevents them from unleashing their Ultimate Abilities; if the effect lingers, it gradually commandeers their mind, forcing them to move toward Emma Frost.' },
+          { name: 'Ultimate: Psionic Seduction', description: 'Project a forward psychic assault that stuns foes and prevents them from unleashing their Ultimate Abilities; if the effect lingers, it gradually commandeers their mind, forcing them to move toward Emma Frost.' },
         ]
       },
       {
@@ -1427,7 +1427,7 @@
         attackType: 'Projectile Heroes',
         health: '575',
         stats: [
-          { label: 'Difficulty', value: '★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Walking' },
           { label: 'Passive', value: 'Price Of Magic' }
@@ -1437,7 +1437,7 @@
           { name: 'Maelstrom Of Madness', description: 'Release Dark Magic to deal damage to nearby enemies.' },
           { name: 'Pentagram Of Farallah', description: 'Open portals between two locations, enabling all units to travel through them.' },
           { name: 'Cloak Of Levitation', description: 'Ascend and then enter a brief state of sustained flight.' },
-          { name: 'Eye Of Agamotto', description: 'Separate nearby enemies\' Souls from their bodies. Damage dealt to these Souls is transferred to their physical bodies.' }
+          { name: 'Ultimate: Eye Of Agamotto', description: 'Separate nearby enemies\' Souls from their bodies. Damage dealt to these Souls is transferred to their physical bodies.' }
         ]
       },
     ];
@@ -1458,7 +1458,7 @@
         health: '275',
         attackType: 'Melee Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers, Illuminati' },
           { label: 'Mobility', value: 'Dashes' },
           { label: 'Passive', value: 'Panthers Cunning' } ],
@@ -1466,7 +1466,7 @@
           { name: 'Spear Toss', description: 'Toss a Vibranium energy spear forward and attach a Vibranium Mark to enemies in its radius.' },
           { name: 'Spirit Rend', description: 'Lunge forward and deal damage to enemies. Vibranium Mark produces Bonus Health and refreshes the ability.' },
           { name: 'Spinning Kick', description: 'Spiral forward and attach a Vibranium Mark to hit enemies.' },
-          { name: 'Basts Descent', description: 'Summon Bast, pouncing forward, dealing damage and attaching a Vibranium Mark to hit enemies, while refreshing Spirit Rend.' }
+          { name: 'Ultimate: Basts Descent', description: 'Summon Bast, pouncing forward, dealing damage and attaching a Vibranium Mark to hit enemies, while refreshing Spirit Rend.' }
         ]
       },
       {
@@ -1484,15 +1484,15 @@
         health: '350',
         attackType: 'Melee Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★★★' },
-          { label: 'Team', value: 'Midnight Suns, Vigilante' },
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: 'Midnight-Suns' },
           { label: 'Mobility', value: 'Dash then Beyblade' },
           { label: 'Passive', value: 'Bloodline Awakening' }
         ],
         abilities: [
           { name: 'Daywalker Dash', description: 'Dash forward. If wielding your gun, shoot at enemies upon impact, applying a Healing Reduction effect. If wielding your sword, deliver a cleaving strike that inflicts Slow.' },
           { name: 'Scarlet Shroud', description: 'Parry with Ancestral Sword to become Unstoppable for a brief period, reducing damage taken from the front and decreasing the cooldown of Daywalker Dash.' },
-          { name: 'Thousand-fold Slash', description: 'Charge power and swiftly draw the Sword of Dracula, executing a powerful Iaido strike as you dash forward, leaving behind a slashing zone where the sword automatically strikes enemies. Enemies hit suffer Reduced Healing.' },
+          { name: 'Ultimate: Thousand-fold Slash', description: 'Charge power and swiftly draw the Sword of Dracula, executing a powerful Iaido strike as you dash forward, leaving behind a slashing zone where the sword automatically strikes enemies. Enemies hit suffer Reduced Healing.' },
         ]
       },
       {
@@ -1510,7 +1510,7 @@
         attackType: 'Hitscan Heroes',
         health: '250',
         stats: [
-          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Run and Gun' },
           { label: 'Passive', value: 'Infra-detector' }
@@ -1519,7 +1519,7 @@
           { name: 'Fleet Foot', description: 'Dash forward and enable a powerful jump.' },
           { name: 'Straight Shooter', description: 'Switch the Red Room Rifle to Sniper mode to fire high-energy rounds.' },
           { name: 'Edge Dancer', description: 'Unleash a spinning kick to Launch Up enemies. Landing the hit will allow her to zip to the target with a grappling hook for a second kick.' },
-          { name: 'Electro-plasma Explosion', description: 'Switch the Red Room Rifle to Destruction mode and unleash an electro-plasma blast, damaging enemies within range and inflicting them with Vulnerability.' }
+          { name: 'Ultimate: Electro-plasma Explosion', description: 'Switch the Red Room Rifle to Destruction mode and unleash an electro-plasma blast, damaging enemies within range and inflicting them with Vulnerability.' }
         ]
       },
       {
@@ -1537,8 +1537,8 @@
         health: '300',
         attackType: 'Melee Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★★' },
-          { label: 'Team', value: 'Vigilante' },
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: '' },
           { label: 'Mobility', value: 'Combo Forward' },
           { label: 'Passive', value: 'Radar Sense' }
         ],
@@ -1546,7 +1546,7 @@
           { name: 'Righteous Cross', description: 'Cross Billy Clubs and surge forward. Gain Fury on hit.' },
           { name: 'Objection!', description: 'Block frontal damage and reflect projectiles, becoming immune to all incoming harm during this stance and gain Fury.' },
           { name: 'Devils Latch', description: 'Fire a grappling line that reels Daredevil and his target toward each other. On completion' },
-          { name: 'Let The Devil Out', description: ' Enemies with Daredevil in their line of sight take damage and suffer a ramping Blind effect. Continually gain Fury while active.' }
+          { name: 'Ultimate: Let The Devil Out', description: ' Enemies with Daredevil in their line of sight take damage and suffer a ramping Blind effect. Continually gain Fury while active.' }
         ]
       },
       {
@@ -1564,7 +1564,7 @@
         health: '250',
         attackType: 'Projectile Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Fantastic Four' },
           { label: 'Mobility', value: 'Plasma Body' },
           { label: 'Passive', value: 'Flame Fist' }
@@ -1573,7 +1573,7 @@
           { name: 'Blazing Blast', description: 'Launch a fireball to deal damage or create a Flame Field at the targeted area, dealing damage to enemies within.' },
           { name: 'Flaming Meteor', description: 'Dive towards the ground, dealing damage to enemies. This will also detonate any Flame Fields hit and grant you Bonus Health.' },
           { name: 'Pyro-prison', description: 'When 2 or more Flame Fields exist, connect them to form a fire wall that deals one-off high damage to enemies that pass through the wall.' },
-          { name: 'Supernova', description: 'Explode with cosmic fire to deal damage to enemies within range and enter Supernova state. While in Supernova state, Blazing Blast will transform into Flame Tornado, and Plasma Body can be activated without any cost.' }
+          { name: 'Ultimate: Supernova', description: 'Explode with cosmic fire to deal damage to enemies within range and enter Supernova state. While in Supernova state, Blazing Blast will transform into Flame Tornado, and Plasma Body can be activated without any cost.' }
         ]
       },
       {
@@ -1591,7 +1591,7 @@
         health: '250',
         attackType: 'Projectile Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Hyper-velocity' },
           { label: 'Passive', value: 'Fusion Boost' }
@@ -1600,7 +1600,7 @@
           { name: 'Repulsor Blast', description: 'Fire nano pulse cannons forward.' },
           { name: 'Unibeam', description: 'Fire a beam of energy forward, dealing damage to enemies in its path.' },
           { name: 'Armor Overdrive', description: 'Activate Armor Overdrive state, enhancing damage of Repulsor Blast and Unibeam, while also granting Bonus Health.' },
-          { name: 'MAXIMUM PULSE', description: 'Fire a devastating pulse cannon in the targeted direction, delivering catastrophic damage to the targeted area upon impact.' }
+          { name: 'Ultimate: MAXIMUM PULSE', description: 'Fire a devastating pulse cannon in the targeted direction, delivering catastrophic damage to the targeted area upon impact.' }
         ],
       },
       {
@@ -1618,7 +1618,7 @@
         health: '375',
         attackType: 'Melee Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Fantastic Four' },
           { label: 'Mobility', value: 'Stretch' },
           { label: 'Passive', value: 'Elastic Strength' }
@@ -1627,7 +1627,7 @@
           { name: 'Flexible Elongation', description: 'Gain a Shield, select a target, and dash towards them, dealing damage to enemies and granting a Shield to allies.' },
           { name: 'Distended Grip', description: 'Pull the hit enemy toward you, or select and yank another enemy, knocking them airborne against each other.' },
           { name: 'Reflexive Rubber', description: 'Stretch body to absorb damage before launching stored damage in the targeted direction.' },
-          { name: 'Brainiac Bounce', description: 'Leap upward and smash the ground, slowing enemies within range. Can leap again upon landing a hit.' }
+          { name: 'Ultimate: Brainiac Bounce', description: 'Leap upward and smash the ground, slowing enemies within range. Can leap again upon landing a hit.' }
         ],
       },
       {
@@ -1645,19 +1645,19 @@
         health: '999',
         attackType: 'Projectile Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★★★' },
-          { label: 'Team', value: 'Midnight Suns, Vigilante' },
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: 'Midnight-Suns' },
           { label: 'Mobility', value: 'Limited' },
           { label: 'Passive', value: 'Bouncing Projectiles' } ],
           abilities: [
             { name: 'Moon Blade', description: 'Bounce between enemies and Ankhs, dealing damage to enemies while granting Bonus Health.' },
             { name: 'Ancient Ankh', description: 'Fire an Ankh to Knock enemies within its radius airborne towards the center.' },
             { name: 'Night Glider', description: 'Great... He glides now.' },
-            { name: 'Hand Of Khonshu', description: 'Open a portal that allows Khonshu to bombard enemies with his talons.' }
+            { name: 'Ultimate: Hand Of Khonshu', description: 'Open a portal that allows Khonshu to bombard enemies with his talons.' }
           ]
-      },
-      {
-        id: 'namor',
+        },
+        {
+          id: 'namor',
         category: 'duelist',
         name: 'Namor',
         tagline: 'Broken Teamup Merchant, Wha Da Flark is dev idea of teamups..',
@@ -1671,14 +1671,14 @@
         health: '275',
         attackType: 'Projectile Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Illuminati' },
           { label: 'Mobility', value: 'Blessing Of The Deep' },
           { label: 'Passive', value: 'Tide Fall' } ],
         abilities: [
           { name: 'Wrath Of The Seven Seas', description: 'When the trident hits an enemy, Monstro Spawn to enter a berserk state, gaining increased Attack Speed.' },
           { name: 'Aquatic Dominion', description: 'Summon a Monstro Spawn that can autonomously attack enemies.' },
-          { name: 'Horn Of Proteus', description: 'Summon Giganto to leap atop enemies within range, disabling their mobility abilities.' },
+          { name: 'Ultimate: Horn Of Proteus', description: 'Summon Giganto to leap atop enemies within range, disabling their mobility abilities.' },
         ]
       },
       {
@@ -1696,15 +1696,15 @@
         health: '250',
         attackType: 'Melee Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★★★' },
-          { label: 'Team', value: 'Avengers, SpiderVerse, Vigilante' },
+          { label: 'Title', value: 'Vigilante, Hero' },
+          { label: 'Team', value: 'Avengers, SpiderVerse' },
           { label: 'Mobility', value: 'Thwip And Flip' },
           { label: 'Passive', value: 'Spider-Sense' } ],
         abilities: [
           { name: 'Web-cluster', description: 'Shoot a Web-Cluster that deals damage and attaches a Spider-Tracer to the hit enemy.' },
           { name: 'Web-swing', description: 'Shoot a strand of webbing to swing.' },
           { name: 'Get Over Here!', description: 'Shoot webbing to reel in the hit enemy. If the enemy is tagged with a Spider-Tracer, Spider-Man will get pulled to them instead.' },
-          { name: 'Spectacular Spin', description: 'Launch Web-Clusters all around to damage and Stun enemies.' }
+          { name: 'Ultimate: Spectacular Spin', description: 'Launch Web-Clusters all around to damage and Stun enemies.' }
         ]
       },  
       {
@@ -1722,7 +1722,7 @@
         health: '250',
         attackType: 'Hitscan Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'X-Men' },
           { label: 'Mobility', value: 'Limited' },
           { label: 'Passive', value: 'Phoenix Force' } ],
@@ -1730,7 +1730,7 @@
           { name: 'Psionic Detonation', description: 'Mark a targeted area with psionic energy, followed by a series of fiery explosions. ' },
           { name: 'Dark Ascent', description: 'Merge with the Phoenix, entering a state of free flight. Gain a Movement Boost.' },
           { name: 'Telepathic Illusion', description: 'Leave behind an illusion and instantly teleport in the desired direction, followed by detonating the illusion.' },
-          { name: 'Endsong Inferno', description: 'Soar into the sky with the Phoenix and crash down onto a selected area, dealing devastating damage to enemies while creating a shockwave that destroys enemy Summons, Shields, and any Bonus Health. ' }
+          { name: 'Ultimate: Endsong Inferno', description: 'Soar into the sky with the Phoenix and crash down onto a selected area, dealing devastating damage to enemies while creating a shockwave that destroys enemy Summons, Shields, and any Bonus Health. ' }
         ]
       },
       {
@@ -1748,14 +1748,14 @@
         health: '275',
         attackType: 'Projectile Heroes',
         stats: [
-          { label: 'Difficulty', value: '★' },
-          { label: 'Team', value: 'Vigilante' },
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: '' },
           { label: 'Mobility', value: 'Tail Bounce' },
           { label: 'Passive', value: 'Acorn Launcher' } ],
         abilities: [
           { name: 'Squirrel Blockade', description: 'Launch an acorn to unleash Squirrel Guards, Imprisoning the first hit enemy.' },
           { name: 'Mammal Bond', description: 'Reload Burst Acorns and can use an ability without cooldown once in a short duration.' },
-          { name: 'Unbeatable Squirrel Tsunami', description: 'Summon a horde of squirrels to charge forward, dealing damage while bouncing against structures.' }
+          { name: 'Ultimate: Unbeatable Squirrel Tsunami', description: 'Summon a horde of squirrels to charge forward, dealing damage while bouncing against structures.' }
         ]
       },
       {
@@ -1773,8 +1773,8 @@
         health: '250',
         attackType: 'Melee Heroes',
         stats: [
-          { label: 'Difficulty', value: '★' },
-          { label: 'Team', value: 'Midnight Suns' },
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'Midnight-Suns' },
           { label: 'Mobility', value: 'Limited' },
           { label: 'Passive', value: 'Limbos Might' } ],
         abilities: [
@@ -1782,7 +1782,7 @@
           { name: 'Stepping Discs', description: 'Jump through a Stepping Disc, teleporting a short distance in the direction of movement. Become Invincible while teleporting.' },
           { name: 'Eldritch Whirl', description: 'Spin while swinging the Soulsword after exiting a Stepping Disc.' },
           { name: 'Demons Rage', description: 'Summon a Limbo demon that attacks enemies after exiting a Stepping Disc.' },
-          { name: 'Darkchild', description: 'Transform into the demonic Darkchild, gaining increased damage, health, and invincibility frames.' }
+          { name: 'Ultimate: Darkchild', description: 'Transform into the demonic Darkchild, gaining increased damage, health, and invincibility frames.' }
         ]
       },
       {
@@ -1800,14 +1800,14 @@
         health: '250',
         attackType: 'Hitscan Heroes',
         stats: [
-          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'X-Men' },
           { label: 'Mobility', value: 'Psi-blade Dash' },
           { label: 'Passive', value: 'Psychic Echoes' } ],
         abilities: [
           { name: 'Wing Shurikens', description: 'Launch a volley of psionic shurikens that stick to enemies, dealing damage and granting herself Bonus Health.' },
           { name: 'Psychic Stealth', description: 'Enter stealth and gain a Movement Boost.' },
-          { name: 'Dance Of The Butterfly', description: 'Slash nearby enemies with a psionic katana, dealing massive damage.' },
+          { name: 'Ultimate: Dance Of The Butterfly', description: 'Slash nearby enemies with a psionic katana, dealing massive damage.' },
         ]
       },
       {
@@ -1825,7 +1825,7 @@
         attackType: 'Hitscan Heroes', 
         health: '270',
         stats: [
-          { label: 'Difficulty', value: '★★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers' },
           { label: 'Mobility', value: 'Double Jump' },
           { label: 'Passive', value: 'Archers Focus' }
@@ -1834,7 +1834,7 @@
           { name: 'Hypersonic Arrow', description: 'Fire an arrow dealing two instances of damage to enemies in its path and inflicting them with Slow. This ability can Knock Down flying heroes.' },
           { name: 'Blast Arrow', description: 'Shoot three explosive arrows.' },
           { name: 'Crescent Slash', description: 'Unsheathe a katana and slash forward, Launching Up hit enemies.' },
-          { name: 'Hunters Sight', description: 'Capture Afterimages of enemies in his view. Damage dealt to an Afterimage is transferred to the corresponding enemy.' }
+          { name: 'Ultimate: Hunters Sight', description: 'Capture Afterimages of enemies in his view. Damage dealt to an Afterimage is transferred to the corresponding enemy.' }
         ]
       },
       {
@@ -1852,7 +1852,7 @@
         attackType: 'Hitscan Heroes',
         health: '250',
         stats: [
-          { label: 'Difficulty', value: '★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Guardians of the Galaxy' },
           { label: 'Mobility', value: 'Flexible' },
           { label: 'Passive', value: 'Rocket Boots' }
@@ -1861,7 +1861,7 @@
           { name: 'Rocket Propulsion', description: 'Consume energy to gain a Movement Boost and soar forward.' },
           { name: 'Stellar Shift', description: 'Dodge in the direction of movement and swiftly reload. Become Unstoppable and Invincible while dodging.' },
           { name: 'Blaster Barrage', description: 'Fire a frenzy of shots, causing damage to enemies within range.' },
-          { name: 'Galactic Legend', description: 'AIMBOT.' }
+          { name: 'Ultimate: Galactic Legend', description: 'AIMBOT.' }
         ]
       },
       {
@@ -1879,7 +1879,7 @@
         attackType: 'Melee Heroes',
         health: '250',
         stats: [
-          { label: 'Difficulty', value: '★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Avengers, X-Men' },
           { label: 'Mobility', value: 'Mystic Projection' },
           { label: 'Passive', value: 'Chaos Control' }
@@ -1887,7 +1887,7 @@
         abilities: [
           { name: 'Chthonian Burst', description: 'Consume Chaos Energy to fire explosive magic missiles, damaging enemies.' },
           { name: 'Dark Seal', description: 'Land a hit on a target or the scene, or press again to generate a Force Field that periodically Stuns enemies within range.' },
-          { name: 'Reality Erasure', description: 'Stay closer to me and get erased lol.' }
+          { name: 'Ultimate: Reality Erasure', description: 'Stay closer to me and get erased lol.' }
         ]
       },
       {
@@ -1905,7 +1905,7 @@
         attackType: 'Hitscan Heroes',
         health: '250',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Odinsons' },
           { label: 'Mobility', value: 'Im a bird caw caw!' },
           { label: 'Passive', value: 'Nastrond Crowstorm' }
@@ -1913,7 +1913,7 @@
         abilities: [
           { name: 'Piercing Night', description: 'Fire multiple Nightsword Thorns that detonate after a delay.' },
           { name: 'Soul Drainer', description: 'Project an explosive Hel sphere to Stun nearby enemies and pull them into the blast zone.' },
-          { name: 'Goddess Of Death', description: 'Soar into the sky and unleash Nastrond Crows from each hand at will.' }
+          { name: 'Ultimate: Goddess Of Death', description: 'Soar into the sky and unleash Nastrond Crows from each hand at will.' }
         ]
       },
       {
@@ -1931,8 +1931,8 @@
         attackType: 'Melee Heroes',
         health: '300',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
-          { label: 'Team', value: 'Vigilante' },
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: '' },
           { label: 'Mobility', value: 'Kungfu' },
           { label: 'Passive', value: 'Wall Runner Detection' }
         ],
@@ -1941,7 +1941,7 @@
           { name: 'Yat Jee Chung Kuen', description: 'Dash forward to pursue the targeted enemy and unleash a flurry of attacks.' },
           { name: 'Harmony Recovery', description: 'Cross legs and channel Chi, recovering health. Excess healing converts to Bonus Health.' },
           { name: 'Kun-lun Kick', description: 'Dash forward, delivering a flying kick when hitting an enemy or reaching full range.' },
-          { name: 'Living Chi', description: 'Become living Chi to boost his speed, damage, and attack range, delivering stronger punches while reducing the cooldown of Dragons Defense.' }
+          { name: 'Ultimate: Living Chi', description: 'Become living Chi to boost his speed, damage, and attack range, delivering stronger punches while reducing the cooldown of Dragons Defense.' }
         ]
       },
       {
@@ -1959,7 +1959,7 @@
         attackType: 'Projectile Heroes',
         health: '250',
         stats: [
-          { label: 'Difficulty', value: '★★★' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'X-Men' },
           { label: 'Mobility', value: 'Windrider' },
           { label: 'Passive', value: 'Weather Control' }
@@ -1967,7 +1967,85 @@
         abilities: [
           { name: 'Bolt Rush', description: 'Unleash a lightning bolt forward.' },
           { name: 'Goddess Boost', description: 'Wind push you to moves faster, Electric empowers you to kill faster' },
-          { name: 'Omega Hurricane', description: 'Transform into a hurricane to draw in nearby enemies and deal damage.' }
+          { name: 'Ultimate: Omega Hurricane', description: 'Transform into a hurricane to draw in nearby enemies and deal damage.' }
+        ]
+      },
+      {
+        id: 'punisher',
+        category: 'duelist',
+        name: 'Punisher',
+        tagline: 'Aim = Broken Player',
+        summary: 'Basically the guy who brings a tank to a snowball fight, ensuring any "criminals" on the opposing team regret their life choices.',
+        lore: 'Expertly wielding a full arsenal of futuristic weapons, Frank Castle is a formidable one-man army. With a steadfast resolve to deliver justice to his enemies, The Punisher won\'t cease in his mission until every last round is fired!',
+        portrait: 'Images/PunisherStory.png',
+        background: 'Images/PunisherSilhouette.webp',
+        card: 'Images/Punisher.webp',
+        accent: '#636159',
+        realName: 'Frank Castle',
+        attackType: 'Hitscan Heroes',
+        health: '300',
+        stats: [
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: '' },
+          { label: 'Mobility', value: 'Vantage Connection' },
+          { label: 'Passive', value: 'Warrior\'s Gaze' }
+        ],
+        abilities: [
+          { name: 'Culling Turret', description: 'Deploy a Culling Turret that grounds Punisher and blocks damage from the front while dealing massive damage.' },
+          { name: 'Scourge Grenade', description: 'Throw a smoke grenade forward to Block Enemies Vision and leap backward.' },
+          { name: 'Ultimate: Final Judgement', description: 'Unleash two gatling guns and missiles to attack enemies.' }
+        ]
+      },
+      {
+        id: 'winter-soldier',
+        category: 'duelist',
+        name: 'Winter Soldier',
+        tagline: 'AAAAGAAIN! AND AGAIIIN!',
+        summary: '',
+        lore: 'Terrifying experiments turned him into a brainwashed assassin, but now James "Bucky" Barnes is in control of his own fate once again. With his enhanced mechanical arm, the Winter Soldier is primed to deliver earth-shattering blows to any foe in his path!',
+        portrait: 'Images/Winter.png',
+        background: 'Images/WinterSilhouette.webp',
+        card: 'Images/Winter.webp',
+        accent: '#2a5727',
+        realName: 'James Bucky Barnes',
+        attackType: 'Hitscans Heroes',
+        health: '275',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'Avengers, Thunderbolts' },
+          { label: 'Mobility', value: 'Walking' },
+          { label: 'Passive', value: 'Ceaseless Charge' }
+        ],
+        abilities: [
+          { name: 'Bionic Hook', description: 'Charge up and launch a hook with his bionic arm, reeling in the first target hit and enemies lurking behind.' },
+          { name: 'Trooper\'s Fist', description: 'Dash forward, seizing enemies along the path, and Launch Up enemies in front at the end of the dash.' },
+          { name: 'Tainted Voltage', description: ' Launch a powerful electrical punch in the target direction, dealing damage to enemies within range and Slowing them.' },
+          { name: 'Ultimate: Kraken Impact', description: 'Any kill or assist here grant him to use this ability AGAIN!' }
+        ]
+      },
+      {
+        id: 'wolverine',
+        category: 'duelist',
+        name: 'Wolverine',
+        tagline: 'True Breed Animal ',
+        summary: '',
+        lore: 'Thanks to his regenerative healing factor and berserker rage, the centuries-old Logan can fight through the worst pain to go claw-to-claw with any foe. The Wolverine stands ready to shred through all obstacles in his way with his Adamantium claws.',
+        portrait: 'Images/WolverineStory.png',
+        background: 'Images/WolverineSilhouette.webp',
+        card: 'Images/Wolverine.webp',
+        accent: '#ddff00',
+        realName: 'James Logan Howlett',
+        attackType: 'Melee Heroes',
+        health: '350',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'X-men' },
+          { label: 'Mobility', value: 'Vicious Rampage' },
+          { label: 'Passive', value: 'Regenerative Healing Factor' }
+        ],
+        abilities: [
+          { name: 'Claw Strike', description: 'Slash with Adamantium claws for a Claw Strike. Unleashing Feral Leap will enhance it to Berserk Claw Strike for a brief period.' },
+          { name: 'Ultimate: Last Stand', description: 'Launch Up enemies ahead and spiral through the air, sweeping up enemies along the path and delivering a devastating impact at the landing point. Impact deals extra damage based on Rage accumulated.' }
         ]
       },
     ];
@@ -1988,7 +2066,7 @@
         attackType: 'Hitscan Heroes',
         health: '250',
         stats: [
-          { label: 'Difficulty', value: '★★☆☆☆' },
+          { label: 'Title', value: 'Hero' },
           { label: 'Team', value: 'Guardian of the Galaxy' },
           { label: 'Mobility', value: 'Nerf Movement MORE' },
           { label: 'Passive', value: 'Regenerative Cocoon' }
@@ -1996,7 +2074,243 @@
         abilities: [  
           { name: 'Avatar Life Stream', description: 'Target an ally for a bouncing stream of healing energy, which also heals himself upon casting; self-targets if no ally is selected.' },
           { name: 'Soul Bond', description: 'Forge a soul bond with allies, granting Healing Over Time and distributing damage taken across the bond.' },
-          { name: 'Karmic Revival', description: 'Awaken the karma of allies to revive them. Allies revived have lower health but enjoy a brief period of invincibility.' }
+          { name: 'Ultimate: Karmic Revival', description: 'Awaken the karma of allies to revive them. Allies revived have lower health but enjoy a brief period of invincibility.' }
+        ]
+      },
+      {
+        id: 'cloak and dagger',
+        category: 'strategist',
+        name: 'Cloak & Dagger',
+        tagline: 'Its US against.. Za World!',
+        summary: 'Fastest Ult Farm and the highest zero skill level requirement to play as...',
+        lore: 'Tyrone Johnson and Tandy Bowen are nearly inseparable, like two sides of the same coin. Intertwined by forces of shadow and light, Cloak & Dagger fight as a united front, dealing havoc and healing allies across the arena.',
+        portrait: 'Images/CloakStory.png',
+        background: 'Images/CloakSilhouette.png',
+        card: 'Images/Cloak.png',
+        accent: '#b3ccf5',
+        realName: 'Tyrone Johnson & Tandy Bowen',
+        attackType: 'Projectile Heroes',
+        health: '225',
+        stats: [
+          { label: 'Title', value: 'Vigilante' },
+          { label: 'Team', value: 'Midnight-Suns' },
+          { label: 'Mobility', value: 'Dark Teleportation' },
+          { label: 'Passive', value: 'Shadow and Light Embrace' }
+        ],
+        abilities: [
+          { name: 'Terror Cape', description: 'Damage enemies upon touch, applying Blind to narrow their sight and Vulnerability to amplify damage received.' },
+          { name: 'Dagger Storm', description: 'Launch a volley of daggers, creating a Healing-Over-Time field in the impact area.' },
+          { name: 'Ultimate: Eternal Bond', description: 'Perform four rapid dashes, healing allies and damaging enemies along the path.' }
+        ]
+      },
+      {
+        id: 'gambit',
+        category: 'strategist',
+        name: 'Gambit',
+        tagline: 'He Never Folds',
+        summary: 'Straight Flush? Royale House? How about... the Ace in a hole support?',
+        lore: 'Charming and free-spirited, Remy LeBeau manipulates kinetic energy with unmatched skill. With a flick of his wrist, his charged playing cards become explosive projectiles for foes or heal his allies through kinetic shifting. ',
+        portrait: 'Images/GambitStory.png',
+        background: 'Images/GambitSilhouette.png',
+        card: 'Images/Gambit.png',
+        accent: '#d400ff',
+        realName: 'Remy Lebeau',
+        attackType: 'Projectile Heroes',
+        health: '275',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'X-men' },
+          { label: 'Mobility', value: 'Cajun Charge' },
+          { label: 'Passive', value: 'Ace Of Aces' }
+        ],
+        abilities: [
+          { name: 'Healing Hearts', description: 'Conjure a Heart card by consuming one stack of Sleight of Hand to Heal and switch to the Healing Hearts deck.' },
+          { name: 'Bridge Boost', description: 'While the Healing Hearts deck is active, spend one stack of Sleight of Hand to Flush and card spring before firing a full deck forward.' },
+          { name: 'Breaking Spades', description: 'Conjure a Spade card by consuming one stack of Sleight of Hand to gain a Damage Boost and switch to the Breaking Spades deck.' },
+          { name: 'Ultimate: Ragin Royal Flush', description: 'Lock onto an ally within sight and unleash multiple Aces that heal and Purify. Both enter the Kinetic Transfer state, granting increased Movement Speed and Jump Boost, while enhancing attacks with additional single-target explosive damage and providing the ally with Ultimate Ability Charge Acceleration.' }
+        ]
+      },
+      {
+        id: 'invisible-woman',
+        category: 'strategist',
+        name: 'Invisible Woman',
+        tagline: 'Reed Can\'t handle all that',
+        summary: 'Bounces Heals, Bouncy Skills, Bouncy Boo-',
+        lore: 'The Invisible Woman is able to slip in and out of sight without a trace. No matter how intense the battle may be, Susan Storm always keeps her cool, conjuring up impenetrable force fields to protect herself and her team.',
+        portrait: 'Images/InvisibleStory.png',
+        background: 'Images/InvisibleSilhouette.png',
+        card: 'Images/Invisible.png',
+        accent: '#cfd7fa',
+        realName: 'Susan Storm',
+        attackType: 'Projectile Heroes',
+        health: '275',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'Fantastic Four' },
+          { label: 'Mobility', value: 'Veiled Step' },
+          { label: 'Passive', value: 'Covert Advance' }
+        ],
+        abilities: [
+          { name: 'Guardian Shield', description: ' The shield can block damage and provide Healing Over Time to nearby allies.' },
+          { name: 'Psionic Vortex', description: 'It erupts into a psionic vortex, continuously drawing in enemies and causing damage.' },
+          { name: 'Force Physics', description: 'Manipulate psionic energy to push or pull enemies in front of you.' },
+          { name: 'Ultimate: Invisible Boundary' , description: 'Manifest an unseen force field within a chosen area, rendering allies inside undetectable by enemies and providing Healing Over Time. Enemies that pass through the field are Slowed.'}
+        ]
+      },
+      {
+        id: 'luna snow',
+        category: 'strategist',
+        name: 'Luna Snow',
+        tagline: 'Your One and Only Kpop Demon Huntrix... Wait wrong universe',
+        summary: 'Wins teamfights from a floating chair and a calm eyebrow raise.',
+        lore: 'The arena is her stage, where Seol Hee and her team orchestrate spectacular displays that earn her an ever-increasing number of fans and wins.',
+        portrait: 'Images/LunaStory.png',
+        background: 'Images/LunaSilhouette.png',
+        card: 'Images/Luna.png',
+        accent: '#7547ff',
+        realName: 'Seol Hee',
+        attackType: 'Hitscan Heroes',
+        health: '275',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: '' },
+          { label: 'Mobility', value: 'Smooth Skate' },
+          { label: 'Passive', value: 'Idol Aura' }
+        ],
+        abilities: [
+          { name: 'Ice Arts', description: 'Fire ice shards for a short duration, damaging enemies or healing allies while restoring her own Health.' },
+          { name: 'Absolute Zero', description: 'Cast a clump of ice to Freeze the hit enemy and restore Health. Landing a hit grants Bonus Health.' },
+          { name: 'Ultimate: Fate Of Both Worlds', description: 'Take center stage and start dancing! Toggle between two performances: Heal allies or grant them Damage Boost.' }
+        ]
+      },
+      {
+        id: 'mantis',
+        category: 'strategist',
+        name: 'Mantis',
+        tagline: 'Synthetic Shotcaller',
+        summary: 'Gooooo tooo sleeep, Goo tooo sleeeep~ ... Gooo too sleep myy sleeeppy baabbyy~',
+        lore: 'Mantis uses her impressive mental abilities and her penchant for plant control to anchor any team she fights alongside. Her powers tap into a limitless flow of life energy, gently nourishing everything she touches.',
+        portrait: 'Images/MantisStory.png',
+        background: 'Images/MantisSilhouette.png',
+        card: 'Images/Mantis.png',
+        accent: '#42f5bc',
+        realName: 'Mantis',
+        attackType: 'Projectile Heroes',
+        health: '250',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'Guardians Of the Galaxy' },
+          { label: 'Mobility', value: 'Walking' },
+          { label: 'Passive', value: 'Natures Favor' }
+        ],
+        abilities: [
+          { name: 'Allied Inspiration', description: 'Consume Life Orbs to grant allies a Damage Boost.' },
+          { name: 'Spore Slumber', description: 'Throw a spore to Sedate the nearest enemy.' },
+          { name: 'Healing Flower', description: 'Consume Life Orbs to grant allies Healing Over Time.' },
+          { name: 'Ultimate: Soul Resurgence', description: 'Release energy around her while moving, providing Healing Over Time and Movement Boosts for surrounding allies. Excess healing converts to Bonus Health.'}
+        ]
+      },
+      {
+        id: 'loki',
+        category: 'strategist',
+        name: 'Loki',
+        tagline: 'God of Outplays',
+        summary: 'If you can see him, you’re already in the wrong timeline.',
+        lore: 'The God of Mischief weaves illusions and decoys across the battlefield, forcing enemies to waste cooldowns on copies. Every trick creates another opening for his team to strike.',
+        portrait: 'Images/LokiStory.png',
+        background: 'Images/LokiSilhouette.png',
+        card: 'Images/Loki.png',
+        accent: '#7acb4a',
+        realName: 'Loki Laufeyson',
+        attackType: 'Projectile Heroes',
+        health: '225',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'Odinsons' },
+          { label: 'Mobility', value: 'Illusory Step' },
+          { label: 'Passive', value: 'Trickster\'s Guile' }
+        ],
+        abilities: [
+          { name: 'Decoy Mirage', description: 'Spawn multiple illusions that mimic Loki’s movement, obscuring his real position.' },
+          { name: 'Backline Switch', description: 'Swap locations with an illusion behind enemy lines, briefly cloaking after arrival.' },
+          { name: 'Ultimate: Chaos Script', description: 'Randomly silences, slows, or disarms enemies in a large area, sowing complete confusion.' }
+        ]
+      },
+      {
+        id: 'jeff',
+        category: 'strategist',
+        name: 'Jeff The Land Shark',
+        tagline: 'The Devil That Smiles...',
+        summary: 'MMRRR... MNNYAARR!',
+        lore: 'Most land sharks are vicious creatures of the deep... but not Jeff! This adorable and mischievous little guy brings joy and healing to every battle. But if the tide turns, Jeff can morph into a voracious beast, capable of swallowing an army of foes in a single gulp!',
+        portrait: 'Images/JeffStory.png',
+        background: 'Images/JeffSilhouette.png',
+        card: 'Images/Jeff.png',
+        accent: '#24dae0',
+        realName: 'Jeff',
+        attackType: 'Projectile Heroes',
+        health: '250',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'secret' },
+          { label: 'Mobility', value: 'Hide And Seek' },
+          { label: 'Passive', value: 'Joyful Splash' }
+        ],
+        abilities: [
+          { name: 'Healing Bubble', description: 'Spit a bubble that heals the ally who collects it, granting them Healing and Movement Boost.' },
+          { name: 'Ultimate: Its Jeff!', description: 'Deep dive into the scene and leave behind a healing water zone for allies. Upon resurfacing, swallow both enemies and allies within range, activating Hide and Seek for a brief duration before ejecting the swallowed heroes forward. Excess healing converts to Bonus Health.' }
+        ]
+      },
+      {
+        id: 'rocket-raccoon',
+        category: 'strategist',
+        name: 'Rocket Raccoon',
+        tagline: 'Ain\'t Nothin\' Like Me \'Cept Me',
+        summary: 'The only raccoon with a bounty list longer than his tail and tech skills that make Tony Stark jealous.',
+        lore: 'Rocket may not look like a tech genius or an expert tactician, but anyone who\'s ever made his hit list has quickly regretted underestimating him. This savvy space soldier is equally eager to boost his teammates and to collect bounties on his foes. Armed with an arsenal of custom-built weapons and gadgets, Rocket turns every battlefield into his personal workshop.',
+        portrait: 'Images/RocketStory.png',
+        background: 'Images/RocketSilhouette.png',
+        card: 'Images/Rocket.png',
+        accent: '#7a620a',
+        realName: 'Rocket',
+        attackType: 'Projectile Heroes',
+        health: '250',
+        stats: [
+          { label: 'Title', value: 'Hero' },
+          { label: 'Team', value: 'Guardians of the Galaxy' },
+          { label: 'Mobility', value: 'Jetpack Dash' },
+          { label: 'Passive', value: 'Wild Crawl' }
+        ],
+        abilities: [
+          { name: 'Repair Mode', description: 'Shoot bouncing spheres to heal allies. Directly hitting an ally provides extra healing.' },
+          { name: 'B.R.B', description: 'Deploy a Battle Rebirth Beacon that revives a fallen ally and periodically produces armor packs and rocket jet packs.' },
+          { name: 'Ultimate: C.Y.A', description: 'Deploy a Cosmic Yarn Amplifier that grants allies a Damage Boost, while continuously providing them with Bonus Health.' }
+        ]
+      },
+      {
+        id: 'ultron',
+        category: 'strategist',
+        name: 'Ultron',
+        tagline: 'There Are No Strings On Me',
+        summary: 'The perfect AI strategist who calculates every move before it happens, orchestrating battles with mechanical precision.',
+        lore: 'The pinnacle of artificial lifeforms, Ultron is programmed to learn and adapt in ways far beyond human capability. He can summon an army of automated drones that obey his every command, raising his chances of victory exponentially.',
+        portrait: 'Images/UltronStory.png',
+        background: 'Images/UltronSilhouette.png',
+        card: 'Images/Ultron.png',
+        accent: '#615f58',
+        realName: 'Ultron',
+        attackType: 'Hitscan Heroes',
+        health: '250',
+        stats: [
+          { label: 'Title', value: 'Villain' },
+          { label: 'Team', value: '' },
+          { label: 'Mobility', value: 'Dynamic Flight' },
+          { label: 'Passive', value: 'Algorithm Correction' }
+        ],
+        abilities: [
+          { name: 'Imperative: Patch', description: 'Command up to 2 giant drones to follow 2 allies, constantly healing allies within its radius, with more healing for the designated allies.' },
+          { name: 'Imperative: Firewall', description: 'Deploy drones to an ally marked by Imperative: Patch, granting them increased Speed and Damage. Additionally, all allies within range of you and the chosen teammate receive Bonus Health.' },
+          { name: 'Ultimate: EXTERMINATION!', description: 'Summon Ultron Drones to fire Encephalo-Rays, damaging enemies or healing allies. Deals enhanced damage against Bonus Health.' },
         ]
       },
     ];
@@ -2089,17 +2403,57 @@
 
     let activeFilter = 'all';
     let activeHero = heroCatalog[0];
+    let searchQuery = '';
+    const heroSearchInput = document.querySelector('[data-hero-search]');
+    const heroSearchButton = document.querySelector('[data-hero-search-btn]');
+    const heroNoResults = document.querySelector('[data-hero-no-results]');
+    const heroSuggestions = document.querySelectorAll('[data-suggestion]');
 
     function updateCounts() {
-      const counts = heroCatalog.reduce((acc, hero) => {
+      const filtered = filteredHeroes();
+      const counts = filtered.reduce((acc, hero) => {
         acc.all += 1;
         acc[hero.category] += 1;
         return acc;
       }, { all: 0, vanguard: 0, duelist: 0, strategist: 0 });
+      
+      // Update counts with filtered results
       if (countAll) countAll.textContent = counts.all;
       if (countVanguard) countVanguard.textContent = counts.vanguard;
       if (countDuelist) countDuelist.textContent = counts.duelist;
       if (countStrategist) countStrategist.textContent = counts.strategist;
+    }
+    
+    function updateFilterCount() {
+      const heroes = filteredHeroes();
+      if (!filterDisplayCount) return;
+      
+      // If there's a search query, try to show a more descriptive label
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        const teamStat = heroes.length > 0 ? heroes[0].stats.find(stat => stat.label === 'Team') : null;
+        const titleStat = heroes.length > 0 ? heroes[0].stats.find(stat => stat.label === 'Title') : null;
+        
+        // Check if search matches a team name
+        if (teamStat && teamStat.value && teamStat.value.toLowerCase().includes(query)) {
+          const teamName = teamStat.value.split(',')[0].trim(); // Get first team if multiple
+          filterDisplayCount.textContent = `${heroes.length} ${teamName}`;
+          return;
+        }
+        
+        // Check if search matches a title
+        if (titleStat && titleStat.value && titleStat.value.toLowerCase().includes(query)) {
+          const titleName = titleStat.value.split(',')[0].trim(); // Get first title if multiple
+          filterDisplayCount.textContent = `${heroes.length} ${titleName}${heroes.length === 1 ? '' : 's'}`;
+          return;
+        }
+        
+        // Default: show count with "Results"
+        filterDisplayCount.textContent = `${heroes.length} Result${heroes.length === 1 ? '' : 's'}`;
+      } else {
+        // No search, show normal count
+        filterDisplayCount.textContent = String(heroes.length);
+      }
     }
 
     function renderStats(container, stats) {
@@ -2188,7 +2542,9 @@
         featureHealth.textContent = hero.health;
         // CSS white-space: pre-line will handle the \n characters
       }
-      if (featureDifficulty) featureDifficulty.textContent = hero.difficulty;
+      if (featureDifficulty) {
+        featureDifficulty.textContent = hero.difficulty || '★★★☆☆';
+      }
       if (featureBgImg) {
         featureBgImg.src = hero.backgroundImage;
         featureBgImg.style.objectPosition = hero.backgroundPosition;
@@ -2230,14 +2586,65 @@
     }
 
     function filteredHeroes() {
-      if (activeFilter === 'all') return heroCatalog;
-      return heroCatalog.filter(hero => hero.category === activeFilter);
+      let heroes = heroCatalog;
+      
+      // Apply category filter
+      if (activeFilter !== 'all') {
+        heroes = heroes.filter(hero => hero.category === activeFilter);
+      }
+      
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase().trim();
+        heroes = heroes.filter(hero => {
+          // Search in hero name (exact match or partial)
+          if (hero.name.toLowerCase().includes(query)) return true;
+          
+          // Search in real name
+          if (hero.realName && hero.realName.toLowerCase().includes(query)) return true;
+          
+          // Search in team (from stats) - check all teams if comma-separated
+          const teamStat = hero.stats.find(stat => stat.label === 'Team');
+          if (teamStat && teamStat.value) {
+            const teams = teamStat.value.toLowerCase().split(',').map(t => t.trim());
+            if (teams.some(team => team.includes(query) || query.includes(team))) return true;
+          }
+          
+          // Search in title (from stats) - check all titles if comma-separated
+          const titleStat = hero.stats.find(stat => stat.label === 'Title');
+          if (titleStat && titleStat.value) {
+            const titles = titleStat.value.toLowerCase().split(',').map(t => t.trim());
+            if (titles.some(title => title.includes(query) || query.includes(title))) return true;
+          }
+          
+          // Search in tagline
+          if (hero.tagline && hero.tagline.toLowerCase().includes(query)) return true;
+          
+          // Search in category
+          if (hero.category && hero.category.toLowerCase().includes(query)) return true;
+          
+          // Search in attack type
+          if (hero.attackType && hero.attackType.toLowerCase().includes(query)) return true;
+          
+          return false;
+        });
+      }
+      
+      return heroes;
     }
 
     function renderRoster() {
       if (!rosterGrid) return;
       rosterGrid.innerHTML = '';
       const heroes = filteredHeroes();
+      
+      // Show/hide no results message
+      if (heroes.length === 0 && searchQuery.trim()) {
+        if (heroNoResults) heroNoResults.removeAttribute('hidden');
+      } else {
+        if (heroNoResults) heroNoResults.setAttribute('hidden', '');
+      }
+      
       heroes.forEach(hero => {
         const card = document.createElement('button');
         card.type = 'button';
@@ -2258,7 +2665,8 @@
         if (hero.id === activeHero.id) card.classList.add('active');
         rosterGrid.appendChild(card);
       });
-      if (filterDisplayCount) filterDisplayCount.textContent = String(heroes.length);
+      updateFilterCount();
+      updateCounts();
       // Always animate cards when roster is rendered
       const cards = Array.from(rosterGrid.querySelectorAll('.hero-roster__card'));
       cards.forEach((card, index) => {
@@ -2299,7 +2707,9 @@
       if (modalAttack) modalAttack.textContent = hero.attackType;
       if (modalRealName) modalRealName.textContent = hero.realName;
       if (modalHealth) modalHealth.textContent = hero.health;
-      if (modalDifficulty) modalDifficulty.textContent = hero.difficulty;
+      if (modalDifficulty) {
+        modalDifficulty.textContent = hero.difficulty || '★★★☆☆';
+      }
       renderAbilities(modalAbilities, hero.abilities);
     }
 
@@ -2319,6 +2729,42 @@
       btn.addEventListener('click', () => {
         const filter = btn.dataset.filter || 'all';
         handleFilterChange(filter);
+      });
+    });
+    
+    // Search functionality
+    function handleSearch() {
+      searchQuery = heroSearchInput ? heroSearchInput.value : '';
+      const heroes = filteredHeroes();
+      if (heroes.length && !heroes.some(hero => hero.id === activeHero.id)) {
+        setFeatured(heroes[0].id);
+      }
+      renderRoster();
+    }
+    
+    if (heroSearchInput) {
+      heroSearchInput.addEventListener('input', handleSearch);
+      heroSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleSearch();
+        }
+      });
+    }
+    
+    if (heroSearchButton) {
+      heroSearchButton.addEventListener('click', handleSearch);
+    }
+    
+    // Handle suggestion clicks
+    heroSuggestions.forEach(suggestionBtn => {
+      suggestionBtn.addEventListener('click', () => {
+        const suggestion = suggestionBtn.dataset.suggestion;
+        if (heroSearchInput) {
+          heroSearchInput.value = suggestion;
+          searchQuery = suggestion;
+          handleSearch();
+        }
       });
     });
 

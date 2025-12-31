@@ -47,6 +47,11 @@
       const href = link.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
       
+      // Don't show loader for download links (video downloads, file downloads, etc.)
+      if (link.hasAttribute('download') || href.includes('.mp4') || href.includes('.mp3') || href.includes('.pdf') || href.includes('.zip')) {
+        return; // Download link, don't show loader
+      }
+      
       // Don't show loader for external links
       if (href.startsWith('http://') || href.startsWith('https://')) {
         // Check if it's an external link
@@ -363,6 +368,50 @@
     }
   });
 
+  // Email validation function
+  function isValidEmail(email) {
+    const validDomains = ['@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com'];
+    if (!email || !email.includes('@')) return false;
+    const emailLower = email.toLowerCase();
+    return validDomains.some(domain => emailLower.endsWith(domain));
+  }
+  
+  // Password visibility toggle
+  function setupPasswordToggle(toggleId, inputId) {
+    const toggle = document.getElementById(toggleId);
+    const input = document.getElementById(inputId);
+    if (toggle && input) {
+      // Remove any existing listeners
+      const newToggle = toggle.cloneNode(true);
+      toggle.parentNode.replaceChild(newToggle, toggle);
+      
+      newToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        
+        // Toggle icons
+        const eyeIcon = newToggle.querySelector('.eye-icon');
+        const eyeOffIcon = newToggle.querySelector('.eye-off-icon');
+        if (eyeIcon && eyeOffIcon) {
+          if (isPassword) {
+            eyeIcon.style.display = 'none';
+            eyeOffIcon.style.display = 'block';
+          } else {
+            eyeIcon.style.display = 'block';
+            eyeOffIcon.style.display = 'none';
+          }
+        }
+      });
+    }
+  }
+  
+  // Setup password toggles
+  setupPasswordToggle('popup-reg-password-toggle', 'popup-reg-password');
+  setupPasswordToggle('popup-reg-password-repeat-toggle', 'popup-reg-password-repeat');
+  setupPasswordToggle('popup-login-password-toggle', 'popup-login-password');
+  
   // Switch between registration and login in split-screen design
   const popupSwitchToLogin = document.getElementById('popup-switchToLogin');
   const popupExpandLink = document.getElementById('popup-expandLink');
@@ -424,6 +473,7 @@
 
     const isValid = 
         email && 
+        isValidEmail(email) &&
         nickname && 
         password && 
         password === passwordRepeat && 
@@ -464,25 +514,39 @@
     popupRegistrationForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const email = document.getElementById('popup-reg-email').value;
-      const nickname = document.getElementById('popup-reg-nickname').value;
+      const email = document.getElementById('popup-reg-email').value.trim();
+      const nickname = document.getElementById('popup-reg-nickname').value.trim();
       const password = document.getElementById('popup-reg-password').value;
       const passwordRepeat = document.getElementById('popup-reg-password-repeat').value;
-      const captcha = document.getElementById('popup-reg-captcha').value;
+      const captcha = document.getElementById('popup-reg-captcha').value.trim();
+      
+      // Validate email format
+      if (!isValidEmail(email)) {
+        alert('Please enter a proper email address.\nAccepted domains: @gmail.com, @yahoo.com, @hotmail.com, @outlook.com');
+        return;
+      }
+      
+      // Validate password match
+      if (password !== passwordRepeat) {
+        alert('Passwords do not match. Please enter the same password in both fields.');
+        return;
+      }
       
       // Validate captcha
       if (captcha !== popupCaptcha.toString()) {
-        alert('Invalid captcha code. Please try again.');
+        alert('Invalid verification code. Please enter the correct code shown above.');
         popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
         if (popupCaptchaText) popupCaptchaText.textContent = popupCaptcha.toString();
         document.getElementById('popup-reg-captcha').value = '';
         return;
       }
       
-      // Validate password match
-      if (password !== passwordRepeat) {
-        alert('Passwords do not match.');
-        return;
+      // Show loading state
+      const submitBtn = document.getElementById('popup-reg-submit-btn');
+      const originalText = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating Account...';
       }
       
       try {
@@ -495,13 +559,69 @@
             name: nickname, 
             email: email, 
             password: password 
-          })
+          }),
+          signal: AbortSignal.timeout(30000) // 30 second timeout
         });
         
-        const data = await response.json();
+        let data;
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          throw new Error('Server response was not valid JSON. Make sure the server is running correctly.');
+        }
         
         if (response.ok) {
-          alert('Account created successfully! Please log in.');
+          const creationDate = new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          
+          // Save user data locally
+          const newUser = {
+            id: data.user?.id || data.user?._id || data._id || `user_${Date.now()}`,
+            name: nickname,
+            username: nickname,
+            email: email,
+            avatar: 'Images/Rival.png',
+            bio: '',
+            favoriteCharacter: 'Not set',
+            rank: 'Unranked',
+            winrate: 0,
+            createdAt: data.user?.createdAt || data.createdAt || new Date().toISOString(),
+            isGuest: false
+          };
+          
+          localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+          sessionStorage.setItem('loggedInUser', JSON.stringify(newUser));
+          localStorage.removeItem('isGuest');
+          sessionStorage.removeItem('isGuest');
+          
+          // Dispatch login event
+          window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user: newUser } }));
+          
+          // Reset button
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          }
+          
+          alert(`✅ Account created successfully!\n\nUsername: ${nickname}\nEmail: ${email}\n\nA confirmation email with your account details has been sent to your email address.\n\nPlease log in below.`);
+          
+          // Clear form
+          document.getElementById('popup-reg-email').value = '';
+          document.getElementById('popup-reg-nickname').value = '';
+          document.getElementById('popup-reg-password').value = '';
+          document.getElementById('popup-reg-password-repeat').value = '';
+          document.getElementById('popup-reg-captcha').value = '';
+          document.getElementById('popup-reg-terms').checked = false;
+          
+          // Generate new captcha
+          popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
+          if (popupCaptchaText) popupCaptchaText.textContent = popupCaptcha.toString();
+          
           // Expand login section
           const expandContent = document.getElementById('popup-expandContent');
           const expandBtn = document.getElementById('popup-expandLink');
@@ -513,10 +633,27 @@
           const loginEmail = document.getElementById('popup-login-email');
           if (loginEmail) loginEmail.value = email;
         } else {
-          alert(data.error || 'Registration failed. Please try again.');
+          // Reset button
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+          }
+          const errorMsg = data.error || data.message || 'Registration failed. Please try again.';
+          alert(`❌ Registration Failed\n\n${errorMsg}\n\nPlease check:\n- MongoDB is running\n- Server is running\n- Email is not already registered`);
         }
       } catch (error) {
-        alert('Network error. Please make sure the server is running.');
+        // Reset button
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+        let errorMsg = error.message || 'Network error occurred';
+        if (error.name === 'AbortError' || error.message.includes('timeout')) {
+          errorMsg = 'Connection timeout. Please check:\n1. MongoDB is running (check MongoDB Compass)\n2. Server is running (npm start)\n3. You\'re connected to localhost:3000';
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          errorMsg = 'Cannot connect to server. Please make sure:\n1. Server is running (npm start)\n2. You\'re accessing from localhost:3000';
+        }
+        alert(`❌ Connection Error\n\n${errorMsg}`);
         console.error('Registration error:', error);
       }
     });
@@ -528,8 +665,14 @@
     popupLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const email = document.getElementById('popup-login-email').value;
+      const email = document.getElementById('popup-login-email').value.trim();
       const password = document.getElementById('popup-login-password').value;
+      
+      // Validate email format
+      if (!isValidEmail(email)) {
+        alert('Please enter a proper email address.\nAccepted domains: @gmail.com, @yahoo.com, @hotmail.com, @outlook.com');
+        return;
+      }
       
       try {
         const response = await fetch('/login', {
@@ -543,11 +686,40 @@
         const data = await response.json();
         
         if (response.ok) {
+          // Save user data locally
+          const loggedInUser = {
+            id: data.user?.id || data.user?._id || `user_${Date.now()}`,
+            name: data.user?.name || data.user?.username || data.user?.nickname || email.split('@')[0],
+            username: data.user?.username || data.user?.name || data.user?.nickname || email.split('@')[0],
+            email: email,
+            avatar: data.user?.avatar || 'Images/Rival.png',
+            bio: data.user?.bio || '',
+            favoriteCharacter: data.user?.favoriteCharacter || 'Not set',
+            rank: data.user?.rank || 'Unranked',
+            winrate: data.user?.winrate || 0,
+            createdAt: data.user?.createdAt || data.user?.created_at || new Date().toISOString(),
+            isGuest: false
+          };
+          
+          localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+          sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+          localStorage.removeItem('isGuest');
+          sessionStorage.removeItem('isGuest');
+          localStorage.removeItem('guestUser');
+          sessionStorage.removeItem('guestUser');
+          
+          // Dispatch login event
+          window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user: loggedInUser } }));
+          
           alert('Login successful!');
           closeLoginPopup();
-          window.location.reload();
+          
+          // Reload page to update UI
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         } else {
-          alert(data.error || 'Invalid email or password.');
+          alert(data.error || 'Incorrect email or password. Please check your credentials and try again.');
         }
       } catch (error) {
         alert('Network error. Please make sure the server is running.');
@@ -592,11 +764,25 @@
       localStorage.setItem('isGuest', 'true');
       localStorage.setItem('guestUser', JSON.stringify(guestUser));
       
+      // Remove any logged in user data
+      localStorage.removeItem('loggedInUser');
+      sessionStorage.removeItem('loggedInUser');
+      
+      // Dispatch logout event (to switch from logged in to guest)
+      window.dispatchEvent(new CustomEvent('userLoggedOut'));
+      
       // Update UI to show guest status
       checkGuestStatus();
       
       // Show success message
       alert('Logged in as Guest! Welcome to Rival!');
+      
+      // Reload page to update community profile
+      setTimeout(() => {
+        if (window.location.pathname.includes('Community.html')) {
+          window.location.reload();
+        }
+      }, 500);
       
       // Optionally try to save to server in background (non-blocking)
       try {
@@ -623,16 +809,26 @@
   const guestLogoutBtn = document.getElementById('guest-logout-btn');
   if (guestLogoutBtn) {
     guestLogoutBtn.addEventListener('click', () => {
-      // Clear guest session
-      sessionStorage.removeItem('guestUser');
-      sessionStorage.removeItem('isGuest');
+      // Clear guest data
       localStorage.removeItem('isGuest');
+      sessionStorage.removeItem('isGuest');
       localStorage.removeItem('guestUser');
+      sessionStorage.removeItem('guestUser');
+      
+      // Dispatch logout event
+      window.dispatchEvent(new CustomEvent('userLoggedOut'));
       
       // Update UI
       checkGuestStatus();
       
       alert('Logged out as Guest');
+      
+      // Reload page to update community profile
+      setTimeout(() => {
+        if (window.location.pathname.includes('Community.html')) {
+          window.location.reload();
+        }
+      }, 500);
     });
   }
 
@@ -1655,9 +1851,9 @@
             { name: 'Night Glider', description: 'Great... He glides now.' },
             { name: 'Ultimate: Hand Of Khonshu', description: 'Open a portal that allows Khonshu to bombard enemies with his talons.' }
           ]
-        },
-        {
-          id: 'namor',
+      },
+      {
+        id: 'namor',
         category: 'duelist',
         name: 'Namor',
         tagline: 'Broken Teamup Merchant, Wha Da Flark is dev idea of teamups..',

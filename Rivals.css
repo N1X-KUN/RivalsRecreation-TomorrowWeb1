@@ -2302,9 +2302,9 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .login-modal {
   position: relative;
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
   background: rgba(15, 20, 35, 0.95);
   border-radius: 16px;
   box-shadow: 
@@ -2313,6 +2313,8 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   backdrop-filter: blur(20px);
   transform: scale(0.95) translateY(20px);
   transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .login-popup[open] .login-modal {
@@ -2323,14 +2325,19 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .login-modal-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  min-height: 600px;
+  height: 100%;
+  max-height: 90vh;
   gap: 0;
+  overflow: hidden;
 }
 
 .login-section {
-  padding: 60px 50px;
+  padding: 35px 30px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 90vh;
 }
 
 .login-section.registration-section {
@@ -2467,9 +2474,9 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 
 /* Section Title */
 .login-section-title {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   color: #ffffff;
 }
 
@@ -2477,7 +2484,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .login-auth-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .login-form-group {
@@ -2486,7 +2493,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 
 .login-form-group input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 12px 16px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
@@ -2505,6 +2512,50 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 215, 0, 0.5);
   box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+/* Password Group with Toggle */
+.login-password-group {
+  position: relative;
+}
+
+.login-password-group input {
+  padding-right: 50px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.password-toggle:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+.password-toggle .eye-icon {
+  display: block;
+}
+
+.password-toggle .eye-off-icon {
+  display: none;
 }
 
 /* Captcha Group */
@@ -2592,16 +2643,16 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 /* Submit Button */
 .login-submit-btn {
   width: 100%;
-  padding: 16px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   color: rgba(255, 255, 255, 0.5);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: not-allowed;
   transition: all 0.3s ease;
-  margin-top: 8px;
+  margin-top: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }

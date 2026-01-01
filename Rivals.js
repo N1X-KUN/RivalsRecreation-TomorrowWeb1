@@ -121,7 +121,10 @@
       document.body.style.overflow = 'hidden';
       sessionStorage.setItem('loginPopupOpen', 'true');
       // Check guest status when popup opens
-      setTimeout(checkGuestStatus, 100);
+      setTimeout(() => {
+        checkGuestStatus();
+        renderAccountPanelState();
+      }, 100);
     }
   }
 
@@ -381,7 +384,7 @@
     const toggle = document.getElementById(toggleId);
     const input = document.getElementById(inputId);
     if (toggle && input) {
-      // Remove any existing listeners
+      // Remove any existing listeners by cloning
       const newToggle = toggle.cloneNode(true);
       toggle.parentNode.replaceChild(newToggle, toggle);
       
@@ -391,18 +394,13 @@
         const isPassword = input.type === 'password';
         input.type = isPassword ? 'text' : 'password';
         
-        // Toggle icons
-        const eyeIcon = newToggle.querySelector('.eye-icon');
-        const eyeOffIcon = newToggle.querySelector('.eye-off-icon');
-        if (eyeIcon && eyeOffIcon) {
-          if (isPassword) {
-            eyeIcon.style.display = 'none';
-            eyeOffIcon.style.display = 'block';
-          } else {
-            eyeIcon.style.display = 'block';
-            eyeOffIcon.style.display = 'none';
-          }
+        // Toggle icons - show eye-off when password is visible (text type)
+        const svgs = newToggle.querySelectorAll('svg');
+        if (svgs.length >= 2) {
+          svgs[0].style.display = isPassword ? 'block' : 'none'; // eye icon
+          svgs[1].style.display = isPassword ? 'none' : 'block'; // eye-off icon
         }
+        newToggle.classList.toggle('hidden', isPassword);
       });
     }
   }
@@ -541,14 +539,6 @@
         return;
       }
       
-      // Show loading state
-      const submitBtn = document.getElementById('popup-reg-submit-btn');
-      const originalText = submitBtn ? submitBtn.textContent : '';
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Creating Account...';
-      }
-      
       try {
         const response = await fetch('/users', {
           method: 'POST',
@@ -560,7 +550,7 @@
             email: email, 
             password: password 
           }),
-          signal: AbortSignal.timeout(30000) // 30 second timeout
+          signal: AbortSignal.timeout(15000) // 15 second timeout
         });
         
         let data;
@@ -581,7 +571,7 @@
           
           // Save user data locally
           const newUser = {
-            id: data.user?.id || data.user?._id || data._id || `user_${Date.now()}`,
+            id: data._id || data.id || `user_${Date.now()}`,
             name: nickname,
             username: nickname,
             email: email,
@@ -590,7 +580,7 @@
             favoriteCharacter: 'Not set',
             rank: 'Unranked',
             winrate: 0,
-            createdAt: data.user?.createdAt || data.createdAt || new Date().toISOString(),
+            createdAt: data.createdAt || new Date().toISOString(),
             isGuest: false
           };
           
@@ -601,14 +591,11 @@
           
           // Dispatch login event
           window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user: newUser } }));
-          
-          // Reset button
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-          }
-          
-          alert(`✅ Account created successfully!\n\nUsername: ${nickname}\nEmail: ${email}\n\nA confirmation email with your account details has been sent to your email address.\n\nPlease log in below.`);
+
+          // NOTE: Welcome-email sending (if enabled) is handled server-side in `routes/users.js`.
+          // We intentionally do NOT call `/send-welcome-email` from the browser to avoid duplicates/spam.
+
+          alert('✅ Account created successfully!\n\nUsername: ' + nickname + '\nEmail: ' + email);
           
           // Clear form
           document.getElementById('popup-reg-email').value = '';
@@ -633,27 +620,24 @@
           const loginEmail = document.getElementById('popup-login-email');
           if (loginEmail) loginEmail.value = email;
         } else {
-          // Reset button
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+          let errorMsg = data.error || data.message || 'Registration failed.';
+          if (errorMsg.includes('duplicate') || errorMsg.includes('E11000')) {
+            errorMsg = '❌ Email already registered!\n\nThis email address is already in use. Please use a different email or log in instead.';
+          } else if (errorMsg.includes('validation')) {
+            errorMsg = '❌ Invalid information!\n\n' + errorMsg;
           }
-          const errorMsg = data.error || data.message || 'Registration failed. Please try again.';
-          alert(`❌ Registration Failed\n\n${errorMsg}\n\nPlease check:\n- MongoDB is running\n- Server is running\n- Email is not already registered`);
+          alert(errorMsg);
         }
       } catch (error) {
-        // Reset button
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalText;
-        }
-        let errorMsg = error.message || 'Network error occurred';
+        let errorMsg = 'Network error occurred.';
         if (error.name === 'AbortError' || error.message.includes('timeout')) {
-          errorMsg = 'Connection timeout. Please check:\n1. MongoDB is running (check MongoDB Compass)\n2. Server is running (npm start)\n3. You\'re connected to localhost:3000';
+          errorMsg = '❌ Connection Timeout!\n\nMongoDB connection timed out. Please check:\n\n1. MongoDB is running (check MongoDB Compass)\n2. Server is running (run: npm start)\n3. You are connected to localhost:3000';
         } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-          errorMsg = 'Cannot connect to server. Please make sure:\n1. Server is running (npm start)\n2. You\'re accessing from localhost:3000';
+          errorMsg = '❌ Cannot Connect to Server!\n\nPlease make sure:\n\n1. Server is running (run: npm start in terminal)\n2. You are accessing from localhost:3000\n3. MongoDB is running';
+        } else if (error.message) {
+          errorMsg = '❌ Error: ' + error.message;
         }
-        alert(`❌ Connection Error\n\n${errorMsg}`);
+        alert(errorMsg);
         console.error('Registration error:', error);
       }
     });
@@ -731,18 +715,384 @@
   // Check if user is logged in as guest on page load
   function checkGuestStatus() {
     const isGuest = localStorage.getItem('isGuest') === 'true' || sessionStorage.getItem('isGuest') === 'true';
+    const storedUser = (() => {
+      try {
+        return JSON.parse(localStorage.getItem('loggedInUser') || sessionStorage.getItem('loggedInUser') || 'null');
+      } catch {
+        return null;
+      }
+    })();
+    const isLoggedIn = !!storedUser && storedUser.isGuest === false;
+
     const guestStatus = document.getElementById('guest-status');
     const loginDescription = document.getElementById('login-description');
     const popupGuestLogin = document.getElementById('popup-guestLogin');
     
-    if (isGuest && guestStatus) {
+    if ((isGuest || isLoggedIn) && guestStatus) {
       guestStatus.style.display = 'block';
       if (loginDescription) loginDescription.style.display = 'none';
       if (popupGuestLogin) popupGuestLogin.style.display = 'none';
+
+      // If logged-in (not guest), update the guest-status block to show username + logout
+      if (isLoggedIn) {
+        const name = storedUser.username || storedUser.name || 'User';
+        const text = guestStatus.querySelector('.guest-status-text');
+        if (text) {
+          // Avoid innerHTML for safety
+          text.textContent = `Logged in as ${name}`;
+        }
+        const logoutBtn = guestStatus.querySelector('#guest-logout-btn');
+        if (logoutBtn) logoutBtn.textContent = 'Log out';
+      }
     } else {
       if (guestStatus) guestStatus.style.display = 'none';
       if (loginDescription) loginDescription.style.display = 'block';
       if (popupGuestLogin) popupGuestLogin.style.display = 'flex';
+    }
+  }
+
+  // Logged-in Account Panel (replaces registration form UI when user is logged in)
+  function getStoredUser() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser') || sessionStorage.getItem('loggedInUser') || 'null');
+    } catch {
+      return null;
+    }
+  }
+
+  function saveStoredUser(user) {
+    localStorage.setItem('loggedInUser', JSON.stringify(user));
+    sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+  }
+
+  function ensureAccountPanel() {
+    const registrationSection = document.querySelector('.registration-section');
+    if (!registrationSection) return null;
+
+    let panel = document.getElementById('popup-account-panel');
+    if (panel) return panel;
+
+    panel = document.createElement('div');
+    panel.id = 'popup-account-panel';
+    panel.className = 'login-account-panel';
+    panel.setAttribute('hidden', 'true');
+    panel.innerHTML = `
+      <h2 class="login-section-title">Account Details</h2>
+      <div class="account-field">
+        <div class="account-field__label">Who's your Main?</div>
+        <div class="account-field__row">
+          <div class="account-hero-preview">
+            <img id="account-main-hero-img" src="Images/Rival.png" alt="Main hero" />
+            <div class="account-hero-preview__meta">
+              <div id="account-main-hero-name" class="account-hero-preview__name">Not set</div>
+            </div>
+          </div>
+          <button type="button" class="account-action-btn" id="account-select-main-btn">Select</button>
+        </div>
+      </div>
+
+      <div class="account-field">
+        <div class="account-field__label">Rank</div>
+        <select id="account-rank-select" class="account-select">
+          <option value="Plastic">Plastic</option>
+          <option value="Bronze">Bronze</option>
+          <option value="Silver">Silver</option>
+          <option value="Gold">Gold</option>
+          <option value="Platinum">Platinum</option>
+          <option value="Diamond">Diamond</option>
+          <option value="Grandmaster">Grandmaster</option>
+          <option value="Celestial">Celestial</option>
+          <option value="Eternity">Eternity</option>
+        </select>
+      </div>
+
+      <div class="account-field">
+        <div class="account-field__label">Winrate</div>
+        <div class="account-field__row">
+          <div id="account-winrate-value" class="account-winrate">0%</div>
+          <button type="button" class="account-action-btn" id="account-randomize-winrate-btn">Randomize</button>
+        </div>
+      </div>
+
+      <div class="account-actions">
+        <button type="button" class="login-submit-btn" id="account-save-btn">Save Profile</button>
+      </div>
+    `;
+
+    registrationSection.appendChild(panel);
+    return panel;
+  }
+
+  function ensureHeroPickerModal() {
+    let modal = document.getElementById('hero-picker-modal');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'hero-picker-modal';
+    modal.className = 'hero-picker-modal';
+    modal.setAttribute('hidden', 'true');
+    modal.innerHTML = `
+      <div class="hero-picker-backdrop" data-hero-picker-close></div>
+      <div class="hero-picker-panel" role="dialog" aria-modal="true" aria-label="Select your main hero">
+        <div class="hero-picker-header">
+          <div class="hero-picker-title">Select Your Main</div>
+          <button class="hero-picker-close" type="button" aria-label="Close" data-hero-picker-close>&times;</button>
+        </div>
+        <div class="hero-picker-grid" id="hero-picker-grid"></div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', (e) => {
+      const close = e.target.closest('[data-hero-picker-close]');
+      if (close) {
+        modal.setAttribute('hidden', 'true');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.hasAttribute('hidden')) {
+        modal.setAttribute('hidden', 'true');
+      }
+    });
+
+    return modal;
+  }
+
+  function ensureBioPanel() {
+    const rightContent = document.querySelector('.login-section.login-right-section .login-right-content');
+    if (!rightContent) return null;
+
+    let panel = document.getElementById('account-bio-panel');
+    if (panel) return panel;
+
+    panel = document.createElement('div');
+    panel.id = 'account-bio-panel';
+    panel.className = 'account-bio-panel';
+    panel.setAttribute('hidden', 'true');
+    panel.innerHTML = `
+      <div class="account-bio-title">Bio</div>
+      <textarea id="account-bio-input" class="account-bio-textarea" rows="6" maxlength="220" placeholder="Add a short bio about yourself..."></textarea>
+      <div class="account-bio-meta">
+        <span id="account-bio-status" class="account-bio-status">Saved</span>
+        <span id="account-bio-count" class="account-bio-count">0 / 220</span>
+      </div>
+    `;
+
+    rightContent.appendChild(panel);
+    return panel;
+  }
+
+  async function persistUserProfile(user) {
+    // Persist to MongoDB (best effort). Still keeps localStorage as source of truth for UI.
+    if (!user?.id || user.id.toString().startsWith('guest_')) return;
+    try {
+      await fetch(`/users/${encodeURIComponent(user.id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          favoriteCharacter: user.favoriteCharacter,
+          mainHeroId: user.mainHeroId,
+          rank: user.rank,
+          winrate: user.winrate,
+          avatar: user.avatar,
+          bio: user.bio
+        })
+      });
+    } catch (e) {
+      // Non-blocking (offline-friendly)
+      console.warn('Failed to persist profile to server (will stay local).', e);
+    }
+  }
+
+  function renderAccountPanelState() {
+    const user = getStoredUser();
+    const isLoggedIn = !!user && user.isGuest === false;
+
+    const registrationForm = document.getElementById('popup-registrationForm');
+    const registrationTitle = document.querySelector('.registration-section .login-section-title');
+    const switchAuth = document.querySelector('.login-switch-auth');
+    const accountPanel = ensureAccountPanel();
+
+    if (switchAuth) switchAuth.style.display = isLoggedIn ? 'none' : '';
+    if (registrationForm) registrationForm.style.display = isLoggedIn ? 'none' : '';
+    if (registrationTitle) registrationTitle.style.display = isLoggedIn ? 'none' : '';
+
+    if (accountPanel) {
+      if (isLoggedIn) accountPanel.removeAttribute('hidden');
+      else accountPanel.setAttribute('hidden', 'true');
+    }
+
+    // Right side: hide guest CTA when logged in; show "Logged in as ..."
+    const loginDescription = document.getElementById('login-description');
+    const popupGuestLogin = document.getElementById('popup-guestLogin');
+    const expandContent = document.getElementById('popup-expandContent');
+    const expandBtn = document.getElementById('popup-expandLink');
+    const expandableSection = document.querySelector('.login-expandable-section');
+    const loginRightSection = document.querySelector('.login-section.login-right-section');
+    const bioPanel = ensureBioPanel();
+
+    if (isLoggedIn) {
+      if (popupGuestLogin) popupGuestLogin.style.display = 'none';
+      if (loginDescription) loginDescription.textContent = `Logged in as ${user.username || user.name || 'User'}`;
+      if (expandableSection) expandableSection.style.display = 'none';
+      if (expandContent) expandContent.hidden = true;
+      if (expandBtn) expandBtn.setAttribute('aria-expanded', 'false');
+    } else {
+      // Default handled by checkGuestStatus()
+      if (expandableSection) expandableSection.style.display = '';
+    }
+
+    // Populate fields if logged in
+    if (isLoggedIn && accountPanel) {
+      const img = document.getElementById('account-main-hero-img');
+      const nameEl = document.getElementById('account-main-hero-name');
+      const rankSelect = document.getElementById('account-rank-select');
+      const winrateEl = document.getElementById('account-winrate-value');
+
+      if (img) img.src = user.avatar || 'Images/Rival.png';
+      if (nameEl) nameEl.textContent = user.favoriteCharacter || 'Not set';
+      if (rankSelect) rankSelect.value = user.rank || 'Unranked';
+      if (winrateEl) winrateEl.textContent = `${Number(user.winrate || 0)}%`;
+
+      // Right side background: use selected hero's background image
+      if (loginRightSection) {
+        const catalog = Array.isArray(window.RIVALS_HERO_CATALOG) ? window.RIVALS_HERO_CATALOG : [];
+        const hero = catalog.find(h => h.id === user.mainHeroId) || catalog.find(h => h.name === user.favoriteCharacter);
+        const bg = hero?.backgroundImage || user.avatar || 'Images/Rival.png';
+        loginRightSection.style.setProperty('--login-right-bg', `url('${bg}')`);
+      }
+
+      // Right side bio panel (fills the empty space)
+      if (bioPanel) {
+        bioPanel.removeAttribute('hidden');
+        const bioInput = document.getElementById('account-bio-input');
+        const count = document.getElementById('account-bio-count');
+        const status = document.getElementById('account-bio-status');
+        if (bioInput) {
+          // Avoid stomping cursor while typing
+          if (document.activeElement !== bioInput) {
+            bioInput.value = user.bio || '';
+          }
+        }
+        if (count) {
+          const len = (user.bio || '').length;
+          count.textContent = `${len} / 220`;
+        }
+        if (status) status.textContent = 'Saved';
+      }
+    } else {
+      if (bioPanel) bioPanel.setAttribute('hidden', 'true');
+    }
+  }
+
+  function wireAccountPanelHandlers() {
+    const selectBtn = document.getElementById('account-select-main-btn');
+    const saveBtn = document.getElementById('account-save-btn');
+    const randomBtn = document.getElementById('account-randomize-winrate-btn');
+    const rankSelect = document.getElementById('account-rank-select');
+    const bioPanel = ensureBioPanel();
+
+    if (rankSelect) {
+      rankSelect.addEventListener('change', () => {
+        const user = getStoredUser();
+        if (!user || user.isGuest) return;
+        user.rank = rankSelect.value;
+        saveStoredUser(user);
+        renderAccountPanelState();
+        window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user } }));
+        // Auto-save so it persists after logout/login
+        persistUserProfile(user);
+      });
+    }
+
+    if (randomBtn) {
+      randomBtn.addEventListener('click', () => {
+        const user = getStoredUser();
+        if (!user || user.isGuest) return;
+        user.winrate = Math.floor(Math.random() * 101);
+        saveStoredUser(user);
+        renderAccountPanelState();
+        window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user } }));
+        // Auto-save so it persists after logout/login
+        persistUserProfile(user);
+      });
+    }
+
+    if (selectBtn) {
+      selectBtn.addEventListener('click', () => {
+        const user = getStoredUser();
+        if (!user || user.isGuest) return;
+
+        const modal = ensureHeroPickerModal();
+        const grid = modal.querySelector('#hero-picker-grid');
+        const catalog = Array.isArray(window.RIVALS_HERO_CATALOG) ? window.RIVALS_HERO_CATALOG : [];
+
+        if (grid) {
+          grid.innerHTML = catalog.map(hero => `
+            <button type="button" class="hero-picker-card" data-hero-id="${hero.id}">
+              <img src="${hero.card}" alt="${hero.name}" loading="lazy" />
+              <div class="hero-picker-name">${hero.name}</div>
+            </button>
+          `).join('');
+
+          grid.querySelectorAll('.hero-picker-card').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const heroId = btn.getAttribute('data-hero-id');
+              const hero = catalog.find(h => h.id === heroId);
+              if (!hero) return;
+              user.mainHeroId = hero.id;
+              user.favoriteCharacter = hero.name;
+              user.avatar = hero.card;
+              saveStoredUser(user);
+              renderAccountPanelState();
+              window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user } }));
+              // Auto-save so it persists after logout/login
+              persistUserProfile(user);
+              modal.setAttribute('hidden', 'true');
+            });
+          });
+        }
+
+        modal.removeAttribute('hidden');
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        const user = getStoredUser();
+        if (!user || user.isGuest) return;
+        await persistUserProfile(user);
+        alert('✅ Profile saved!');
+      });
+    }
+
+    // Bio autosave (debounced)
+    if (bioPanel) {
+      const bioInput = document.getElementById('account-bio-input');
+      const count = document.getElementById('account-bio-count');
+      const status = document.getElementById('account-bio-status');
+
+      let bioTimer = null;
+      if (bioInput) {
+        bioInput.addEventListener('input', () => {
+          const user = getStoredUser();
+          if (!user || user.isGuest) return;
+
+          user.bio = bioInput.value || '';
+          saveStoredUser(user);
+          if (count) count.textContent = `${user.bio.length} / 220`;
+          if (status) status.textContent = 'Saving...';
+          window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user } }));
+
+          if (bioTimer) window.clearTimeout(bioTimer);
+          bioTimer = window.setTimeout(async () => {
+            await persistUserProfile(user);
+            if (status) status.textContent = 'Saved';
+          }, 500);
+        });
+      }
     }
   }
 
@@ -809,19 +1159,25 @@
   const guestLogoutBtn = document.getElementById('guest-logout-btn');
   if (guestLogoutBtn) {
     guestLogoutBtn.addEventListener('click', () => {
-      // Clear guest data
+      const user = getStoredUser();
+      const isLoggedIn = !!user && user.isGuest === false;
+
+      // Clear guest or logged-in session
       localStorage.removeItem('isGuest');
       sessionStorage.removeItem('isGuest');
       localStorage.removeItem('guestUser');
       sessionStorage.removeItem('guestUser');
+      localStorage.removeItem('loggedInUser');
+      sessionStorage.removeItem('loggedInUser');
       
       // Dispatch logout event
       window.dispatchEvent(new CustomEvent('userLoggedOut'));
       
       // Update UI
       checkGuestStatus();
+      renderAccountPanelState();
       
-      alert('Logged out as Guest');
+      alert(isLoggedIn ? 'Logged out' : 'Logged out as Guest');
       
       // Reload page to update community profile
       setTimeout(() => {
@@ -834,6 +1190,10 @@
 
   // Check on page load
   checkGuestStatus();
+  // Setup account panel (logged-in view)
+  ensureAccountPanel();
+  renderAccountPanelState();
+  wireAccountPanelHandlers();
 
   // Scroll reveal
   const revealables = Array.from(document.querySelectorAll('[data-reveal]'));
@@ -1265,7 +1625,6 @@
   // Hero page logic
   (function initHeroPage(){
     const heroPage = document.querySelector('.hero-page');
-    if (!heroPage) return;
 
     const roleLabels = {
       vanguard: 'Vanguard',
@@ -2552,6 +2911,18 @@
       ...duelistHeroes.map((hero, index) => createHero(hero, vanguardHeroes.length + index)),
       ...strategistHeroes.map((hero, index) => createHero(hero, vanguardHeroes.length + duelistHeroes.length + index))
     ];
+
+    // Expose a minimal catalog globally so other pages (login popup) can use hero images for profile selection.
+    // This is safe because we only export data; the DOM-heavy hero page logic still only runs on Hero.html.
+    window.RIVALS_HERO_CATALOG = heroCatalog.map(h => ({
+      id: h.id,
+      name: h.name,
+      category: h.category,
+      card: h.card,
+      backgroundImage: h.backgroundImage
+    }));
+
+    if (!heroPage) return;
 
     const heroMap = new Map(heroCatalog.map(hero => [hero.id, hero]));
 

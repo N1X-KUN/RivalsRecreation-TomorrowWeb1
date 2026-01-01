@@ -2302,8 +2302,8 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .login-modal {
   position: relative;
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
+  max-width: 850px;
+  max-height: 85vh;
   overflow: hidden;
   background: rgba(15, 20, 35, 0.95);
   border-radius: 16px;
@@ -2313,8 +2313,6 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   backdrop-filter: blur(20px);
   transform: scale(0.95) translateY(20px);
   transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
 }
 
 .login-popup[open] .login-modal {
@@ -2325,19 +2323,18 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .login-modal-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  height: 100%;
-  max-height: 90vh;
+  max-height: 85vh;
   gap: 0;
   overflow: hidden;
 }
 
 .login-section {
-  padding: 35px 30px;
+  padding: 30px 28px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
-  max-height: 90vh;
+  max-height: 85vh;
 }
 
 .login-section.registration-section {
@@ -2346,13 +2343,13 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 }
 
 .login-section.login-right-section {
-  background-image: url('Images/Rival.png');
+  background-image: var(--login-right-bg, url('Images/Rival.png'));
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
   justify-content: flex-start;
-  padding-top: 120px; /* Align with "Registration" title on left side (header ~60px + margin ~30px + title position) */
+  padding-top: 80px;
 }
 
 .login-section.login-right-section::before {
@@ -2397,7 +2394,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 
 /* Section Header */
 .login-section-header {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .login-logo-container {
@@ -2476,7 +2473,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .login-section-title {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   color: #ffffff;
 }
 
@@ -2493,12 +2490,12 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 
 .login-form-group input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
@@ -2540,6 +2537,270 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   border-radius: 4px;
 }
 
+/* Logged-in Account Panel (Login Popup Left Side) */
+.login-account-panel {
+  margin-top: 12px;
+}
+
+.login-account-panel[hidden] {
+  display: none !important;
+}
+
+.account-field {
+  margin-bottom: 14px;
+}
+
+.account-field__label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.account-field__row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.account-hero-preview {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+
+.account-hero-preview img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.account-hero-preview__name {
+  font-size: 14px;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-action-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.account-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.26);
+  transform: translateY(-1px);
+}
+
+.account-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 13px;
+}
+
+.account-select option {
+  color: #111;
+}
+
+.account-winrate {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
+}
+
+.account-actions {
+  margin-top: 8px;
+}
+
+/* Hero Picker Modal */
+.hero-picker-modal[hidden] {
+  display: none !important;
+}
+
+.hero-picker-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.hero-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 6, 10, 0.75);
+  backdrop-filter: blur(8px);
+}
+
+.hero-picker-panel {
+  position: relative;
+  width: min(860px, 95vw);
+  max-height: 78vh;
+  overflow: hidden;
+  background: rgba(15, 20, 35, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.hero-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.hero-picker-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.6px;
+}
+
+.hero-picker-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hero-picker-grid {
+  padding: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+  overflow: auto;
+  max-height: calc(78vh - 58px);
+}
+
+.hero-picker-card {
+  text-align: left;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.hero-picker-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 215, 0, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.hero-picker-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.hero-picker-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Right-side Bio Panel (Login Popup) */
+.account-bio-panel[hidden] {
+  display: none !important;
+}
+
+.account-bio-panel {
+  margin-top: 18px;
+  padding: 14px 14px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: left;
+}
+
+.account-bio-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.account-bio-textarea {
+  width: 100%;
+  resize: none;
+  min-height: 120px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  line-height: 1.4;
+  outline: none;
+}
+
+.account-bio-textarea:focus {
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.10);
+}
+
+.account-bio-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.account-bio-status {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 700;
+}
+
+.account-bio-count {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .password-toggle:hover {
   color: rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.1);
@@ -2550,12 +2811,25 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   height: 20px;
 }
 
-.password-toggle .eye-icon {
+.password-toggle svg {
   display: block;
 }
 
-.password-toggle .eye-off-icon {
+/* Password toggle icons - first SVG (eye) shows when password is hidden, second SVG (eye-off) shows when password is visible */
+.password-toggle svg:first-child {
+  display: block;
+}
+
+.password-toggle svg:last-child {
   display: none;
+}
+
+.password-toggle.hidden svg:first-child {
+  display: none;
+}
+
+.password-toggle.hidden svg:last-child {
+  display: block;
 }
 
 /* Captcha Group */
@@ -2572,14 +2846,14 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  min-width: 120px;
+  min-width: 110px;
   justify-content: center;
 }
 
@@ -2609,7 +2883,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 
 /* Checkbox */
 .login-checkbox-group {
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 .login-checkbox-label {
@@ -2706,29 +2980,29 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 }
 
 .login-description {
-  font-size: 16px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 30px;
-  line-height: 1.6;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 .login-social-login-btn {
   width: 100%;
-  padding: 16px 24px;
+  padding: 12px 20px;
   background: linear-gradient(135deg, #1e88e5, #1565c0);
   border: none;
   border-radius: 8px;
   color: #ffffff;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .login-social-login-btn:hover {

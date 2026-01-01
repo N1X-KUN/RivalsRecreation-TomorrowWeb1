@@ -4,19 +4,52 @@
 
   // Data Storage (localStorage - ready for backend migration)
   const STORAGE_KEY = 'rivals_community_posts';
+  // Legacy community user key (kept for backward compatibility)
   const USER_STORAGE_KEY = 'rivals_current_user';
+  // Main site login key used by `Rivals.js` (source of truth across pages)
+  const LOGGED_IN_USER_KEY = 'loggedInUser';
+  const GUEST_KEY = 'isGuest';
+  // Following storage (per user)
+  const FOLLOWING_KEY_PREFIX = 'rivals_following_';
+
+  // urls for quick navigation links
+  const QUICK_NAV_LINKS = {
+    hotList: 'https://www.marvelrivals.com/heroes_data/',
+    teamUp: 'https://www.marvelrivals.com/heroes/teamup.html',
+    media: 'https://www.marvelrivals.com/media/'
+  };
 
   // Get current user
   function getCurrentUser() {
+    // Prefer main-site auth state so Community stays in sync after login/logout on any page
+    const loggedStr = localStorage.getItem(LOGGED_IN_USER_KEY) || sessionStorage.getItem(LOGGED_IN_USER_KEY);
+    if (loggedStr) {
+      try {
+        const u = JSON.parse(loggedStr);
+        if (u && typeof u === 'object') {
+          u.isGuest = false;
+          return u;
+        }
+      } catch {}
+    }
+
+    // If guest flag exists, treat as guest
+    const isGuestFlag = localStorage.getItem(GUEST_KEY) === 'true' || sessionStorage.getItem(GUEST_KEY) === 'true';
+
+    // Fallback to legacy community user key
     const userStr = localStorage.getItem(USER_STORAGE_KEY);
     if (userStr) {
-      const user = JSON.parse(userStr);
-      // Ensure isGuest flag exists
-      if (user.isGuest === undefined) {
-        user.isGuest = user.id && user.id.startsWith('guest_');
-      }
-      return user;
+      try {
+        const user = JSON.parse(userStr);
+        if (user && typeof user === 'object') {
+          if (user.isGuest === undefined) {
+            user.isGuest = isGuestFlag || (user.id && user.id.startsWith('guest_'));
+          }
+          return user;
+        }
+      } catch {}
     }
+
     // Default guest user
     return {
       id: 'guest_' + Date.now(),
@@ -33,13 +66,47 @@
 
   // Save current user
   function saveCurrentUser(user) {
+    // Keep both keys in sync to avoid "Guest" showing up after a real login.
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    if (user && user.isGuest === false) {
+      localStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(user));
+      sessionStorage.setItem(LOGGED_IN_USER_KEY, JSON.stringify(user));
+      localStorage.removeItem(GUEST_KEY);
+      sessionStorage.removeItem(GUEST_KEY);
+    }
   }
 
   // Get all posts
   function getPosts() {
     const postsStr = localStorage.getItem(STORAGE_KEY);
     return postsStr ? JSON.parse(postsStr) : [];
+  }
+
+  function getFollowingKey() {
+    const id = (currentUser && currentUser.id) ? String(currentUser.id) : 'guest';
+    return `${FOLLOWING_KEY_PREFIX}${id}`;
+  }
+
+  function getFollowingSet() {
+    try {
+      const raw = localStorage.getItem(getFollowingKey());
+      const arr = raw ? JSON.parse(raw) : [];
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveFollowingSet(set) {
+    localStorage.setItem(getFollowingKey(), JSON.stringify(Array.from(set)));
+  }
+
+  function toggleFollowUser(targetUserId) {
+    const set = getFollowingSet();
+    if (set.has(targetUserId)) set.delete(targetUserId);
+    else set.add(targetUserId);
+    saveFollowingSet(set);
+    return set;
   }
 
   // Save posts
@@ -143,7 +210,7 @@
   const profileCreatedDate = document.getElementById('profile-created-date');
 
   let selectedMedia = [];
-  let activeTab = 'following';
+  let activeTab = 'discussions';
   let currentUser = getCurrentUser();
 
   // Format account creation date
@@ -193,7 +260,7 @@
       // Disable posting for guests
       if (createPostInput) {
         createPostInput.disabled = true;
-        createPostInput.placeholder = 'Sign up to create posts and share content!';
+        createPostInput.placeholder = 'Sign up to create a post and share content!';
       }
       if (submitPostBtn) submitPostBtn.disabled = true;
       createPostBtns.forEach(btn => {
@@ -235,51 +302,57 @@
     if (getPosts().length === 0) {
       initializeSamplePosts();
     }
+
+    // Quick navigation links
+    const hot = document.getElementById('nav-hot-list');
+    const team = document.getElementById('nav-team-up');
+    const media = document.getElementById('nav-media');
+    if (hot) hot.href = QUICK_NAV_LINKS.hotList;
+    if (team) team.href = QUICK_NAV_LINKS.teamUp;
+    if (media) media.href = QUICK_NAV_LINKS.media;
   }
 
-  // Initialize sample posts
-  function initializeSamplePosts() {
-    const samplePosts = [
+  // Built-in (seed) posts that ship with the site.
+  // You can edit/add posts here to make them appear "already there" before users post anything.
+  // TIP: keep `userId` stable (e.g. 'seed_admin') so follow filters work predictably.
+  const SEEDED_POSTS = [
       {
-        userId: 'user1',
-        username: 'ladyhues',
+        userId: 'seed_admin',
+        username: 'RivalsTeam',
         avatar: 'Images/Rival.png',
-        game: 'Genshin Impact',
-        title: 'New Codes For primogems, Moras & More',
-        text: '✨ Hello, Travelers! ❤️ A small gift from Teyvat has just arrived Redeem these Genshin Impact codes before they expire and claim your rewards! 🎁',
-        codes: ['BLKS3198XVS2', '7TBZAGPP2WRD', 'P3GXX56W3VG9'],
+        game: 'Marvel Rivals',
+        title: 'Welcome to Rivals Nexus Community',
+        text: 'Drop your highlights, team comps, and memes here. Use ❤️ to boost posts into Popular.',
         media: ['Images/New1.jpg'],
-        hashtags: ['#GenshinImpact', '#Codes'],
+        hashtags: ['#RivalsNexus', '#Community'],
         likes: 98,
         comments: [
-          { userId: 'user2', username: 'Traveler123', avatar: 'Images/Rival.png', text: 'Thanks for sharing!', createdAt: new Date(Date.now() - 3600000).toISOString() }
+          { userId: 'seed_user2', username: 'PatchNotes', avatar: 'Images/Rival.png', text: 'Be respectful and have fun!', createdAt: new Date(Date.now() - 3600000).toISOString() }
         ],
         views: 627,
         createdAt: new Date(Date.now() - 86400000).toISOString()
       },
       {
-        userId: 'user2',
-        username: '69SHAN69',
+        userId: 'seed_user2',
+        username: 'Test1',
         avatar: 'Images/Rival.png',
-        game: 'Zenless Zone Zero',
-        text: 'is this good ? as f2p',
-        media: ['Images/New1.jpg', 'Images/New1.jpg'],
-        hashtags: ['#YeShunguang'],
+        game: 'Marvel Rivals',
+        text: 'he said nah id win',
+        media: [],
+        hashtags: ['#UltronMain'],
         likes: 98,
-        comments: [
-          { userId: 'user3', username: 'ProGamer', avatar: 'Images/Rival.png', text: 'Looks solid for F2P!', createdAt: new Date(Date.now() - 7200000).toISOString() }
-        ],
+        comments: [],
         views: 21000,
         createdAt: new Date(Date.now() - 72000000).toISOString()
       },
       {
-        userId: 'user3',
-        username: 'SoraHoshina',
+        userId: 'seed_user3',
+        username: 'StrategyLab',
         avatar: 'Images/Rival.png',
-        game: 'Zenless Zone Zero',
-        text: 'Ye Shunguang & Zhao M6 Mindscape Server is up! Good luck to those pulling for YSG and Zhao\'s Mindscape (or W-Engines)!',
-        media: ['Images/New1.jpg', 'Images/New1.jpg', 'Images/New1.jpg', 'Images/New1.jpg'],
-        hashtags: ['#YeShunguang', '#Zhao', '#2.5'],
+        game: 'Marvel Rivals',
+        text: 'Tip: Ultron + zone control comps dominate choke points. What’s your best team-up?',
+        media: ['Images/TeamUp.jpg'],
+        hashtags: ['#Tips', '#TeamUp'],
         likes: 73,
         comments: [],
         views: 27000,
@@ -287,7 +360,10 @@
       }
     ];
 
-    samplePosts.forEach(post => {
+  // Initialize seed posts (only runs once when there are no posts yet)
+  function initializeSamplePosts() {
+
+    SEEDED_POSTS.forEach(post => {
       addPost(post);
     });
     loadPosts();
@@ -472,15 +548,26 @@
 
     // Filter by active tab
     if (activeTab === 'following') {
-      // Show all for now (can filter by followed users later)
-    } else if (activeTab === 'recommended') {
-      // Sort by likes/views
-      posts = posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-    } else if (activeTab === 'events') {
-      // Filter event posts (can add event tag later)
+      const following = getFollowingSet();
+      posts = posts.filter(p => following.has(String(p.userId)));
+    } else if (activeTab === 'popular') {
+      posts = posts
+        .filter(p => (p.likes || 0) > 0)
+        .sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    } else {
+      // discussions = everything (default ordering = newest first)
     }
 
-    postsFeed.innerHTML = posts.map(post => renderPost(post)).join('');
+    if (posts.length === 0) {
+      const msg = activeTab === 'popular'
+        ? 'No popular posts yet. Posts appear here once they have at least 1 like.'
+        : activeTab === 'following'
+          ? 'You are not following anyone yet. Follow users to see their posts here.'
+          : 'No posts yet.';
+      postsFeed.innerHTML = `<div class="community-empty-state">${escapeHtml(msg)}</div>`;
+    } else {
+      postsFeed.innerHTML = posts.map(post => renderPost(post)).join('');
+    }
 
     // Attach event listeners to new posts
     attachPostListeners();
@@ -490,6 +577,9 @@
   function renderPost(post) {
     const timeAgo = getTimeAgo(new Date(post.createdAt));
     const isLiked = post.likedBy && post.likedBy.includes(currentUser.id);
+    const following = getFollowingSet();
+    const isOwnPost = String(post.userId) === String(currentUser.id);
+    const isFollowingUser = following.has(String(post.userId));
     const mediaHtml = renderPostMedia(post.media || []);
     const codesHtml = post.codes ? renderCodes(post.codes) : '';
     const hashtagsHtml = post.hashtags ? renderHashtags(post.hashtags) : '';
@@ -511,7 +601,7 @@
             </div>
           </div>
           <div class="post-actions-header">
-            <button class="follow-btn">Follow</button>
+            ${isOwnPost ? '' : `<button class="follow-btn ${isFollowingUser ? 'is-following' : ''}" data-user-id="${escapeHtml(String(post.userId))}">${isFollowingUser ? 'Following' : 'Follow'}</button>`}
             <button class="post-menu-btn" aria-label="More options">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="1"></circle>
@@ -654,6 +744,20 @@
 
   // Attach post listeners
   function attachPostListeners() {
+    // Follow buttons
+    document.querySelectorAll('.follow-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetUserId = btn.getAttribute('data-user-id');
+        if (!targetUserId) return;
+        const set = toggleFollowUser(String(targetUserId));
+        const nowFollowing = set.has(String(targetUserId));
+        btn.classList.toggle('is-following', nowFollowing);
+        btn.textContent = nowFollowing ? 'Following' : 'Follow';
+        // If currently in following tab, re-render to reflect filtering immediately
+        if (activeTab === 'following') loadPosts();
+      });
+    });
+
     // Like buttons
     document.querySelectorAll('.like-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {

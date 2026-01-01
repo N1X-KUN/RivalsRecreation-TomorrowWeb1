@@ -3,7 +3,9 @@
 .community-main {
   min-height: 100vh;
   padding: 100px 20px 40px;
-  background: var(--bg-1);
+  /* Let the background image show through */
+  background: transparent;
+  position: relative;
 }
 
 .community-container {
@@ -12,6 +14,35 @@
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Top-only background image (behind the top section area) */
+.community-top-bg {
+  position: absolute;
+  /* Start at the very top so it fills the "blank gap" above the tabs */
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Cover from the very top down past the tabs area */
+  height: 520px;
+  z-index: 0;
+  overflow: hidden;
+  background-image: url('Images/Community.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05) contrast(1.05);
+}
+
+.community-top-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(15, 15, 22, 0.30) 0%, rgba(15, 15, 22, 0.92) 85%, rgba(15, 15, 22, 1) 100%),
+    radial-gradient(900px 320px at 20% 20%, rgba(255, 215, 0, 0.10) 0%, rgba(0,0,0,0) 60%);
+  pointer-events: none;
 }
 
 /* Navigation Tabs */
@@ -230,6 +261,21 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.community-empty-state {
+  padding: 22px;
+  border-radius: 16px;
+  background: rgba(20, 24, 38, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+}
+
+.follow-btn.is-following {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 215, 0, 0.35);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .community-post {

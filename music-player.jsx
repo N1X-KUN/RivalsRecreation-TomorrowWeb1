@@ -16,34 +16,136 @@ function MusicPlayer() {
   const iconRef = useRef(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
 
+  // Use global audio element to persist across page navigations
+  useEffect(() => {
+    if (!window.__globalMusicAudio) {
+      window.__globalMusicAudio = new Audio();
+      window.__globalMusicAudio.volume = 0.6;
+      window.__globalMusicAudio.loop = false;
+    }
+    audioRef.current = window.__globalMusicAudio;
+    
+    // Restore playback state from sessionStorage
+    const savedState = sessionStorage.getItem('musicPlayerState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        if (state.currentTime && audioRef.current) {
+          audioRef.current.currentTime = state.currentTime;
+        }
+        if (state.isPlaying !== undefined) {
+          setIsPlaying(state.isPlaying);
+        }
+        if (state.currentSongIndex !== undefined) {
+          setCurrentSongIndex(state.currentSongIndex);
+        }
+        if (state.volume !== undefined) {
+          setVolume(state.volume);
+        }
+        if (state.isMuted !== undefined) {
+          setIsMuted(state.isMuted);
+        }
+      } catch (e) {
+        console.warn('Failed to restore music state:', e);
+      }
+    }
+    
+    return () => {
+      // Save state before unmount
+      if (audioRef.current) {
+        sessionStorage.setItem('musicPlayerState', JSON.stringify({
+          currentTime: audioRef.current.currentTime,
+          isPlaying: !audioRef.current.paused,
+          currentSongIndex,
+          volume,
+          isMuted
+        }));
+      }
+    };
+  }, []);
+
   // Load playlist from API
   useEffect(() => {
     fetch('/api/playlist')
       .then(res => res.json())
       .then(data => {
         setPlaylist(data);
-        setCurrentSongIndex(data.currentSongIndex || 0);
-        if (audioRef.current) {
-          audioRef.current.src = data.songs[data.currentSongIndex || 0]?.audioUrl || '';
-          audioRef.current.volume = volume / 100;
+        const savedIndex = data.currentSongIndex || 0;
+        setCurrentSongIndex(savedIndex);
+        if (audioRef.current && data.songs[savedIndex]) {
+          const currentSrc = audioRef.current.src;
+          const newSrc = data.songs[savedIndex].audioUrl;
+          // Only change source if it's different (avoid restarting on page navigation)
+          if (!currentSrc || !currentSrc.includes(newSrc.split('/').pop())) {
+            audioRef.current.src = newSrc;
+          }
+          audioRef.current.volume = isMuted ? 0 : volume / 100;
+          
+          // Restore playback state
+          const savedState = sessionStorage.getItem('musicPlayerState');
+          if (savedState) {
+            try {
+              const state = JSON.parse(savedState);
+              if (state.currentTime && audioRef.current) {
+                audioRef.current.currentTime = state.currentTime;
+              }
+              if (state.isPlaying && !audioRef.current.paused) {
+                // If it was playing, continue playing
+                const playPromise = audioRef.current.play();
+                if (playPromise !== undefined) {
+                  playPromise
+                    .then(() => {
+                      setIsPlaying(true);
+                    })
+                    .catch(error => {
+                      console.log('Auto-play prevented:', error);
+                    });
+                }
+              } else {
+                setIsPlaying(state.isPlaying || false);
+              }
+            } catch (e) {
+              console.warn('Failed to restore music state:', e);
+            }
+          } else {
+            // First boot: auto-play unmuted
+            setIsMuted(false);
+            setIsPlaying(true);
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  setIsPlaying(true);
+                })
+                .catch(error => {
+                  console.log('Auto-play prevented:', error);
+                });
+            }
+          }
         }
       })
       .catch(err => console.error('Error loading playlist:', err));
   }, []);
 
-  // Auto-play on load
+  // Auto-play on first load (unmuted by default)
   useEffect(() => {
     if (playlist && playlist.songs.length > 0 && audioRef.current) {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-          })
-          .catch(error => {
-            console.log('Auto-play prevented:', error);
-            // User interaction required for some browsers
-          });
+      const firstBoot = !sessionStorage.getItem('musicPlayerState');
+      if (firstBoot) {
+        // First boot: ensure unmuted and playing
+        setIsMuted(false);
+        setIsPlaying(true);
+        audioRef.current.volume = volume / 100;
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch(error => {
+              console.log('Auto-play prevented:', error);
+            });
+        }
       }
     }
   }, [playlist]);
@@ -52,8 +154,18 @@ function MusicPlayer() {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume / 100;
+      // Save state
+      if (audioRef.current) {
+        sessionStorage.setItem('musicPlayerState', JSON.stringify({
+          currentTime: audioRef.current.currentTime,
+          isPlaying: !audioRef.current.paused,
+          currentSongIndex,
+          volume,
+          isMuted
+        }));
+      }
     }
-  }, [volume, isMuted]);
+  }, [volume, isMuted, currentSongIndex]);
 
   // Handle song end
   useEffect(() => {
@@ -81,6 +193,36 @@ function MusicPlayer() {
     }).catch(err => console.error('Error updating song index:', err));
   };
 
+  // Save state periodically and on navigation
+  useEffect(() => {
+    const saveState = () => {
+      if (audioRef.current) {
+        sessionStorage.setItem('musicPlayerState', JSON.stringify({
+          currentTime: audioRef.current.currentTime,
+          isPlaying: !audioRef.current.paused,
+          currentSongIndex,
+          volume,
+          isMuted
+        }));
+      }
+    };
+
+    // Save state every 2 seconds
+    const interval = setInterval(saveState, 2000);
+    
+    // Save state before page unload
+    window.addEventListener('beforeunload', saveState);
+    
+    // Save state on page visibility change
+    document.addEventListener('visibilitychange', saveState);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('beforeunload', saveState);
+      document.removeEventListener('visibilitychange', saveState);
+    };
+  }, [currentSongIndex, volume, isMuted, isPlaying]);
+
   // Play/Pause toggle
   const togglePlayPause = () => {
     if (!audioRef.current) return;
@@ -105,6 +247,7 @@ function MusicPlayer() {
     setCurrentSongIndex(index);
     if (audioRef.current) {
       audioRef.current.src = playlist.songs[index].audioUrl;
+      audioRef.current.currentTime = 0; // Reset to start of new song
       audioRef.current.play();
       setIsPlaying(true);
     }

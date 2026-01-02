@@ -219,6 +219,34 @@ function openBanModal(id, name) {
     minutesInput.focus();
 }
 
+function getPostCountForUser(userId) {
+    try {
+        const postsStr = localStorage.getItem('rivals_community_posts');
+        if (!postsStr) return 0;
+        const posts = JSON.parse(postsStr);
+        if (!Array.isArray(posts)) return 0;
+        // Count posts by userId (match both string and ObjectId formats)
+        return posts.filter(p => String(p.userId) === String(userId) || String(p.userId) === String(userId)).length;
+    } catch {
+        return 0;
+    }
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    try {
+        const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) return 'N/A';
+        return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+    } catch {
+        return 'N/A';
+    }
+}
+
 async function loadUsers() {
     try {
         const response = await fetch('/users');
@@ -227,13 +255,24 @@ async function loadUsers() {
             const userTableBody = document.getElementById('userTableBody');
             userTableBody.innerHTML = '';
             
+            // Sort users by creation date (newest first)
+            users.sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0).getTime();
+                const dateB = new Date(b.createdAt || 0).getTime();
+                return dateB - dateA;
+            });
+            
             users.forEach(user => {
                 const isBanned = !!user.bannedUntil && new Date(user.bannedUntil).getTime() > Date.now();
                 const isAdmin = user.role === 'admin';
+                const postCount = getPostCountForUser(user._id);
+                const createdDate = formatDate(user.createdAt);
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${user.name}</td>
                     <td>${user.email}</td>
+                    <td>${createdDate}</td>
+                    <td>${postCount}</td>
                     <td>${formatBanStatus(user.bannedUntil)}</td>
                     <td>
                         <a href="edit-user.html?id=${user._id}">Edit</a>

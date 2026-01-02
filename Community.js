@@ -263,6 +263,19 @@
     return null;
   }
 
+  // Delete comment (admin only)
+  function deleteComment(postId, commentId) {
+    if (!isAdminUser()) return null;
+    const posts = getPosts();
+    const post = posts.find(p => p.id === postId);
+    if (post && post.comments) {
+      post.comments = post.comments.filter(c => String(c.id) !== String(commentId));
+      savePosts(posts);
+      return true;
+    }
+    return null;
+  }
+
   // Toggle like on post
   function toggleLike(postId, userId) {
     const posts = getPosts();
@@ -395,6 +408,13 @@
 
     // Set up event listeners
     setupEventListeners();
+
+    // Show admin widget if admin
+    if (isAdminUser()) {
+      const adminWidget = document.getElementById('admin-accounts-widget');
+      if (adminWidget) adminWidget.style.display = 'block';
+      setupAdminAccountsModal();
+    }
 
     // Initialize with sample posts if empty
     if (getPosts().length === 0) {
@@ -711,6 +731,193 @@
   // Expose reload function to window for console access
   window.reloadSeededPosts = reloadSeededPosts;
 
+  // Admin Accounts Modal
+  function setupAdminAccountsModal() {
+    const modal = document.getElementById('admin-accounts-modal');
+    const openBtn = document.getElementById('admin-view-accounts-btn');
+    const closeBtns = document.querySelectorAll('[data-modal-close]');
+    
+    if (!modal || !openBtn) return;
+
+    function openModal() {
+      modal.removeAttribute('hidden');
+      modal.style.display = 'flex';
+      loadAdminAccounts();
+    }
+
+    function closeModal() {
+      modal.setAttribute('hidden', 'true');
+      modal.style.display = 'none';
+    }
+    
+    // Ensure modal starts hidden
+    modal.setAttribute('hidden', 'true');
+    modal.style.display = 'none';
+
+    openBtn.addEventListener('click', openModal);
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.hasAttribute('hidden')) {
+        closeModal();
+      }
+    });
+  }
+
+  function getCommentCountForUser(userId) {
+    try {
+      const postsStr = localStorage.getItem(STORAGE_KEY);
+      if (!postsStr) return 0;
+      const posts = JSON.parse(postsStr);
+      if (!Array.isArray(posts)) return 0;
+      let count = 0;
+      const targetUserId = String(userId || '');
+      posts.forEach(post => {
+        if (post.comments && Array.isArray(post.comments)) {
+          count += post.comments.filter(c => {
+            const commentUserId = String(c.userId || c.user_id || '');
+            return commentUserId === targetUserId || commentUserId.includes(targetUserId) || targetUserId.includes(commentUserId);
+          }).length;
+        }
+      });
+      return count;
+    } catch {
+      return 0;
+    }
+  }
+
+  function getPostCountForUser(userId) {
+    try {
+      const postsStr = localStorage.getItem(STORAGE_KEY);
+      if (!postsStr) return 0;
+      const posts = JSON.parse(postsStr);
+      if (!Array.isArray(posts)) return 0;
+      // Match by userId (can be _id from MongoDB or userId from posts)
+      return posts.filter(p => {
+        const postUserId = String(p.userId || p.user_id || '');
+        const targetUserId = String(userId || '');
+        return postUserId === targetUserId || postUserId.includes(targetUserId) || targetUserId.includes(postUserId);
+      }).length;
+    } catch {
+      return 0;
+    }
+  }
+
+  async function loadAdminAccounts() {
+    const tbody = document.getElementById('admin-accounts-table-body');
+    if (!tbody) return;
+
+    try {
+      const response = await fetch('/users');
+      if (!response.ok) {
+        alert('Error loading accounts');
+        return;
+      }
+
+      const users = await response.json();
+      tbody.innerHTML = '';
+
+      // Sort by creation date (newest first)
+      users.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+
+      users.forEach(user => {
+        // Try both _id and id for MongoDB compatibility
+        const userId = user._id || user.id;
+        const postCount = getPostCountForUser(userId);
+        const commentCount = getCommentCountForUser(userId);
+        const createdDate = user.createdAt 
+          ? new Date(user.createdAt).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            })
+          : 'N/A';
+        const isBanned = !!user.bannedUntil && new Date(user.bannedUntil).getTime() > Date.now();
+        const isAdmin = user.role === 'admin';
+
+        const row = document.createElement('tr');
+        const userIdForActions = userId;
+        row.innerHTML = `
+          <td>${escapeHtml(user.name || 'N/A')}</td>
+          <td>${createdDate}</td>
+          <td>${postCount}</td>
+          <td>${commentCount}</td>
+          <td>
+            ${isAdmin ? '<span style="color: #ffd700;">Admin</span>' : isBanned
+              ? `<button class="admin-ban-btn" onclick="unbanUserFromModal('${userIdForActions}')">Unban</button>`
+              : `<button class="admin-ban-btn danger" onclick="banUserFromModal('${userIdForActions}', '${escapeHtml(String(user.name || 'User').replace(/'/g, "\\'"))}')">Ban</button>`
+            }
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    } catch (error) {
+      alert('Error loading accounts: ' + error.message);
+    }
+  }
+
+  window.banUserFromModal = async function(userId, userName) {
+    const minutes = window.prompt(`Ban ${userName} for how many minutes? (5-1440, max 24 hours)`);
+    if (!minutes) return;
+    const mins = Number(minutes);
+    if (!Number.isFinite(mins) || mins < 5 || mins > 1440) {
+      alert('Please enter a number between 5 and 1440 minutes.');
+      return;
+    }
+
+    try {
+      const user = getCurrentUser();
+      const response = await fetch(`/users/${userId}/ban`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-email': user?.email || '',
+          'x-admin-role': user?.role || ''
+        },
+        body: JSON.stringify({ minutes: mins })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        showToast(`${userName} banned for ${mins} minutes`);
+        loadAdminAccounts();
+      } else {
+        alert('Error: ' + (data.error || 'Failed to ban user'));
+      }
+    } catch (error) {
+      alert('Error banning user: ' + error.message);
+    }
+  };
+
+  window.unbanUserFromModal = async function(userId) {
+    if (!window.confirm('Unban this user?')) return;
+    try {
+      const user = getCurrentUser();
+      const response = await fetch(`/users/${userId}/unban`, {
+        method: 'PATCH',
+        headers: {
+          'x-admin-email': user?.email || '',
+          'x-admin-role': user?.role || ''
+        }
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        showToast('User unbanned');
+        loadAdminAccounts();
+      } else {
+        alert('Error: ' + (data.error || 'Failed to unban user'));
+      }
+    } catch (error) {
+      alert('Error unbanning user: ' + error.message);
+    }
+  };
+
   // Extract hashtags from text
   function extractHashtags(text) {
     const hashtagRegex = /#(\w+)/g;
@@ -782,7 +989,7 @@
     const mediaHtml = renderPostMedia(post.media || []);
     const codesHtml = post.codes ? renderCodes(post.codes) : '';
     const hashtagsHtml = post.hashtags ? renderHashtags(post.hashtags) : '';
-    const commentsHtml = renderComments(post.comments || []);
+    const commentsHtml = renderComments(post.comments || [], post.id);
 
     const blockLabel = blocked ? 'Unblock' : 'Block';
     const pinLabel = pinned ? 'Unpin' : 'Pin';
@@ -951,17 +1158,26 @@
   }
 
   // Render comments
-  function renderComments(comments) {
+  function renderComments(comments, postId) {
     if (!comments || comments.length === 0) return '';
     return comments.map(comment => {
       const timeAgo = getTimeAgo(new Date(comment.createdAt));
       return `
-        <div class="comment-item">
+        <div class="comment-item" data-comment-id="${comment.id}">
           <div class="comment-avatar">
             <img src="${comment.avatar || 'Images/Rival.png'}" alt="${comment.username}" />
           </div>
           <div class="comment-content">
-            <div class="comment-author">${escapeHtml(comment.username)}</div>
+            <div class="comment-header-row">
+              <div class="comment-author">${escapeHtml(comment.username)}</div>
+              ${isAdminUser() ? `
+                <button class="comment-delete-btn" type="button" data-post-id="${postId}" data-comment-id="${comment.id}" title="Delete comment">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              ` : ''}
+            </div>
             <div class="comment-text">${formatText(comment.text)}</div>
             <div class="comment-meta">${timeAgo}</div>
           </div>
@@ -1063,6 +1279,24 @@
         }
       });
     });
+
+    // Admin delete comment buttons
+    if (isAdminUser()) {
+      document.querySelectorAll('.comment-delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const postId = btn.dataset.postId;
+          const commentId = btn.dataset.commentId;
+          if (!postId || !commentId) return;
+          if (window.confirm('Delete this comment?')) {
+            if (deleteComment(postId, commentId)) {
+              loadPosts();
+              showToast('Comment deleted');
+            }
+          }
+        });
+      });
+    }
 
     // Share buttons
     document.querySelectorAll('.share-btn').forEach(btn => {

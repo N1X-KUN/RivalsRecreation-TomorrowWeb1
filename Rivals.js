@@ -1,6 +1,28 @@
 (function() {
   const root = document.documentElement;
 
+  // First boot detection - clear login state and ensure fresh start
+  (function initFirstBoot() {
+    const FIRST_BOOT_KEY = 'rivals_first_boot_complete';
+    const isFirstBoot = !sessionStorage.getItem(FIRST_BOOT_KEY);
+    
+    if (isFirstBoot) {
+      // Clear all login state on first boot
+      localStorage.removeItem('loggedInUser');
+      sessionStorage.removeItem('loggedInUser');
+      localStorage.removeItem('isGuest');
+      sessionStorage.removeItem('isGuest');
+      localStorage.removeItem('guestUser');
+      sessionStorage.removeItem('guestUser');
+      localStorage.removeItem('rivals_current_user');
+      
+      // Mark first boot as complete (only for this session)
+      sessionStorage.setItem(FIRST_BOOT_KEY, 'true');
+      
+      console.log('🔄 First boot: Cleared login state for fresh start');
+    }
+  })();
+
   // Page Loader - Show on navigation (except when going back to home or returning from external sites)
   (function initPageLoader() {
     const pageLoader = document.getElementById('page-loader');

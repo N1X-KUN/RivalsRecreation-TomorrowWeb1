@@ -59,6 +59,115 @@
         .add-user-btn:hover {
             background-color: #218838;
         }
+
+        /* Ban modal */
+        .ban-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 16px;
+        }
+        .ban-modal-overlay.show { display: flex; }
+        .ban-modal {
+            width: 100%;
+            max-width: 520px;
+            background: #12151d;
+            color: #fff;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+            overflow: hidden;
+        }
+        .ban-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.10);
+        }
+        .ban-modal-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .ban-modal-close {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.85);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0 6px;
+            line-height: 1;
+        }
+        .ban-modal-body {
+            padding: 16px;
+        }
+        .ban-help {
+            font-size: 13px;
+            color: rgba(255,255,255,0.75);
+            margin: 0 0 12px;
+        }
+        .ban-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .ban-preset-btn {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 999px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .ban-preset-btn:hover {
+            background: rgba(255,255,255,0.14);
+        }
+        .ban-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .ban-input-row input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            outline: none;
+        }
+        .ban-meta {
+            font-size: 12px;
+            color: rgba(255,255,255,0.65);
+            margin-bottom: 16px;
+        }
+        .ban-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.10);
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.16);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -70,6 +179,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -77,6 +187,38 @@
                 <!-- User rows will be inserted here -->
             </tbody>
         </table>
+    </div>
+
+    <!-- Ban Modal -->
+    <div class="ban-modal-overlay" id="banModalOverlay" aria-hidden="true">
+        <div class="ban-modal" role="dialog" aria-modal="true" aria-labelledby="banModalTitle">
+            <div class="ban-modal-header">
+                <div class="ban-modal-title" id="banModalTitle">Ban User</div>
+                <button class="ban-modal-close" id="banModalClose" aria-label="Close">&times;</button>
+            </div>
+            <div class="ban-modal-body">
+                <p class="ban-help" id="banModalUserText">Choose a ban duration (max 24 hours).</p>
+
+                <div class="ban-presets">
+                    <button class="ban-preset-btn" type="button" data-minutes="5">5 min</button>
+                    <button class="ban-preset-btn" type="button" data-minutes="15">15 min</button>
+                    <button class="ban-preset-btn" type="button" data-minutes="60">1 hour</button>
+                    <button class="ban-preset-btn" type="button" data-minutes="360">6 hours</button>
+                    <button class="ban-preset-btn" type="button" data-minutes="600">10 hours</button>
+                    <button class="ban-preset-btn" type="button" data-minutes="1440">24 hours</button>
+                </div>
+
+                <div class="ban-input-row">
+                    <input id="banMinutesInput" type="number" min="5" max="1440" step="1" placeholder="Custom minutes (5 - 1440)" />
+                </div>
+                <div class="ban-meta">Minimum 5 minutes • Maximum 1440 minutes (24 hours)</div>
+
+                <div class="ban-modal-actions">
+                    <button class="btn-secondary" id="banCancelBtn" type="button">Cancel</button>
+                    <button class="btn-danger" id="banConfirmBtn" type="button">Ban user</button>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>

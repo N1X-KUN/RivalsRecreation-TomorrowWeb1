@@ -132,6 +132,28 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await response.json();
         
         if (response.ok) {
+            // Persist login state so admin-only UI (like /public/admin) can detect role.
+            const loggedInUser = {
+                id: data.user?.id || data.user?._id,
+                name: data.user?.name,
+                username: data.user?.username || data.user?.name,
+                email: data.user?.email || email,
+                avatar: data.user?.avatar || 'Images/Rival.png',
+                bio: data.user?.bio || '',
+                favoriteCharacter: data.user?.favoriteCharacter || 'Not set',
+                rank: data.user?.rank || 'Unranked',
+                winrate: data.user?.winrate || 0,
+                createdAt: data.user?.createdAt || new Date().toISOString(),
+                role: data.user?.role || 'user',
+                isGuest: false
+            };
+            localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+            sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+            localStorage.removeItem('isGuest');
+            sessionStorage.removeItem('isGuest');
+            localStorage.removeItem('guestUser');
+            sessionStorage.removeItem('guestUser');
+
             showSuccess('Login successful! Redirecting...');
             setTimeout(() => {
                 window.location.href = '/';

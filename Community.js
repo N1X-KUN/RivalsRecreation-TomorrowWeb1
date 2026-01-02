@@ -11,6 +11,8 @@
   const GUEST_KEY = 'isGuest';
   // Following storage (per user)
   const FOLLOWING_KEY_PREFIX = 'rivals_following_';
+  // Blocked posts storage (per user)
+  const BLOCKED_KEY_PREFIX = 'rivals_blocked_posts_';
 
   // urls for quick navigation links
   const QUICK_NAV_LINKS = {
@@ -112,6 +114,102 @@
   // Save posts
   function savePosts(posts) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  }
+
+  function isAdminUser() {
+    return !!currentUser && currentUser.isGuest !== true && String(currentUser.role || 'user') === 'admin';
+  }
+
+  function getBlockedKey() {
+    const id = (currentUser && currentUser.id) ? String(currentUser.id) : 'guest';
+    return `${BLOCKED_KEY_PREFIX}${id}`;
+  }
+
+  function getBlockedSet() {
+    try {
+      const raw = localStorage.getItem(getBlockedKey());
+      const arr = raw ? JSON.parse(raw) : [];
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveBlockedSet(set) {
+    localStorage.setItem(getBlockedKey(), JSON.stringify(Array.from(set)));
+  }
+
+  function isPostBlocked(postId) {
+    return getBlockedSet().has(String(postId));
+  }
+
+  function toggleBlockPost(postId) {
+    const set = getBlockedSet();
+    const id = String(postId);
+    if (set.has(id)) set.delete(id);
+    else set.add(id);
+    saveBlockedSet(set);
+    return set.has(id);
+  }
+
+  function deletePost(postId) {
+    const posts = getPosts();
+    const next = posts.filter(p => String(p.id) !== String(postId));
+    savePosts(next);
+  }
+
+  function togglePinPost(postId) {
+    if (!isAdminUser()) return null;
+    const posts = getPosts();
+    const idx = posts.findIndex(p => String(p.id) === String(postId));
+    if (idx === -1) return null;
+    const pinnedNow = !posts[idx].pinned;
+    posts[idx] = {
+      ...posts[idx],
+      pinned: pinnedNow,
+      pinnedAt: pinnedNow ? new Date().toISOString() : null
+    };
+    savePosts(posts);
+    return posts[idx];
+  }
+
+  function getShareUrlForPost(postId) {
+    try {
+      return `${window.location.origin}${window.location.pathname}#${encodeURIComponent(String(postId))}`;
+    } catch {
+      return `#${encodeURIComponent(String(postId))}`;
+    }
+  }
+
+  let toastEl = null;
+  let toastTimer = null;
+  function showToast(message) {
+    if (!toastEl) {
+      toastEl = document.createElement('div');
+      toastEl.id = 'community-toast';
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.remove('show');
+    }, 1600);
+  }
+
+  async function sharePost(postId) {
+    const url = getShareUrlForPost(postId);
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('Shared: link copied');
+    } catch {
+      // Fallback if clipboard is blocked
+      window.prompt('Copy this link:', url);
+    }
+  }
+
+  function closeAllPostMenus() {
+    document.querySelectorAll('.post-menu').forEach(menu => menu.setAttribute('hidden', ''));
   }
 
   // Add new post
@@ -314,20 +412,19 @@
 
   // Built-in (seed) posts that ship with the site.
   // You can edit/add posts here to make them appear "already there" before users post anything.
-  // TIP: keep `userId` stable (e.g. 'seed_admin') so follow filters work predictably.
   const SEEDED_POSTS = [
       {
         userId: 'seed_admin',
         username: 'RivalsTeam',
-        avatar: 'Images/Rival.png',
+        avatar: 'Images/Luna.png',
         game: 'Marvel Rivals',
-        title: 'Welcome to Rivals Nexus Community',
+        title: 'Welcome to Rivals Community Page',
         text: 'Drop your highlights, team comps, and memes here. Use ❤️ to boost posts into Popular.',
-        media: ['Images/New1.jpg'],
+        media: ['Images/Community1.jpg'],
         hashtags: ['#RivalsNexus', '#Community'],
-        likes: 98,
+        likes: 67,
         comments: [
-          { userId: 'seed_user2', username: 'PatchNotes', avatar: 'Images/Rival.png', text: 'Be respectful and have fun!', createdAt: new Date(Date.now() - 3600000).toISOString() }
+          { userId: 'seed_user2', username: 'Cinematic Jeff', avatar: 'Images/Login.jpg', text: 'Mrrwarrrr!', createdAt: new Date(Date.now() - 3600000).toISOString() }
         ],
         views: 627,
         createdAt: new Date(Date.now() - 86400000).toISOString()
@@ -335,28 +432,15 @@
       {
         userId: 'seed_user2',
         username: 'Test1',
-        avatar: 'Images/Rival.png',
+        avatar: 'Images/Login.jpg',
         game: 'Marvel Rivals',
         text: 'he said nah id win',
         media: [],
         hashtags: ['#UltronMain'],
-        likes: 98,
+        likes: 11,
         comments: [],
         views: 21000,
         createdAt: new Date(Date.now() - 72000000).toISOString()
-      },
-      {
-        userId: 'seed_user3',
-        username: 'StrategyLab',
-        avatar: 'Images/Rival.png',
-        game: 'Marvel Rivals',
-        text: 'Tip: Ultron + zone control comps dominate choke points. What’s your best team-up?',
-        media: ['Images/TeamUp.jpg'],
-        hashtags: ['#Tips', '#TeamUp'],
-        likes: 73,
-        comments: [],
-        views: 27000,
-        createdAt: new Date(Date.now() - 86400000).toISOString()
       }
     ];
 
@@ -439,6 +523,15 @@
       if (e.key === 'Escape' && postModal && !postModal.hasAttribute('hidden')) {
         postModal.setAttribute('hidden', '');
       }
+      if (e.key === 'Escape') {
+        closeAllPostMenus();
+      }
+    });
+
+    // Close post menus when clicking outside
+    document.addEventListener('click', (e) => {
+      const inside = e.target && e.target.closest && e.target.closest('.post-menu-wrap');
+      if (!inside) closeAllPostMenus();
     });
     
     // Ensure modal is hidden on page load
@@ -512,6 +605,34 @@
       return;
     }
 
+    // Check if we're editing an existing post
+    const editingPostId = createPostInput ? createPostInput.dataset.editingPostId : null;
+    if (editingPostId) {
+      // Update existing post
+      const updated = updatePost(editingPostId, {
+        text: text,
+        media: selectedMedia.map(m => m.url),
+        hashtags: extractHashtags(text)
+      });
+      if (updated) {
+        // Reset form
+        if (createPostInput) {
+          createPostInput.value = '';
+          delete createPostInput.dataset.editingPostId;
+        }
+        selectedMedia = [];
+        updateMediaPreview();
+        if (submitPostBtn) {
+          submitPostBtn.disabled = true;
+          submitPostBtn.textContent = 'Post';
+        }
+        loadPosts();
+        showToast('Post updated!');
+      }
+      return;
+    }
+
+    // Create new post
     const newPost = addPost({
       userId: currentUser.id,
       username: currentUser.username,
@@ -532,6 +653,63 @@
     // Reload posts
     loadPosts();
   }
+
+  // Open edit post modal
+  function openEditPostModal(postId) {
+    const posts = getPosts();
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+
+    // Check ownership or admin status
+    const isOwnPost = String(post.userId) === String(currentUser.id);
+    if (!isOwnPost && !isAdminUser()) {
+      alert('You can only edit your own posts.');
+      return;
+    }
+
+    // Pre-fill the create post form with existing post data
+    if (createPostInput) {
+      createPostInput.value = post.text || '';
+      createPostInput.dataset.editingPostId = postId;
+      createPostInput.focus();
+    }
+
+    // Load existing media
+    selectedMedia = (post.media || []).map(url => ({
+      type: url.includes('video') || url.endsWith('.mp4') || url.endsWith('.webm') ? 'video' : 'image',
+      url: url
+    }));
+    updateMediaPreview();
+
+    // Update submit button text
+    if (submitPostBtn) {
+      submitPostBtn.textContent = 'Update Post';
+      submitPostBtn.disabled = false;
+    }
+
+    // Scroll to create post section
+    const createPostCard = document.querySelector('.create-post-card');
+    if (createPostCard) {
+      createPostCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      createPostCard.style.border = '2px solid #ffd700';
+      setTimeout(() => {
+        createPostCard.style.border = '';
+      }, 2000);
+    }
+  }
+
+  // Force reload seeded posts (clears existing and re-adds from SEEDED_POSTS)
+  function reloadSeededPosts() {
+    if (!window.confirm('This will clear all current posts and reload the seeded posts from code. Continue?')) {
+      return;
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    initializeSamplePosts();
+    showToast('Seeded posts reloaded!');
+  }
+
+  // Expose reload function to window for console access
+  window.reloadSeededPosts = reloadSeededPosts;
 
   // Extract hashtags from text
   function extractHashtags(text) {
@@ -558,6 +736,25 @@
       // discussions = everything (default ordering = newest first)
     }
 
+    // Always prioritize pinned posts at the top across all tabs (Discussions/Popular/Following)
+    const secondarySort = activeTab === 'popular'
+      ? (a, b) => (b.likes || 0) - (a.likes || 0)
+      : (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+    posts.sort((a, b) => {
+      const ap = a && a.pinned === true ? 1 : 0;
+      const bp = b && b.pinned === true ? 1 : 0;
+      if (ap !== bp) return bp - ap;
+
+      if (ap === 1 && bp === 1) {
+        const at = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0;
+        const bt = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0;
+        if (at !== bt) return bt - at;
+      }
+
+      return secondarySort(a, b);
+    });
+
     if (posts.length === 0) {
       const msg = activeTab === 'popular'
         ? 'No popular posts yet. Posts appear here once they have at least 1 like.'
@@ -580,13 +777,18 @@
     const following = getFollowingSet();
     const isOwnPost = String(post.userId) === String(currentUser.id);
     const isFollowingUser = following.has(String(post.userId));
+    const blocked = isPostBlocked(post.id);
+    const pinned = post.pinned === true;
     const mediaHtml = renderPostMedia(post.media || []);
     const codesHtml = post.codes ? renderCodes(post.codes) : '';
     const hashtagsHtml = post.hashtags ? renderHashtags(post.hashtags) : '';
     const commentsHtml = renderComments(post.comments || []);
 
+    const blockLabel = blocked ? 'Unblock' : 'Block';
+    const pinLabel = pinned ? 'Unpin' : 'Pin';
+
     return `
-      <article class="community-post" data-post-id="${post.id}">
+      <article class="community-post ${blocked ? 'is-blocked' : ''}" data-post-id="${post.id}">
         <div class="post-header">
           <div class="post-user">
             <div class="user-avatar">
@@ -597,18 +799,44 @@
               <div class="post-meta">
                 <span class="post-time">${timeAgo}</span>
                 ${post.game ? `<span class="post-game">• ${escapeHtml(post.game)}</span>` : ''}
+                ${pinned ? `<span class="post-pin-badge" title="Pinned">📌 Pinned</span>` : ''}
               </div>
             </div>
           </div>
           <div class="post-actions-header">
             ${isOwnPost ? '' : `<button class="follow-btn ${isFollowingUser ? 'is-following' : ''}" data-user-id="${escapeHtml(String(post.userId))}">${isFollowingUser ? 'Following' : 'Follow'}</button>`}
-            <button class="post-menu-btn" aria-label="More options">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="19" cy="12" r="1"></circle>
-                <circle cx="5" cy="12" r="1"></circle>
-              </svg>
-            </button>
+            ${blocked ? `
+              <span class="post-blocked-indicator" title="Blocked">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58"></path>
+                  <path d="M16.12 16.12A8.94 8.94 0 0 1 12 18c-7 0-11-6-11-6a18.2 18.2 0 0 1 5.11-5.11"></path>
+                  <path d="M14.12 9.88A2 2 0 0 0 9.88 14.12"></path>
+                  <path d="M1 1l22 22"></path>
+                </svg>
+              </span>
+            ` : ''}
+            <div class="post-menu-wrap">
+              <button class="post-menu-btn" aria-label="More options" type="button" data-post-id="${escapeHtml(String(post.id))}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="19" cy="12" r="1"></circle>
+                  <circle cx="5" cy="12" r="1"></circle>
+                </svg>
+              </button>
+              <div class="post-menu" data-post-id="${escapeHtml(String(post.id))}" hidden>
+                ${(isOwnPost || isAdminUser()) ? `
+                  <button class="post-menu-item" type="button" data-action="edit" data-post-id="${escapeHtml(String(post.id))}">Edit</button>
+                  <div class="post-menu-sep" role="separator"></div>
+                ` : ''}
+                ${isAdminUser() ? `
+                  <button class="post-menu-item" type="button" data-action="pin" data-post-id="${escapeHtml(String(post.id))}">${pinLabel}</button>
+                  <button class="post-menu-item danger" type="button" data-action="delete" data-post-id="${escapeHtml(String(post.id))}">Delete</button>
+                  <div class="post-menu-sep" role="separator"></div>
+                ` : ''}
+                <button class="post-menu-item" type="button" data-action="block" data-post-id="${escapeHtml(String(post.id))}">${blockLabel}</button>
+                <button class="post-menu-item" type="button" data-action="share" data-post-id="${escapeHtml(String(post.id))}">Share</button>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -622,19 +850,19 @@
         
         <div class="post-footer">
           <div class="post-interactions">
-            <button class="interaction-btn like-btn ${isLiked ? 'liked' : ''}" data-post-id="${post.id}">
+            <button class="interaction-btn like-btn ${isLiked ? 'liked' : ''}" data-post-id="${post.id}" ${blocked ? 'disabled aria-disabled="true"' : ''}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
               </svg>
               <span>${post.likes || 0}</span>
             </button>
-            <button class="interaction-btn comment-btn" data-post-id="${post.id}">
+            <button class="interaction-btn comment-btn" data-post-id="${post.id}" ${blocked ? 'disabled aria-disabled="true"' : ''}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
               </svg>
               <span>${(post.comments || []).length}</span>
             </button>
-            <button class="interaction-btn share-btn">
+            <button class="interaction-btn share-btn" data-post-id="${post.id}">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="18" cy="5" r="3"></circle>
                 <circle cx="6" cy="12" r="3"></circle>
@@ -652,8 +880,8 @@
             <h4 class="comments-title">Comments</h4>
           </div>
           <div class="comment-form">
-            <input type="text" class="comment-input" placeholder="Write a comment..." data-post-id="${post.id}" />
-            <button class="comment-submit" data-post-id="${post.id}">Post</button>
+            <input type="text" class="comment-input" placeholder="${blocked ? 'This post is blocked' : 'Write a comment...'}" data-post-id="${post.id}" ${blocked ? 'disabled aria-disabled="true"' : ''} />
+            <button class="comment-submit" data-post-id="${post.id}" ${blocked ? 'disabled aria-disabled="true"' : ''}>Post</button>
           </div>
           <div class="comments-list">
             ${commentsHtml}
@@ -761,7 +989,9 @@
     // Like buttons
     document.querySelectorAll('.like-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        if (btn.disabled) return;
         const postId = btn.dataset.postId;
+        if (isPostBlocked(postId)) return;
         const post = toggleLike(postId, currentUser.id);
         if (post) {
           const isLiked = post.likedBy.includes(currentUser.id);
@@ -777,7 +1007,9 @@
     // Comment buttons
     document.querySelectorAll('.comment-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        if (btn.disabled) return;
         const postId = btn.dataset.postId;
+        if (isPostBlocked(postId)) return;
         const commentsSection = document.querySelector(`.post-comments[data-post-id="${postId}"]`);
         if (commentsSection) {
           const isHidden = commentsSection.style.display === 'none';
@@ -789,12 +1021,14 @@
     // Comment submit buttons
     document.querySelectorAll('.comment-submit').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        if (btn.disabled) return;
         if (isGuest()) {
           alert('Please sign up to comment on posts!');
           if (profileSignupTrigger) profileSignupTrigger.click();
           return;
         }
         const postId = btn.dataset.postId;
+        if (isPostBlocked(postId)) return;
         const input = document.querySelector(`.comment-input[data-post-id="${postId}"]`);
         if (input && input.value.trim()) {
           const newComment = addComment(postId, {
@@ -826,6 +1060,76 @@
           const postId = input.dataset.postId;
           const btn = document.querySelector(`.comment-submit[data-post-id="${postId}"]`);
           if (btn) btn.click();
+        }
+      });
+    });
+
+    // Share buttons
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const postId = btn.getAttribute('data-post-id');
+        if (!postId) return;
+        sharePost(postId);
+      });
+    });
+
+    // Post menu button toggle
+    document.querySelectorAll('.post-menu-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const postId = btn.getAttribute('data-post-id');
+        if (!postId) return;
+        const menu = document.querySelector(`.post-menu[data-post-id="${postId}"]`);
+        if (!menu) return;
+        const isOpen = !menu.hasAttribute('hidden');
+        closeAllPostMenus();
+        if (!isOpen) menu.removeAttribute('hidden');
+      });
+    });
+
+    // Post menu item actions
+    document.querySelectorAll('.post-menu-item').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const action = btn.getAttribute('data-action');
+        const postId = btn.getAttribute('data-post-id');
+        if (!action || !postId) return;
+
+        if (action === 'block') {
+          toggleBlockPost(postId);
+          closeAllPostMenus();
+          loadPosts();
+          return;
+        }
+
+        if (action === 'share') {
+          closeAllPostMenus();
+          await sharePost(postId);
+          return;
+        }
+
+        if (action === 'pin') {
+          if (!isAdminUser()) return;
+          togglePinPost(postId);
+          closeAllPostMenus();
+          loadPosts();
+          return;
+        }
+
+        if (action === 'delete') {
+          if (!isAdminUser()) return;
+          const ok = window.confirm('Delete this post? This cannot be undone.');
+          if (!ok) return;
+          deletePost(postId);
+          closeAllPostMenus();
+          loadPosts();
+          return;
+        }
+
+        if (action === 'edit') {
+          closeAllPostMenus();
+          openEditPostModal(postId);
+          return;
         }
       });
     });
@@ -899,6 +1203,7 @@
           rank: loggedInUser.rank || 'Unranked',
           winrate: loggedInUser.winrate || 0,
           createdAt: loggedInUser.createdAt || loggedInUser.created_at || new Date().toISOString(),
+          role: loggedInUser.role || 'user',
           isGuest: false
         };
         saveCurrentUser(currentUser);
@@ -936,6 +1241,7 @@
         rank: e.detail.user.rank || 'Unranked',
         winrate: e.detail.user.winrate || 0,
         createdAt: e.detail.user.createdAt || e.detail.user.created_at || new Date().toISOString(),
+        role: e.detail.user.role || 'user',
         isGuest: false
       };
       saveCurrentUser(currentUser);

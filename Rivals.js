@@ -682,6 +682,7 @@
             rank: data.user?.rank || 'Unranked',
             winrate: data.user?.winrate || 0,
             createdAt: data.user?.createdAt || data.user?.created_at || new Date().toISOString(),
+            role: data.user?.role || 'user',
             isGuest: false
           };
           
@@ -3152,8 +3153,56 @@
       });
     }
 
+    // Admin check and hidden heroes storage
+    function getCurrentUser() {
+      try {
+        const loggedStr = localStorage.getItem('loggedInUser') || sessionStorage.getItem('loggedInUser');
+        if (loggedStr) {
+          const u = JSON.parse(loggedStr);
+          if (u && typeof u === 'object' && u.isGuest !== true) return u;
+        }
+      } catch {}
+      return null;
+    }
+
+    function isAdminUser() {
+      const user = getCurrentUser();
+      return !!user && String(user.role || 'user') === 'admin';
+    }
+
+    const HIDDEN_HEROES_KEY = 'rivals_hidden_heroes';
+    function getHiddenHeroes() {
+      try {
+        const raw = localStorage.getItem(HIDDEN_HEROES_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(arr) ? arr : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveHiddenHeroes(set) {
+      localStorage.setItem(HIDDEN_HEROES_KEY, JSON.stringify(Array.from(set)));
+    }
+
+    function toggleHideHero(heroId) {
+      const set = getHiddenHeroes();
+      const id = String(heroId);
+      if (set.has(id)) set.delete(id);
+      else set.add(id);
+      saveHiddenHeroes(set);
+      return set.has(id);
+    }
+
     function filteredHeroes() {
       let heroes = heroCatalog;
+      
+      // Filter out hidden heroes for non-admins
+      const hiddenHeroes = getHiddenHeroes();
+      const isAdmin = isAdminUser();
+      if (!isAdmin && hiddenHeroes.size > 0) {
+        heroes = heroes.filter(hero => !hiddenHeroes.has(String(hero.id)));
+      }
       
       // Apply category filter
       if (activeFilter !== 'all') {
@@ -3212,6 +3261,9 @@
         if (heroNoResults) heroNoResults.setAttribute('hidden', '');
       }
       
+      const isAdmin = isAdminUser();
+      const hiddenHeroes = getHiddenHeroes();
+      
       heroes.forEach(hero => {
         const card = document.createElement('button');
         card.type = 'button';
@@ -3222,16 +3274,42 @@
         card.style.setProperty('--hero-accent-soft', hero.accentSoft || 'rgba(255,215,0,0.2)');
         // Use card property if available, otherwise fall back to portrait
         const cardImg = hero.card || hero.portrait;
+        const isHidden = hiddenHeroes.has(String(hero.id));
         card.innerHTML = `
           <div class="hero-roster__art">
             <img src="${cardImg}" alt="${hero.name}" loading="lazy" />
             <span class="hero-roster__role">${roleLabels[hero.category] || hero.category}</span>
+            ${isAdmin ? `
+              <button class="hero-admin-hide-btn" type="button" data-hero-id="${hero.id}" title="${isHidden ? 'Unhide' : 'Hide'} hero">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  ${isHidden 
+                    ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>'
+                    : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'
+                  }
+                </svg>
+              </button>
+            ` : ''}
           </div>
           <p class="hero-roster__name">${hero.name}</p>
         `;
         if (hero.id === activeHero.id) card.classList.add('active');
+        if (isHidden && isAdmin) card.classList.add('hero-roster__card--hidden');
         rosterGrid.appendChild(card);
       });
+      
+      // Attach admin hide/unhide button listeners
+      if (isAdmin) {
+        rosterGrid.querySelectorAll('.hero-admin-hide-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const heroId = btn.dataset.heroId;
+            const isHidden = toggleHideHero(heroId);
+            renderRoster();
+            const heroName = heroCatalog.find(h => String(h.id) === heroId)?.name || 'Hero';
+            alert(`${heroName} ${isHidden ? 'hidden' : 'unhidden'}. ${isHidden ? 'Regular users will not see this hero.' : 'Hero is now visible to all users.'}`);
+          });
+        });
+      }
       updateFilterCount();
       updateCounts();
       // Always animate cards when roster is rendered

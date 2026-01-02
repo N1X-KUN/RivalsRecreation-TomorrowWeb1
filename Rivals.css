@@ -1367,6 +1367,61 @@ footer { margin-top: 0; }
 .hero-roster__art {
   flex: 1;
   position: relative;
+}
+
+/* Admin hide button on hero cards */
+.hero-admin-hide-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.hero-roster__card:hover .hero-admin-hide-btn,
+.hero-roster__card--hidden .hero-admin-hide-btn {
+  opacity: 1;
+}
+
+.hero-admin-hide-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.hero-roster__card--hidden {
+  opacity: 0.5;
+  border-color: rgba(255, 0, 0, 0.3);
+}
+
+.hero-roster__card--hidden::after {
+  content: 'HIDDEN';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  z-index: 5;
+  pointer-events: none;
+}
   background: rgba(20,24,36,0.78);
 }
 

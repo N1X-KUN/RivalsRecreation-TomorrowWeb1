@@ -279,6 +279,7 @@
 }
 
 .community-post {
+  position: relative;
   background: rgba(20, 24, 38, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -381,6 +382,149 @@
 .post-menu-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-1);
+}
+
+/* Post menu (three dots dropdown) */
+.post-menu-wrap {
+  position: relative;
+}
+
+.post-menu {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  min-width: 180px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(15, 15, 22, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  z-index: 50;
+}
+
+.post-menu[hidden] {
+  display: none !important;
+}
+
+.post-menu-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 10px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.post-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-1);
+}
+
+.post-menu-item.danger {
+  color: rgba(255, 120, 120, 0.95);
+}
+
+.post-menu-item.danger:hover {
+  background: rgba(255, 60, 60, 0.14);
+}
+
+.post-menu-sep {
+  height: 1px;
+  margin: 8px 6px;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+/* Pinned + blocked indicators */
+.post-pin-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 215, 0, 0.14);
+  border: 1px solid rgba(255, 215, 0, 0.30);
+  color: rgba(255, 235, 140, 0.95);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.post-blocked-indicator {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Blocked post visual: blur + crossed pattern (menu remains usable) */
+.community-post.is-blocked::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 10px,
+    rgba(0, 0, 0, 0) 10px,
+    rgba(0, 0, 0, 0) 20px
+  );
+}
+
+.community-post.is-blocked::after {
+  content: 'Blocked';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.community-post.is-blocked .post-content,
+.community-post.is-blocked .post-footer {
+  filter: blur(4px);
+  opacity: 0.55;
+}
+
+.interaction-btn:disabled,
+.comment-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Toast */
+#community-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(15, 15, 22, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+#community-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
 }
 
 .post-content {

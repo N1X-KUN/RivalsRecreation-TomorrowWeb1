@@ -248,47 +248,80 @@ function formatDate(dateString) {
 }
 
 async function loadUsers() {
+    const userTableBody = document.getElementById('userTableBody');
+    if (!userTableBody) {
+        console.error('User table body not found');
+        return;
+    }
+
+    // Show loading state
+    userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">Loading users...</td></tr>';
+
     try {
         const response = await fetch('/users');
-        if (response.ok) {
-            const users = await response.json();
-            const userTableBody = document.getElementById('userTableBody');
-            userTableBody.innerHTML = '';
-            
-            // Sort users by creation date (newest first)
-            users.sort((a, b) => {
-                const dateA = new Date(a.createdAt || 0).getTime();
-                const dateB = new Date(b.createdAt || 0).getTime();
-                return dateB - dateA;
-            });
-            
-            users.forEach(user => {
-                const isBanned = !!user.bannedUntil && new Date(user.bannedUntil).getTime() > Date.now();
-                const isAdmin = user.role === 'admin';
-                const postCount = getPostCountForUser(user._id);
-                const createdDate = formatDate(user.createdAt);
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.name}</td>
-                    <td>${user.email}</td>
-                    <td>${createdDate}</td>
-                    <td>${postCount}</td>
-                    <td>${formatBanStatus(user.bannedUntil)}</td>
-                    <td>
-                        <a href="edit-user.html?id=${user._id}">Edit</a>
-                        ${isAdmin ? '' : isBanned
-                            ? `<button onclick="unbanUser('${user._id}')">Unban</button>`
-                            : `<button onclick="openBanModal('${user._id}', '${String(user.name || 'User').replace(/'/g, '&#39;')}')">Ban</button>`
-                        }
-                    </td>
-                `;
-                userTableBody.appendChild(row);
-            });
-        } else {
-            alert('Error loading users');
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Failed to load users:', response.status, errorText);
+            userTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">
+                Error loading users (${response.status}). 
+                <br>Make sure MongoDB is connected and the server is running.
+                <br><small>Check browser console (F12) for details.</small>
+            </td></tr>`;
+            return;
         }
+
+        const users = await response.json();
+        
+        if (!Array.isArray(users)) {
+            console.error('Invalid response format:', users);
+            userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">Invalid response from server</td></tr>';
+            return;
+        }
+
+        if (users.length === 0) {
+            userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px;">No users found. Add a user first.</td></tr>';
+            return;
+        }
+
+        userTableBody.innerHTML = '';
+        
+        // Sort users by creation date (newest first)
+        users.sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA;
+        });
+
+        console.log(`Loaded ${users.length} user(s) from database`);
+        
+        users.forEach(user => {
+            const isBanned = !!user.bannedUntil && new Date(user.bannedUntil).getTime() > Date.now();
+            const isAdmin = user.role === 'admin';
+            const postCount = getPostCountForUser(user._id);
+            const createdDate = formatDate(user.createdAt);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${createdDate}</td>
+                <td>${postCount}</td>
+                <td>${formatBanStatus(user.bannedUntil)}</td>
+                <td>
+                    <a href="edit-user.html?id=${user._id}">Edit</a>
+                    ${isAdmin ? '' : isBanned
+                        ? `<button onclick="unbanUser('${user._id}')">Unban</button>`
+                        : `<button onclick="openBanModal('${user._id}', '${String(user.name || 'User').replace(/'/g, '&#39;')}')">Ban</button>`
+                    }
+                </td>
+            `;
+            userTableBody.appendChild(row);
+        });
     } catch (error) {
-        alert('Error loading users: ' + error.message);
+        console.error('Error loading users:', error);
+        userTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: #dc3545;">
+            Error: ${error.message}
+            <br><small>Check browser console (F12) for details.</small>
+        </td></tr>`;
     }
 }
 

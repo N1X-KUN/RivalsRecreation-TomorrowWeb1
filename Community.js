@@ -410,10 +410,21 @@
     setupEventListeners();
 
     // Show admin widget if admin
+    console.log('Current user:', currentUser); // Debug: log current user
+    console.log('Is admin?', isAdminUser()); // Debug: log admin status
     if (isAdminUser()) {
       const adminWidget = document.getElementById('admin-accounts-widget');
-      if (adminWidget) adminWidget.style.display = 'block';
+      if (adminWidget) {
+        adminWidget.style.display = 'block';
+        console.log('Admin widget shown'); // Debug
+      } else {
+        console.error('Admin widget element not found'); // Debug
+      }
       setupAdminAccountsModal();
+    } else {
+      console.log('User is not admin, hiding admin widget'); // Debug
+      const adminWidget = document.getElementById('admin-accounts-widget');
+      if (adminWidget) adminWidget.style.display = 'none';
     }
 
     // Initialize with sample posts if empty
@@ -806,16 +817,40 @@
 
   async function loadAdminAccounts() {
     const tbody = document.getElementById('admin-accounts-table-body');
-    if (!tbody) return;
+    if (!tbody) {
+      console.error('Admin accounts table body not found');
+      return;
+    }
+
+    // Show loading state
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">Loading accounts...</td></tr>';
 
     try {
       const response = await fetch('/users');
       if (!response.ok) {
-        alert('Error loading accounts');
+        const errorText = await response.text();
+        console.error('Failed to load users:', response.status, errorText);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: #dc3545;">
+          Error loading accounts (${response.status}). 
+          <br>Make sure MongoDB is connected and the server is running.
+          <br><small>Check browser console (F12) for details.</small>
+        </td></tr>`;
         return;
       }
 
       const users = await response.json();
+      
+      if (!Array.isArray(users)) {
+        console.error('Invalid response format:', users);
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #dc3545;">Invalid response from server</td></tr>';
+        return;
+      }
+
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: rgba(255,255,255,0.6);">No accounts found. Register a user first.</td></tr>';
+        return;
+      }
+
       tbody.innerHTML = '';
 
       // Sort by creation date (newest first)
@@ -825,7 +860,11 @@
         return dateB - dateA;
       });
 
+      console.log(`Loaded ${users.length} user(s) from database`);
+      console.log('Users data:', users); // Debug: log all users
+
       users.forEach(user => {
+        console.log('Processing user:', user.name, user.email, 'Role:', user.role); // Debug log
         // Try both _id and id for MongoDB compatibility
         const userId = user._id || user.id;
         const postCount = getPostCountForUser(userId);

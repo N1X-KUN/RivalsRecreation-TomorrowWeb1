@@ -464,7 +464,7 @@
         hashtags: ['#Rivals', '#Community'],
         likes: 67,
         comments: [
-          { userId: 'seed_admin', username: 'Cinematic Jeff', avatar: 'Images/Login.jpg', text: 'Mrrwarrrr!', createdAt: new Date(Date.now() - 3600000).toISOString() }
+          { id: 'seed_comment_1', userId: 'seed_admin', username: 'Cinematic Jeff', avatar: 'Images/Login.jpg', text: 'Mrrwarrrr!', createdAt: new Date(Date.now() - 3600000).toISOString() }
         ],
         createdAt: new Date(Date.now() - 86400000).toISOString()
       },
@@ -502,7 +502,19 @@
         hashtags: [],
         likes: 21,
         comments: [],
-        createdAt: new Date(Date.now() - 85400000).toISOString()
+        createdAt: new Date(Date.now() - 96700000).toISOString()
+      },
+      {
+        userId: 'seed_admin',
+        username: 'Galacta',
+        avatar: 'Images/GalactaEmote4.png',
+        game: 'Marvel Rival',
+        text: 'I know how Earth Loves Me As Much As I Love It.',
+        media: ['Images/Community4.jpg'],
+        hashtags: ['#Earth-Chan'],
+        likes: 9000,
+        comments: [],
+        createdAt: new Date(Date.now() - 67000000).toISOString()
       }
     ];
 
@@ -532,16 +544,189 @@
   
   // Expose function globally for manual reload
   window.reloadSeededPosts = function() {
-    console.log('Force reloading seeded posts...');
-    // Clear existing seeded posts
     const allPosts = getPosts();
+    const userPosts = allPosts.filter(p => p.userId !== 'seed_admin');
+    const seededPosts = allPosts.filter(p => p.userId === 'seed_admin');
+    
+    // Warn user about user posts
+    let confirmMessage = `This will replace all seeded posts with the current SEEDED_POSTS array.\n\n`;
+    if (userPosts.length > 0) {
+      confirmMessage += `⚠️ WARNING: You have ${userPosts.length} user post(s) that will be PRESERVED.\n\n`;
+    }
+    confirmMessage += `Current state:\n- User posts: ${userPosts.length}\n- Seeded posts: ${seededPosts.length}\n- Total: ${allPosts.length}\n\nContinue?`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    console.log('Force reloading seeded posts...');
+    console.log(`📊 Total posts before: ${allPosts.length}`);
+    console.log(`👤 User posts: ${userPosts.length}`);
+    console.log(`🌱 Seeded posts: ${seededPosts.length}`);
+    
+    // Keep ONLY user posts (remove all seeded posts)
     const filteredPosts = allPosts.filter(p => 
       p.userId !== 'seed_admin'
     );
+    
+    console.log(`💾 Saving ${filteredPosts.length} user posts...`);
     savePosts(filteredPosts);
-    // Add seeded posts back
+    
+    // Add seeded posts back (this will add ALL posts from SEEDED_POSTS array)
     initializeSamplePosts();
-    console.log('Seeded posts reloaded!');
+    
+    // Verify final count
+    const finalPosts = getPosts();
+    const finalUserPosts = finalPosts.filter(p => p.userId !== 'seed_admin');
+    const finalSeededPosts = finalPosts.filter(p => p.userId === 'seed_admin');
+    
+    console.log(`✅ Seeded posts reloaded!`);
+    console.log(`📊 Total posts after: ${finalPosts.length}`);
+    console.log(`👤 User posts: ${finalUserPosts.length}`);
+    console.log(`🌱 Seeded posts: ${finalSeededPosts.length}`);
+    
+    alert(`Seeded posts reloaded!\n\nUser posts: ${finalUserPosts.length} (preserved)\nSeeded posts: ${finalSeededPosts.length}\nTotal: ${finalPosts.length}`);
+    
+    // Reload the display
+    loadPosts();
+  };
+  
+  // Backup function to save all posts to a JSON string
+  window.backupPosts = function() {
+    const allPosts = getPosts();
+    const backup = {
+      timestamp: new Date().toISOString(),
+      total: allPosts.length,
+      posts: allPosts
+    };
+    const backupStr = JSON.stringify(backup, null, 2);
+    console.log('📦 POST BACKUP:');
+    console.log(backupStr);
+    
+    // Also copy to clipboard if possible
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(backupStr).then(() => {
+        alert(`✅ Backup copied to clipboard!\n\nTotal posts: ${allPosts.length}\n\nYou can paste this into a text file to save it.`);
+      }).catch(() => {
+        alert(`✅ Backup generated!\n\nTotal posts: ${allPosts.length}\n\nCheck the console (F12) to copy the backup JSON.`);
+      });
+    } else {
+      alert(`✅ Backup generated!\n\nTotal posts: ${allPosts.length}\n\nCheck the console (F12) to copy the backup JSON.`);
+    }
+    
+    return backupStr;
+  };
+  
+  // Restore function to restore posts from backup
+  window.restorePosts = function(backupJson) {
+    if (!backupJson) {
+      const backupStr = prompt('Paste your backup JSON here:');
+      if (!backupStr) return;
+      try {
+        backupJson = JSON.parse(backupStr);
+      } catch (e) {
+        alert('Invalid backup JSON. Please check your backup and try again.');
+        return;
+      }
+    }
+    
+    if (!backupJson.posts || !Array.isArray(backupJson.posts)) {
+      alert('Invalid backup format. Expected an object with a "posts" array.');
+      return;
+    }
+    
+    if (!confirm(`This will replace ALL current posts with the backup.\n\nBackup contains ${backupJson.posts.length} post(s) from ${backupJson.timestamp || 'unknown time'}.\n\nContinue?`)) {
+      return;
+    }
+    
+    savePosts(backupJson.posts);
+    loadPosts();
+    alert(`✅ Posts restored! ${backupJson.posts.length} post(s) loaded.`);
+  };
+  
+  // Diagnostic function to check posts
+  window.checkPosts = function() {
+    const allPosts = getPosts();
+    const userPosts = allPosts.filter(p => p.userId !== 'seed_admin');
+    const seededPosts = allPosts.filter(p => p.userId === 'seed_admin');
+    
+    console.log('📊 POST DIAGNOSTICS:');
+    console.log(`Total posts: ${allPosts.length}`);
+    console.log(`User posts: ${userPosts.length}`);
+    console.log(`Seeded posts: ${seededPosts.length}`);
+    console.log('\n👤 USER POSTS:');
+    userPosts.forEach((post, i) => {
+      console.log(`${i + 1}. ${post.username || 'Unknown'} (userId: ${post.userId}) - "${post.text?.substring(0, 50) || post.title?.substring(0, 50) || 'No text'}"... (Post ID: ${post.id})`);
+    });
+    console.log('\n🌱 SEEDED POSTS:');
+    seededPosts.forEach((post, i) => {
+      console.log(`${i + 1}. ${post.username || 'Unknown'} - "${post.text?.substring(0, 50) || post.title?.substring(0, 50) || 'No text'}"... (ID: ${post.id})`);
+    });
+    
+    // Also check all user IDs in posts vs MongoDB users
+    console.log('\n🔍 USER ID ANALYSIS:');
+    const uniqueUserIds = [...new Set(userPosts.map(p => p.userId))];
+    console.log('Unique userIds in posts:', uniqueUserIds);
+    
+    return {
+      total: allPosts.length,
+      user: userPosts.length,
+      seeded: seededPosts.length,
+      userPosts: userPosts,
+      seededPosts: seededPosts,
+      uniqueUserIds: uniqueUserIds
+    };
+  };
+  
+  // Function to check user ID matching
+  window.checkUserMatching = async function() {
+    try {
+      const response = await fetch('/users');
+      if (!response.ok) {
+        console.error('Failed to fetch users');
+        return;
+      }
+      const users = await response.json();
+      const allPosts = getPosts();
+      const userPosts = allPosts.filter(p => p.userId !== 'seed_admin');
+      
+      console.log('\n🔍 USER ID MATCHING ANALYSIS:');
+      console.log(`MongoDB Users: ${users.length}`);
+      console.log(`User Posts: ${userPosts.length}`);
+      
+      users.forEach(user => {
+        const mongoId = String(user._id || user.id);
+        const matchingPosts = userPosts.filter(p => {
+          const postUserId = String(p.userId || '');
+          return postUserId === mongoId || postUserId.includes(mongoId) || mongoId.includes(postUserId);
+        });
+        const matchingComments = getCommentCountForUser(mongoId);
+        console.log(`\n👤 ${user.name || user.email}:`);
+        console.log(`   MongoDB ID: ${mongoId}`);
+        console.log(`   Posts found: ${matchingPosts.length}`);
+        console.log(`   Comments found: ${matchingComments}`);
+        if (matchingPosts.length > 0) {
+          console.log(`   Post userIds:`, matchingPosts.map(p => p.userId));
+        }
+      });
+      
+      // Check for orphaned posts (posts with userIds that don't match any MongoDB user)
+      const mongoIds = users.map(u => String(u._id || u.id));
+      const orphanedPosts = userPosts.filter(p => {
+        const postUserId = String(p.userId || '');
+        return !mongoIds.some(mid => postUserId === mid || postUserId.includes(mid) || mid.includes(postUserId));
+      });
+      
+      if (orphanedPosts.length > 0) {
+        console.log(`\n⚠️ ORPHANED POSTS (${orphanedPosts.length}):`);
+        orphanedPosts.forEach((post, i) => {
+          console.log(`${i + 1}. ${post.username || 'Unknown'} (userId: ${post.userId}) - "${post.text?.substring(0, 50) || 'No text'}"...`);
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error checking user matching:', error);
+    }
   };
 
   // Setup event listeners
@@ -842,18 +1027,37 @@
       if (!postsStr) return 0;
       const posts = JSON.parse(postsStr);
       if (!Array.isArray(posts)) return 0;
+      
+      if (!userId) return 0;
+      
+      const targetUserId = String(userId || '').trim();
+      if (!targetUserId) return 0;
+      
       let count = 0;
-      const targetUserId = String(userId || '');
       posts.forEach(post => {
         if (post.comments && Array.isArray(post.comments)) {
           count += post.comments.filter(c => {
-            const commentUserId = String(c.userId || c.user_id || '');
-            return commentUserId === targetUserId || commentUserId.includes(targetUserId) || targetUserId.includes(commentUserId);
+            const commentUserId = String(c.userId || c.user_id || '').trim();
+            if (!commentUserId) return false;
+            
+            // Exact match
+            if (commentUserId === targetUserId) return true;
+            
+            // Check if one contains the other
+            if (commentUserId.includes(targetUserId) || targetUserId.includes(commentUserId)) return true;
+            
+            // Normalized match
+            const normalizedComment = commentUserId.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const normalizedTarget = targetUserId.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (normalizedComment && normalizedTarget && normalizedComment === normalizedTarget) return true;
+            
+            return false;
           }).length;
         }
       });
       return count;
-    } catch {
+    } catch (error) {
+      console.error('Error in getCommentCountForUser:', error);
       return 0;
     }
   }
@@ -864,13 +1068,37 @@
       if (!postsStr) return 0;
       const posts = JSON.parse(postsStr);
       if (!Array.isArray(posts)) return 0;
-      // Match by userId (can be _id from MongoDB or userId from posts)
-      return posts.filter(p => {
-        const postUserId = String(p.userId || p.user_id || '');
-        const targetUserId = String(userId || '');
-        return postUserId === targetUserId || postUserId.includes(targetUserId) || targetUserId.includes(postUserId);
-      }).length;
-    } catch {
+      
+      // Skip seeded posts
+      const userPosts = posts.filter(p => p.userId !== 'seed_admin');
+      
+      if (!userId) return 0;
+      
+      const targetUserId = String(userId || '').trim();
+      if (!targetUserId) return 0;
+      
+      // Try multiple matching strategies
+      const matches = userPosts.filter(p => {
+        const postUserId = String(p.userId || p.user_id || '').trim();
+        if (!postUserId) return false;
+        
+        // Exact match
+        if (postUserId === targetUserId) return true;
+        
+        // Check if one contains the other (for partial matches)
+        if (postUserId.includes(targetUserId) || targetUserId.includes(postUserId)) return true;
+        
+        // Check if they're the same when normalized (remove special chars, lowercase)
+        const normalizedPost = postUserId.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normalizedTarget = targetUserId.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (normalizedPost && normalizedTarget && normalizedPost === normalizedTarget) return true;
+        
+        return false;
+      });
+      
+      return matches.length;
+    } catch (error) {
+      console.error('Error in getPostCountForUser:', error);
       return 0;
     }
   }
@@ -929,6 +1157,11 @@
         const userId = user._id || user.id;
         const postCount = getPostCountForUser(userId);
         const commentCount = getCommentCountForUser(userId);
+        
+        // Debug logging
+        console.log(`  User ID: ${userId}`);
+        console.log(`  Post count: ${postCount}`);
+        console.log(`  Comment count: ${commentCount}`);
         const createdDate = user.createdAt 
           ? new Date(user.createdAt).toLocaleDateString('en-US', { 
               year: 'numeric', 
@@ -1264,9 +1497,11 @@
   function renderComments(comments, postId) {
     if (!comments || comments.length === 0) return '';
     return comments.map(comment => {
+      // Ensure comment has an id for seeded comments
+      const commentId = comment.id || `comment_${comment.userId}_${comment.createdAt}`;
       const timeAgo = getTimeAgo(new Date(comment.createdAt));
       return `
-        <div class="comment-item" data-comment-id="${comment.id}">
+        <div class="comment-item" data-comment-id="${commentId}">
           <div class="comment-avatar">
             <img src="${comment.avatar || 'Images/Rival.png'}" alt="${comment.username}" />
           </div>
@@ -1274,7 +1509,7 @@
             <div class="comment-header-row">
               <div class="comment-author">${escapeHtml(comment.username)}</div>
               ${isAdminUser() ? `
-                <button class="comment-delete-btn" type="button" data-post-id="${postId}" data-comment-id="${comment.id}" title="Delete comment">
+                <button class="comment-delete-btn" type="button" data-post-id="${postId}" data-comment-id="${commentId}" title="Delete comment">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                   </svg>

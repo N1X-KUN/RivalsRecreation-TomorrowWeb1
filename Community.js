@@ -113,7 +113,18 @@
 
   // Save posts
   function savePosts(posts) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+    try {
+      const postsJson = JSON.stringify(posts);
+      localStorage.setItem(STORAGE_KEY, postsJson);
+    } catch (error) {
+      if (error.name === 'QuotaExceededError') {
+        console.error('Storage quota exceeded!', error);
+        const errorMsg = 'Storage limit reached! Please delete some old posts or clear your browser data. Videos are too large for local storage.';
+        alert(errorMsg);
+        throw new Error(errorMsg);
+      }
+      throw error;
+    }
   }
 
   function isAdminUser() {
@@ -224,9 +235,45 @@
       likedBy: postData.likedBy || []
     };
     posts.unshift(newPost); // Add to beginning
-    savePosts(posts);
+    try {
+      savePosts(posts);
+    } catch (error) {
+      // Remove the post we just added since save failed
+      posts.shift();
+      throw error;
+    }
     return newPost;
   }
+  
+  // Function to clear old posts to free up storage
+  window.clearOldPosts = function(keepCount = 10) {
+    if (!confirm(`This will delete all posts except the ${keepCount} most recent ones. Continue?`)) {
+      return;
+    }
+    try {
+      const posts = getPosts();
+      if (posts.length <= keepCount) {
+        alert(`You only have ${posts.length} posts. Nothing to clear.`);
+        return;
+      }
+      
+      // Keep the most recent posts (sorted by createdAt)
+      const sortedPosts = [...posts].sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+      
+      const postsToKeep = sortedPosts.slice(0, keepCount);
+      const deletedCount = posts.length - postsToKeep.length;
+      
+      savePosts(postsToKeep);
+      loadPosts();
+      alert(`✅ Cleared ${deletedCount} old post(s). Kept ${postsToKeep.length} most recent.`);
+    } catch (error) {
+      alert('Error clearing posts: ' + error.message);
+    }
+  };
 
   // Update post
   function updatePost(postId, updates) {
@@ -735,7 +782,9 @@
     if (createPostInput) {
       createPostInput.addEventListener('input', () => {
         if (submitPostBtn) {
-          submitPostBtn.disabled = !createPostInput.value.trim() && selectedMedia.length === 0;
+          const hasText = createPostInput.value.trim().length > 0;
+          const hasMedia = selectedMedia.length > 0;
+          submitPostBtn.disabled = !hasText && !hasMedia;
         }
       });
     }
@@ -818,21 +867,71 @@
 
   // Handle media upload
   function handleMediaUpload(e) {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          selectedMedia.push({
-            type: file.type.startsWith('image/') ? 'image' : 'video',
-            url: event.target.result,
-            file: file
-          });
-          updateMediaPreview();
-        };
-        reader.readAsDataURL(file);
+    const file = e.target.files[0]; // Only get the first file
+    if (!file) return;
+    
+    // Check if user already has an attachment
+    if (selectedMedia.length > 0) {
+      alert('Please have only one attachment');
+      e.target.value = ''; // Reset input
+      return;
+    }
+    
+    if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+      // Check file size (warn if video is too large)
+      const fileSizeMB = file.size / (1024 * 1024);
+      const isVideo = file.type.startsWith('video/');
+      
+      if (isVideo && fileSizeMB > 5) {
+        if (!confirm(`Warning: This video is ${fileSizeMB.toFixed(1)}MB. Large videos may exceed storage limits and fail to save.\n\nContinue anyway?`)) {
+          e.target.value = '';
+          return;
+        }
       }
-    });
+      
+      if (fileSizeMB > 10) {
+        alert('File is too large! Please use a file smaller than 10MB. Videos stored in browser storage have size limits.');
+        e.target.value = '';
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        const dataUrlSizeMB = dataUrl.length / (1024 * 1024);
+        
+        console.log('File loaded:', { 
+          type: file.type, 
+          fileSizeMB: fileSizeMB.toFixed(2),
+          dataUrlSizeMB: dataUrlSizeMB.toFixed(2)
+        });
+        
+        // Warn if data URL is very large
+        if (dataUrlSizeMB > 8) {
+          alert(`Warning: This file will use ${dataUrlSizeMB.toFixed(1)}MB of storage. You may hit storage limits if you have many posts.`);
+        }
+        
+        selectedMedia = [{
+          type: file.type.startsWith('image/') ? 'image' : 'video',
+          url: dataUrl,
+          file: file
+        }];
+        updateMediaPreview();
+        // Update submit button state
+        if (submitPostBtn) {
+          const hasText = createPostInput ? createPostInput.value.trim().length > 0 : false;
+          const hasMedia = selectedMedia.length > 0;
+          submitPostBtn.disabled = !hasText && !hasMedia;
+        }
+      };
+      reader.onerror = () => {
+        alert('Error reading file. Please try again.');
+        e.target.value = '';
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert('Please select an image or video file');
+    }
     e.target.value = ''; // Reset input
   }
 
@@ -842,28 +941,37 @@
     
     if (selectedMedia.length === 0) {
       mediaPreview.setAttribute('hidden', '');
+      mediaPreview.innerHTML = ''; // Clear any existing content
       return;
     }
 
+    // Only show one media item (the first one)
+    const media = selectedMedia[0];
     mediaPreview.removeAttribute('hidden');
-    mediaPreview.innerHTML = selectedMedia.map((media, index) => `
+    mediaPreview.innerHTML = `
       <div class="media-preview-item">
         ${media.type === 'image' 
-          ? `<img src="${media.url}" alt="Preview ${index + 1}" />`
+          ? `<img src="${media.url}" alt="Preview" />`
           : `<video src="${media.url}" controls></video>`
         }
-        <button class="remove-media" data-index="${index}">&times;</button>
+        <button class="remove-media" type="button" title="Remove attachment">&times;</button>
       </div>
-    `).join('');
+    `;
 
-    // Remove media buttons
-    mediaPreview.querySelectorAll('.remove-media').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const index = parseInt(btn.dataset.index);
-        selectedMedia.splice(index, 1);
-        updateMediaPreview();
+    // Remove media button
+    const removeBtn = mediaPreview.querySelector('.remove-media');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => {
+        selectedMedia = [];
+        updateMediaPreview(); // This will hide the preview
+            // Update submit button state
+            if (submitPostBtn) {
+              const hasText = createPostInput ? createPostInput.value.trim().length > 0 : false;
+              const hasMedia = selectedMedia.length > 0;
+              submitPostBtn.disabled = !hasText && !hasMedia;
+            }
       });
-    });
+    }
   }
 
   // Handle post submit
@@ -884,10 +992,10 @@
     // Check if we're editing an existing post
     const editingPostId = createPostInput ? createPostInput.dataset.editingPostId : null;
     if (editingPostId) {
-      // Update existing post
+      // Update existing post (only save first media item)
       const updated = updatePost(editingPostId, {
         text: text,
-        media: selectedMedia.map(m => m.url),
+        media: selectedMedia.length > 0 ? [selectedMedia[0].url] : [],
         hashtags: extractHashtags(text)
       });
       if (updated) {
@@ -908,26 +1016,50 @@
       return;
     }
 
-    // Create new post
-    const newPost = addPost({
-      userId: currentUser.id,
-      username: currentUser.username,
-      avatar: currentUser.avatar,
-      game: 'Marvel Rivals',
-      text: text,
-      media: selectedMedia.map(m => m.url),
-      hashtags: extractHashtags(text),
-      likedBy: []
+    // Create new post (only save first media item)
+    const mediaArray = selectedMedia.length > 0 ? [selectedMedia[0].url] : [];
+    console.log('Creating post:', { 
+      hasText: text.length > 0, 
+      hasMedia: mediaArray.length > 0,
+      mediaType: selectedMedia.length > 0 ? selectedMedia[0].type : 'none',
+      mediaUrlLength: mediaArray.length > 0 ? mediaArray[0].length : 0
     });
+    
+    try {
+      const newPost = addPost({
+        userId: currentUser.id,
+        username: currentUser.username,
+        avatar: currentUser.avatar,
+        game: 'Marvel Rivals',
+        text: text,
+        media: mediaArray,
+        hashtags: extractHashtags(text),
+        likedBy: []
+      });
 
-    // Reset form
-    if (createPostInput) createPostInput.value = '';
-    selectedMedia = [];
-    updateMediaPreview();
-    if (submitPostBtn) submitPostBtn.disabled = true;
+      console.log('Post created successfully:', { 
+        id: newPost.id, 
+        hasMedia: newPost.media && newPost.media.length > 0,
+        mediaCount: newPost.media ? newPost.media.length : 0
+      });
 
-    // Reload posts
-    loadPosts();
+      // Reset form
+      if (createPostInput) createPostInput.value = '';
+      selectedMedia = [];
+      updateMediaPreview();
+      if (submitPostBtn) submitPostBtn.disabled = true;
+
+      // Reload posts
+      loadPosts();
+      showToast('Post created!');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      if (error.message && error.message.includes('Storage limit')) {
+        alert('❌ Storage limit reached!\n\nYour browser\'s storage is full. Please:\n1. Delete some old posts\n2. Clear browser data\n3. Use smaller video files\n\nVideos are stored in browser storage which has a 5-10MB limit.');
+      } else {
+        alert('Error creating post: ' + error.message);
+      }
+    }
   }
 
   // Open edit post modal
@@ -950,11 +1082,22 @@
       createPostInput.focus();
     }
 
-    // Load existing media
-    selectedMedia = (post.media || []).map(url => ({
-      type: url.includes('video') || url.endsWith('.mp4') || url.endsWith('.webm') ? 'video' : 'image',
-      url: url
-    }));
+    // Load existing media (only first item, since we only allow one attachment)
+    const firstMedia = post.media && post.media.length > 0 ? post.media[0] : null;
+    if (firstMedia) {
+      const isVideo = firstMedia.startsWith('data:video/') || 
+                      firstMedia.includes('video') || 
+                      firstMedia.endsWith('.mp4') || 
+                      firstMedia.endsWith('.webm') ||
+                      firstMedia.endsWith('.mov') ||
+                      firstMedia.endsWith('.avi');
+      selectedMedia = [{
+        type: isVideo ? 'video' : 'image',
+        url: firstMedia
+      }];
+    } else {
+      selectedMedia = [];
+    }
     updateMediaPreview();
 
     // Update submit button text
@@ -1438,39 +1581,28 @@
   function renderPostMedia(media) {
     if (!media || media.length === 0) return '';
 
-    if (media.length === 1) {
-      const isVideo = media[0].includes('video') || media[0].endsWith('.mp4') || media[0].endsWith('.webm');
-      return `
-        <div class="post-media">
-          ${isVideo 
-            ? `<video src="${media[0]}" controls></video>`
-            : `<img src="${media[0]}" alt="Post media" />`
-          }
-        </div>
-      `;
-    } else if (media.length === 2) {
-      return `
-        <div class="post-media post-media-grid">
-          ${media.map(url => {
-            const isVideo = url.includes('video') || url.endsWith('.mp4') || url.endsWith('.webm');
-            return isVideo 
-              ? `<video src="${url}" controls></video>`
-              : `<img src="${url}" alt="Post media" />`;
-          }).join('')}
-        </div>
-      `;
-    } else {
-      return `
-        <div class="post-media post-media-grid-4">
-          ${media.slice(0, 4).map(url => {
-            const isVideo = url.includes('video') || url.endsWith('.mp4') || url.endsWith('.webm');
-            return isVideo 
-              ? `<video src="${url}" controls></video>`
-              : `<img src="${url}" alt="Post media" />`;
-          }).join('')}
-        </div>
-      `;
-    }
+    // Only render the first media item (single attachment)
+    const mediaUrl = media[0];
+    if (!mediaUrl) return '';
+    
+    // Check if it's a video by looking at the data URL prefix or file extension
+    const isVideo = mediaUrl.startsWith('data:video/') || 
+                    mediaUrl.includes('video') || 
+                    mediaUrl.endsWith('.mp4') || 
+                    mediaUrl.endsWith('.webm') ||
+                    mediaUrl.endsWith('.mov') ||
+                    mediaUrl.endsWith('.avi');
+    
+    console.log('Rendering media:', { url: mediaUrl.substring(0, 50) + '...', isVideo });
+    
+    return `
+      <div class="post-media">
+        ${isVideo 
+          ? `<video src="${escapeHtml(mediaUrl)}" controls preload="metadata"></video>`
+          : `<img src="${escapeHtml(mediaUrl)}" alt="Post media" />`
+        }
+      </div>
+    `;
   }
 
   // Render codes

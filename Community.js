@@ -216,12 +216,12 @@
   function addPost(postData) {
     const posts = getPosts();
     const newPost = {
-      id: 'post_' + Date.now(),
+      id: postData.id || 'post_' + Date.now(),
       ...postData,
-      createdAt: new Date().toISOString(),
-      likes: 0,
-      comments: [],
-      likedBy: []
+      createdAt: postData.createdAt || new Date().toISOString(),
+      likes: postData.likes !== undefined ? postData.likes : 0,
+      comments: postData.comments || [],
+      likedBy: postData.likedBy || []
     };
     posts.unshift(newPost); // Add to beginning
     savePosts(posts);
@@ -433,7 +433,7 @@
     } else {
       // Check if seeded posts exist, if not add them
       const hasSeededPosts = existingPosts.some(p => 
-        p.userId === 'seed_admin' || p.userId === 'seed_user2'
+        p.userId === 'seed_admin'
       );
       if (!hasSeededPosts) {
         console.log('Seeded posts missing, adding them...');
@@ -455,30 +455,54 @@
   const SEEDED_POSTS = [
       {
         userId: 'seed_admin',
-        username: 'RivalsTeam',
-        avatar: 'Images/Luna.png',
+        username: 'Galacta',
+        avatar: 'Images/GalactaEmote1.png',
         game: 'Marvel Rivals',
         title: 'Welcome to Rivals Community Page',
         text: 'Drop your highlights, team comps, and memes here. Use ❤️ to boost posts into Popular.',
         media: ['Images/Community1.jpg'],
-        hashtags: ['#RivalsNexus', '#Community'],
+        hashtags: ['#Rivals', '#Community'],
         likes: 67,
         comments: [
-          { userId: 'seed_user2', username: 'Cinematic Jeff', avatar: 'Images/Login.jpg', text: 'Mrrwarrrr!', createdAt: new Date(Date.now() - 3600000).toISOString() }
+          { userId: 'seed_admin', username: 'Cinematic Jeff', avatar: 'Images/Login.jpg', text: 'Mrrwarrrr!', createdAt: new Date(Date.now() - 3600000).toISOString() }
         ],
         createdAt: new Date(Date.now() - 86400000).toISOString()
       },
       {
-        userId: 'seed_user2',
-        username: 'NotJeff',
+        userId: 'seed_admin',
+        username: 'Jeff',
         avatar: 'Images/Login.jpg',
         game: 'Marvel Rivals',
-        text: 'he said nah id win',
+        text: 'Mrrrwaaarrrr~ [Translated: Absolute Cinema.]',
         media: [],
-        hashtags: ['#UltronMain'],
-        likes: 11,
+        hashtags: ['#JeffMain'],
+        likes: 999,
         comments: [],
         createdAt: new Date(Date.now() - 72000000).toISOString()
+      },
+      {
+        userId: 'seed_admin',
+        username: 'Galacta',
+        avatar: 'Images/GalactaEmote3.png',
+        game: 'Marvel Rivals',
+        text: 'STOP THAT VEHICLE 🚗🚗🚗',
+        media: ['Images/Community3.jpg'],
+        hashtags: ['#PUSH DA PAYLOAD'],
+        likes: 69,
+        comments: [],
+        createdAt: new Date(Date.now() - 85400000).toISOString()
+      },
+      {
+        userId: 'seed_admin',
+        username: 'Galacta',
+        avatar: 'Images/GalactaEmote2.png',
+        game: 'Marvel Rival',
+        text: 'HEEELLLP 😭😭',
+        media: ['Images/Community2.jpg'],
+        hashtags: [],
+        likes: 21,
+        comments: [],
+        createdAt: new Date(Date.now() - 85400000).toISOString()
       }
     ];
 
@@ -492,7 +516,14 @@
       const postId = post.id || `seed_${post.userId}_${post.createdAt}`;
       // Only add if it doesn't already exist
       if (!existingIds.has(postId)) {
-        const seededPost = { ...post, id: postId };
+        const seededPost = { 
+          ...post, 
+          id: postId,
+          // Preserve seeded post data (likes, comments, etc.)
+          likes: post.likes || 0,
+          comments: post.comments || [],
+          likedBy: post.likedBy || []
+        };
         addPost(seededPost);
       }
     });
@@ -505,7 +536,7 @@
     // Clear existing seeded posts
     const allPosts = getPosts();
     const filteredPosts = allPosts.filter(p => 
-      p.userId !== 'seed_admin' && p.userId !== 'seed_user2'
+      p.userId !== 'seed_admin'
     );
     savePosts(filteredPosts);
     // Add seeded posts back

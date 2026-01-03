@@ -221,7 +221,6 @@
       createdAt: new Date().toISOString(),
       likes: 0,
       comments: [],
-      views: 0,
       likedBy: []
     };
     posts.unshift(newPost); // Add to beginning
@@ -428,8 +427,18 @@
     }
 
     // Initialize with sample posts if empty
-    if (getPosts().length === 0) {
+    const existingPosts = getPosts();
+    if (existingPosts.length === 0) {
       initializeSamplePosts();
+    } else {
+      // Check if seeded posts exist, if not add them
+      const hasSeededPosts = existingPosts.some(p => 
+        p.userId === 'seed_admin' || p.userId === 'seed_user2'
+      );
+      if (!hasSeededPosts) {
+        console.log('Seeded posts missing, adding them...');
+        initializeSamplePosts();
+      }
     }
 
     // Quick navigation links
@@ -457,7 +466,6 @@
         comments: [
           { userId: 'seed_user2', username: 'Cinematic Jeff', avatar: 'Images/Login.jpg', text: 'Mrrwarrrr!', createdAt: new Date(Date.now() - 3600000).toISOString() }
         ],
-        views: 627,
         createdAt: new Date(Date.now() - 86400000).toISOString()
       },
       {
@@ -470,19 +478,40 @@
         hashtags: ['#UltronMain'],
         likes: 11,
         comments: [],
-        views: 21000,
         createdAt: new Date(Date.now() - 72000000).toISOString()
       }
     ];
 
   // Initialize seed posts (only runs once when there are no posts yet)
   function initializeSamplePosts() {
-
+    const existingPosts = getPosts();
+    const existingIds = new Set(existingPosts.map(p => p.id || p.userId + '_' + p.createdAt));
+    
     SEEDED_POSTS.forEach(post => {
-      addPost(post);
+      // Create a unique ID for seeded posts if they don't have one
+      const postId = post.id || `seed_${post.userId}_${post.createdAt}`;
+      // Only add if it doesn't already exist
+      if (!existingIds.has(postId)) {
+        const seededPost = { ...post, id: postId };
+        addPost(seededPost);
+      }
     });
     loadPosts();
   }
+  
+  // Expose function globally for manual reload
+  window.reloadSeededPosts = function() {
+    console.log('Force reloading seeded posts...');
+    // Clear existing seeded posts
+    const allPosts = getPosts();
+    const filteredPosts = allPosts.filter(p => 
+      p.userId !== 'seed_admin' && p.userId !== 'seed_user2'
+    );
+    savePosts(filteredPosts);
+    // Add seeded posts back
+    initializeSamplePosts();
+    console.log('Seeded posts reloaded!');
+  };
 
   // Setup event listeners
   function setupEventListeners() {
@@ -1005,7 +1034,9 @@
       const msg = activeTab === 'popular'
         ? 'No popular posts yet. Posts appear here once they have at least 1 like.'
         : activeTab === 'following'
-          ? 'You are not following anyone yet. Follow users to see their posts here.'
+          ? (isGuest() 
+              ? 'Please Log In To Follow Favorite Users'
+              : 'You are not following anyone yet. Follow users to see their posts here.')
           : 'No posts yet.';
       postsFeed.innerHTML = `<div class="community-empty-state">${escapeHtml(msg)}</div>`;
     } else {
@@ -1050,7 +1081,10 @@
             </div>
           </div>
           <div class="post-actions-header">
-            ${isOwnPost ? '' : `<button class="follow-btn ${isFollowingUser ? 'is-following' : ''}" data-user-id="${escapeHtml(String(post.userId))}">${isFollowingUser ? 'Following' : 'Follow'}</button>`}
+            ${isOwnPost ? '' : isGuest() 
+              ? `<button class="follow-btn" disabled title="Please log in to follow users" style="opacity: 0.5; cursor: not-allowed;">Follow</button>`
+              : `<button class="follow-btn ${isFollowingUser ? 'is-following' : ''}" data-user-id="${escapeHtml(String(post.userId))}">${isFollowingUser ? 'Following' : 'Follow'}</button>`
+            }
             ${blocked ? `
               <span class="post-blocked-indicator" title="Blocked">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -1118,7 +1152,6 @@
               </svg>
             </button>
           </div>
-          <div class="post-views">${formatViews(post.views || 0)} views</div>
         </div>
 
         <div class="post-comments" data-post-id="${post.id}" style="display: none;">
@@ -1230,6 +1263,13 @@
     // Follow buttons
     document.querySelectorAll('.follow-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        // Disable follow for guests
+        if (isGuest() || btn.disabled) {
+          alert('Please log in to follow users');
+          const loginBtn = document.getElementById('login-btn');
+          if (loginBtn) loginBtn.click();
+          return;
+        }
         const targetUserId = btn.getAttribute('data-user-id');
         if (!targetUserId) return;
         const set = toggleFollowUser(String(targetUserId));
@@ -1440,12 +1480,6 @@
     return 'just now';
   }
 
-  function formatViews(views) {
-    if (views >= 1000) {
-      return (views / 1000).toFixed(1) + 'k';
-    }
-    return views.toString();
-  }
 
   // Listen for user changes (login/logout)
   function syncUserFromStorage() {

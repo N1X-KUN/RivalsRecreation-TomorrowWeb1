@@ -470,7 +470,7 @@
       },
       {
         userId: 'seed_user2',
-        username: 'Test1',
+        username: 'NotJeff',
         avatar: 'Images/Login.jpg',
         game: 'Marvel Rivals',
         text: 'he said nah id win',

@@ -23,9 +23,9 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   z-index: 1001;
   user-select: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(20px) scale(0.95);
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
 }
 
 .music-player-icon--fade-in {

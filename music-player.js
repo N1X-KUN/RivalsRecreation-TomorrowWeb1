@@ -56,6 +56,28 @@
     });
   }
 
+  // Check if user is admin
+  function isAdminUser() {
+    try {
+      const loggedInUserStr = localStorage.getItem('loggedInUser') || sessionStorage.getItem('loggedInUser');
+      if (!loggedInUserStr) return false;
+      const user = JSON.parse(loggedInUserStr);
+      return !!user && String(user.role || 'user') === 'admin';
+    } catch {
+      return false;
+    }
+  }
+
+  // Shuffle array while maintaining order (Fisher-Yates shuffle)
+  function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
   // Fetch YouTube playlist items
   async function fetchYouTubePlaylist(playlistId, apiKey) {
     try {
@@ -787,8 +809,12 @@
           // Fetch playlist from YouTube
           const playlistData = await fetchYouTubePlaylist(YOUTUBE_PLAYLIST_ID, YOUTUBE_API_KEY);
           
-          setPlaylist(playlistData);
-          globalPlaylist = playlistData;
+          // Shuffle the playlist on load (maintains order, just randomizes once)
+          const shuffledSongs = shuffleArray(playlistData.songs);
+          const shuffledPlaylist = { ...playlistData, songs: shuffledSongs };
+          
+          setPlaylist(shuffledPlaylist);
+          globalPlaylist = shuffledPlaylist;
           
           // Always start from the first song in the playlist on each page load.
           // Previously this used a saved index from localStorage, which could
@@ -1061,13 +1087,43 @@
       },
         // Header with close button
         React.createElement('div', { className: 'playlist-header' },
-          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-            React.createElement('h2', null, "Play queue"),
-            React.createElement('button', {
-              className: 'panel-control-btn',
-              onClick: () => setIsOpen(false),
-              title: 'Close'
-            }, createSVGIcon('M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'))
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' } },
+            React.createElement('h2', null, "Starlord's MixTapes"),
+            React.createElement('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
+              isAdminUser() && React.createElement('a', {
+                href: `https://www.youtube.com/playlist?list=${YOUTUBE_PLAYLIST_ID}`,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+                title: 'View YouTube Playlist',
+                style: { 
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  padding: '6px 10px',
+                  textDecoration: 'none',
+                  color: '#ffd700',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
+                  background: 'rgba(255, 215, 0, 0.1)'
+                },
+                onMouseEnter: (e) => {
+                  e.target.style.background = 'rgba(255, 215, 0, 0.2)';
+                  e.target.style.textShadow = '0 0 8px rgba(255, 215, 0, 0.5)';
+                },
+                onMouseLeave: (e) => {
+                  e.target.style.background = 'rgba(255, 215, 0, 0.1)';
+                  e.target.style.textShadow = 'none';
+                }
+              }, '📺 Playlist'),
+              React.createElement('button', {
+                className: 'panel-control-btn',
+                onClick: () => setIsOpen(false),
+                title: 'Close'
+              }, createSVGIcon('M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'))
+            )
           )
         ),
         
@@ -1194,15 +1250,31 @@
   // Wait for React to load, then initialize
   function waitForReact() {
     if (window.React && window.ReactDOM) {
+      console.log('✅ React and ReactDOM found, initializing music player...');
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initMusicPlayer);
       } else {
-        initMusicPlayer();
+        // DOM already loaded, initialize immediately
+        setTimeout(initMusicPlayer, 200);
       }
     } else {
-      setTimeout(waitForReact, 100);
+      // Keep checking for React (max 10 seconds)
+      const maxAttempts = 100;
+      let attempts = 0;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        if (window.React && window.ReactDOM) {
+          clearInterval(checkInterval);
+          console.log('✅ React loaded after ' + attempts + ' attempts, initializing...');
+          initMusicPlayer();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkInterval);
+          console.error('❌ React failed to load after 10 seconds. Music player will not initialize.');
+        }
+      }, 100);
     }
   }
 
+  // Start waiting for React immediately
   waitForReact();
 })();

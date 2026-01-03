@@ -32,9 +32,9 @@
         <img src="Images/Icon Logo.svg" alt="Brand" style="height:40px;width:auto" />
       </a>
       <nav class="nav-links" aria-label="Primary">
-        <a href="Patch.html">Patch Page</a>
-        <a href="Hero.html" aria-current="page">Hero Page</a>
-        <a href="Community.html">Community Page</a>
+        <a href="Patch.html">Patch Notes</a>
+        <a href="Hero.html" aria-current="page">Rival Cards</a>
+        <a href="Community.html">Spawn Chats</a>
         <a href="#" aria-label="Log in" title="Log in" class="login-icon" id="login-btn">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </a>
@@ -46,8 +46,8 @@
     </div>  
     <div class="drawer" id="mobile-drawer" hidden>
       <div class="drawer-panel" role="dialog" aria-label="Mobile Menu">
-        <a href="Patch.html">Patch Page</a>
-        <a href="Hero.html" aria-current="page">Hero Page</a>
+        <a href="Patch.html">Patch Notes</a>
+        <a href="Hero.html" aria-current="page">Rival Cards</a>
         
         
         <a href="Community.html">Community Page</a>
@@ -389,7 +389,7 @@
 
   <script defer src="Rivals.js"></script>
   
-  <!-- React and ReactDOM for Music Player -->
+  <!-- React and ReactDOM for Music Player (load first) -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   
@@ -398,7 +398,7 @@
   
   <!-- Music Player Styles and Script -->
   <link rel="stylesheet" href="music-player.css" />
-  <script src="music-player.js"></script>
+  <script defer src="music-player.js"></script>
 </body>
 </html>
 

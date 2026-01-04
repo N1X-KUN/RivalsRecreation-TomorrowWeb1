@@ -351,10 +351,9 @@
   <!-- 
     # LOGIN / REGISTRATION POPUP MODAL
     This is a split-screen modal that appears when users click the login button.
-    Left side: Registration form where new users can create an account (email, nickname, password, captcha).
+    Left side: Registration form where new users can create an account.
     Right side: Login form for existing users and a "Continue As Guest" button.
-    The modal can be closed by clicking the X button or clicking outside the modal.
-    All login/registration logic is handled by Rivals.js.
+    All login&registration logic is handled by Rivals.js so dont worry about that.
   -->
   <div id="login-popup" class="login-popup" hidden>
     <div class="login-overlay"></div>
@@ -488,8 +487,8 @@
 
   <!-- 
     # MUSIC PLAYER SETUP
-    These React scripts are loaded first because the music player is built with React.
-    The music player appears as a floating button in the bottom-left corner that expands
+    These React scripts are loaded first because the music player is built with React,
+    the music player appears as a floating button in the bottom-left corner which expands
     into a full player panel when hovered. It plays YouTube videos as music and persists
     across page navigations. The actual music player code is in music-player.js.
   -->
@@ -512,7 +511,6 @@
     # YOUTUBE TRAILER MODAL
     This modal pops up when users click "Watch Trailer" on the homepage.
     It embeds a YouTube video player using the YouTube IFrame API.
-    The video automatically mutes background music while playing and unmutes when closed.
   -->
   <div id="trailer-modal" class="trailer-modal" hidden>
     <div class="trailer-modal-backdrop" id="trailer-modal-backdrop"></div>
@@ -537,7 +535,6 @@
   
   <!-- 
     # MUSIC PLAYER STYLES AND SCRIPT
-    The music player CSS styles the floating player button and expanded panel.
     The music-player.js file contains all the React component code for the music player,
     including playlist management, shuffle functionality, and state persistence across pages.
   -->

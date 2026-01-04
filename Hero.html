@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="Rivals.css" />
 </head>
 <body>
-  <!-- Page Loader -->
   <div id="page-loader" class="page-loader">
     <div class="loader-content">
       <div class="loader-logo">
@@ -57,6 +56,13 @@
     </div>
   </header>
 
+  <!-- 
+    # MAIN HERO SHOWCASE SECTION
+    This is the main hero page where users can browse and search through all the game characters.
+    Each hero has their own page with their own background image. which was one of the trickier 
+    parts to implement because we had to sync the background image with the hero data 
+    and creating ID tags for each hero for the search bar.
+  -->
   <main id="main" class="hero-page">
     <section class="hero-showcase" aria-labelledby="hero-roster-title" data-hero-focus>
       <div class="hero-showcase__backdrop" data-feature-bg>
@@ -64,6 +70,14 @@
         <img data-feature-bg-img alt="" aria-hidden="true" />
       </div>
 
+      <!-- 
+        # HERO SIDEBAR SECTION
+        This sidebar contains the search bar, role filters (All, Vanguard, Duelist, Strategist),
+        and hero count. The search functionality was a challenge because we needed to handle
+        partial matches, team names, and character names all at once. Also had to make sure
+        the "no results" message shows helpful suggestions when users search for characters
+        that don't exist yet.
+      -->
       <aside class="hero-sidebar" aria-label="Hero categories">
         <div class="hero-search-container">
           <div class="hero-search-wrapper">
@@ -82,6 +96,12 @@
               </svg>
             </button>
           </div>
+          <!-- 
+            # SEARCH NO RESULTS MESSAGE
+            When users search for a character that doesn't exist, this shows up with helpful
+            suggestions. The suggestions are clickable buttons that filter by team/group.
+            Had to make sure this appears smoothly and doesn't break the layout when it shows.
+          -->
           <div class="hero-search-no-results" data-hero-no-results hidden>
             <p class="hero-search-error">Sorry, This Character Has Not Been Added</p>
             <div class="hero-search-suggestions">
@@ -108,6 +128,14 @@
         </div>
       </aside>
 
+      <!-- 
+        # HERO FEATURE PANEL
+        This is the big card on the right that shows detailed info about the currently
+        selected hero. It displays role, stats, abilities, and has a "View More" button
+        that shows a popup with signature skills and lore. Getting the popup to position
+        correctly and stay visible when hovering was stressful as Ihad to use absolute positioning
+        and z-index carefully to make sure it doesn't get cut off or hidden behind other elements.
+      -->
       <div class="hero-feature" data-feature-panel>
         <article class="hero-feature__card" aria-live="polite">
           <header class="hero-feature__header">
@@ -137,6 +165,7 @@
             <span class="hero-feature__meta-value" data-feature-difficulty></span>
           </div>
           </div>
+
           <div class="hero-feature__actions">
             <button class="hero-feature__view-more" type="button">
               <span>VIEW MORE</span>
@@ -156,6 +185,12 @@
       </div>
     </section>
 
+    <!-- 
+      # HERO ROSTER GRID SECTION
+      Each card shows a hero portrait, name, and role. When clicked, it updates the 
+      feature panel above. The cards have a reveal animation that was fun to implement where 
+      they fade in and slide up one by one.
+    -->
     <section class="hero-roster" aria-label="Hero roster" data-roster-section>
       <header class="hero-roster__head">
         <div>
@@ -170,6 +205,12 @@
         </div>
       </header>
       <div class="hero-roster__grid" data-roster></div>
+      <!-- 
+        # PLAY NOW CALL-TO-ACTION SECTION
+        This is the download section at the bottom of the hero roster. Has a background
+        image and a "Play Now" button. Pretty straightforward, but had to make sure
+        the background image doesn't overpower the text and the button stands out enough.
+      -->
       <div class="hero-roster__play-now">
         <div class="hero-roster__play-now-bg">
           <img src="Images/New1.jpg" alt="Game background" />
@@ -185,6 +226,12 @@
     </section>
   </main>
 
+  <!-- 
+    # HERO DETAIL MODAL
+    This modal pops up when users click on a hero card. Shows full details including
+    all abilities, stats, and lore. The modal has a nice slide-in animation and can be
+    closed by clicking the X button or clicking outside.
+  -->
   <div class="hero-modal" id="hero-modal" hidden>
     <div class="hero-modal__overlay" data-modal-close></div>
     <div class="hero-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="hero-modal-title">

@@ -56,22 +56,44 @@
     </div>
   </header>
 
+  <!-- 
+    # MAIN COMMUNITY PAGE CONTENT
+    This is the social media/community page where users can post, comment, like, and follow.
+    The page has a feed on the left and a sidebar on the right. All posts are stored in
+    localStorage which caused a major issue like when users posted videos, the data URLs were
+    so large that they exceeded the browser's storage quota (5-10MB limit apperantly). Had to add
+    file size warnings and a function to clear old posts to free up space or multiple attachments.
+  -->
   <main id="main" class="community-main">
-    <!-- Top-only Community Background Image (behind the top section area) -->
+    <!-- Background image that appears behind the top section only -->
     <div class="community-top-bg" aria-hidden="true"></div>
     <div class="community-container">
-      <!-- Community Feed Section -->
+      <!-- 
+        # COMMUNITY FEED SECTION
+        This is where all the posts are displayed. The feed has three tabs: Discussions,
+        Popular, and Following. Posts are dynamically generated from localStorage data.
+      -->
       <div class="community-feed">
         <!-- Content Layer -->
         <div class="community-feed-content">
-        <!-- Navigation Tabs -->
+        <!-- 
+          # NAVIGATION TABS
+          Three tabs to filter posts: Discussions (all posts), Popular (most liked),
+          and Following (posts from users you follow). The Following tab shows a message
+          for guest users telling them to log in to follow users. 
+        -->
         <div class="community-nav-tabs">
           <button class="community-tab active" data-tab="discussions">Discussions</button>
           <button class="community-tab" data-tab="popular">Popular</button>
           <button class="community-tab" data-tab="following">Following</button>
         </div>
 
-        <!-- Create Post Section -->
+        <!-- 
+          # CREATE POST SECTION
+          This is where users create new posts. Can add text, one image, or one video
+          (not both, and only one attachment total).The media preview shows immediately 
+          when a file is selected, and there's an X button to remove it. 
+        -->
         <div class="create-post-card">
           <div class="create-post-header">
             <div class="user-avatar-small">
@@ -101,17 +123,35 @@
           <input type="file" id="media-upload-input" accept="image/*,video/*" hidden />
         </div>
 
-        <!-- Posts Feed -->
+        <!-- 
+          # POSTS FEED
+          This is where all posts are rendered. Posts are loaded from localStorage
+          and displayed dynamically. Each post can be liked, commented on, shared,
+          edited or deleted (if you're the author or an admin). The feed updates in real-time 
+          when new posts are created or when posts are edited/deleted.
+          Biggest pain were the seeded posts not showing up but by reseting the post in the console, 
+          using reloadSeededPosts() reseted the posts and showed them again.
+        -->
         <div class="posts-feed" id="posts-feed">
           <!-- Posts will be dynamically generated here -->
         </div>
         </div>
-        <!-- End Content Layer -->
       </div>
 
-      <!-- Sidebar -->
+      <!-- 
+        # COMMUNITY SIDEBAR
+        The sidebar shows user profile info, quick navigation links, and admin tools
+        (if the user is an admin). The profile widget switches between guest and logged-in
+        states.
+    -->
       <aside class="community-sidebar">
-        <!-- Profile Details Widget -->
+        <!-- 
+          # PROFILE DETAILS WIDGET
+          Shows different content based on whether the user is logged in or a guest.
+          For guests, it shows a sign-up prompt. For logged-in users, it shows their
+          avatar, bio, favorite character, rank, winrate, and account creation date.
+          The stats are pulled from the user's account data stored in localStorage.
+        -->
         <div class="sidebar-widget profile-widget" id="profile-widget">
           <!-- Guest State -->
           <div class="profile-guest-state" id="profile-guest-state">
@@ -165,7 +205,10 @@
           </div>
         </div>
 
-        <!-- Quick Navigation Widget -->
+        <!-- 
+          # QUICK NAVIGATION WIDGET
+          Links to other sections of the website.
+        -->
         <div class="sidebar-widget navigation-widget">
           <div class="widget-header">
             <h3>Quick Navigation</h3>
@@ -186,7 +229,15 @@
           </div>
         </div>
 
-        <!-- Admin: View All Accounts Widget -->
+        <!-- 
+          # ADMIN TOOLS WIDGET
+          Only visible to admin users. Contains a button to view all accounts.
+          This was tricky to implement because we had to fetch user data from the
+          backend API, count posts and comments from localStorage, and match user IDs
+          between MongoDB (_id) and localStorage (userId). The ID matching was a pain
+          because they're stored differently, so I had to add multiple fallback checks
+          to match users correctly.
+        -->
         <div class="sidebar-widget admin-accounts-widget" id="admin-accounts-widget" style="display: none;">
           <div class="widget-header">
             <h3>Admin Tools</h3>
@@ -198,7 +249,13 @@
         </div>
       </aside>
 
-      <!-- Admin Accounts Modal -->
+      <!-- 
+        # ADMIN ACCOUNTS MODAL
+        This modal shows all registered accounts in a table with their creation date,
+        post count, comment count, and ban status. Admins can ban/unban users from here,
+        (did this instead of deleting users because I think its better this way).
+        The modal was stuck open initially because the CSS wasn't hiding it by default.
+      -->
       <div class="admin-accounts-modal" id="admin-accounts-modal" hidden>
         <div class="admin-accounts-modal-overlay" data-modal-close></div>
         <div class="admin-accounts-modal-content">
@@ -229,7 +286,8 @@
     </div>
   </main>
 
-  <!-- Social Media Icons (Right Sidebar) -->
+
+  <!-- Social Media Icons Sidebar -->
   <div class="social-sidebar">
     <a href="#" class="social-icon" aria-label="Facebook">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -258,7 +316,12 @@
     </a>
   </div>
 
-  <!-- Post Detail Modal -->
+  <!-- 
+    # POST DETAIL MODAL
+    This modal opens when users click on a post to see full details, comments, etc.
+    The modal shows the complete post content, all comments, and allows users to
+    interact with the post (like, comment, share).
+  -->
   <div class="post-modal" id="post-modal" hidden>
     <div class="post-modal-overlay" data-modal-close></div>
     <div class="post-modal-content">
@@ -435,6 +498,24 @@
   </script>
   
   <script defer src="Rivals.js"></script>
+  <!-- 
+    # COMMUNITY.JS - MAIN COMMUNITY PAGE LOGIC
+    This is the big one - handles all the community page functionality:
+    - Post creation, editing, deletion (with media support)
+    - Comment system with admin deletion
+    - Like/follow functionality
+    - Admin features (ban users, delete comments, view all accounts)
+    - localStorage management for posts (with quota handling)
+    - Media handling (images and videos - single attachment only)
+    - Tab filtering (Discussions, Popular, Following)
+    - Seeded posts initialization and reloading
+    
+    The file is huge (almost 2000 lines) because it has to handle so many features.
+    The localStorage quota issue was a major problem - had to add file size checks,
+    warnings, and a clearOldPosts() function to help users manage storage when it gets full.
+    Also had to fix issues with posts containing only videos not appearing, and ID matching
+    between MongoDB (_id) and localStorage (userId) for the admin panel.
+  -->
   <script defer src="Community.js"></script>
   
   <!-- React and ReactDOM for Music Player (load first) -->

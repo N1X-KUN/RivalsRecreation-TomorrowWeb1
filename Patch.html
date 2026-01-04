@@ -8,6 +8,12 @@
   <title>Patch Notes - Rivals Nexus</title>
   <link rel="icon" href="Images/Rival.png" type="image/x-icon" />
   <link rel="stylesheet" href="Rivals.css" />
+  <!-- 
+    # PATCH PAGE STYLES
+    Inline styles for news and hero cards. The news cards need to be clickable
+    links, and the media images need to fill their containers properly. Had to
+    set min-heights so the cards don't collapse when images load slowly.
+  -->
   <style>
     /* Make news cards act like links you can fill in later */
     .news-card[role="link"] { cursor: pointer; }
@@ -42,7 +48,6 @@
       <nav class="nav-links" aria-label="Primary">
         <a href="Patch.html" aria-current="page">Patch Notes</a>
         <a href="Hero.html">Rival Cards</a>
-        
         <a href="Community.html">Spawn Chats</a>
         <a href="#" aria-label="Log in" title="Log in" class="login-icon" id="login-btn">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -55,16 +60,22 @@
     </div>
     <div class="drawer" id="mobile-drawer" hidden>
       <div class="drawer-panel" role="dialog" aria-label="Mobile Menu">
-        <a href="Patch.html" aria-current="page">Patch Page</a>
-        <a href="Hero.html">Hero Page</a>
-        <a href="Community.html">Community Page</a>
+        <a href="Patch.html" aria-current="page">Patch Notes</a>
+        <a href="Hero.html">Rival Cards</a>
+        <a href="Community.html">Spawn Chats</a>
         <a href="#" class="btn" id="mobile-login-btn">Log in</a>
         <a class="cta" data-magnetic href="Videos/RivalsLauncher.mp4" download="MarvelRivals_Gameplay.mp4"><span class="shine" aria-hidden="true"></span>Play Now</a>
       </div>
     </div>
   </header>
 
-  <!-- Full-width hero banner -->
+  <!-- 
+    # PAGE HERO BANNER
+    Full-width banner at the top with the patch notes background image.
+    The gradient overlay helps the text stay readable over the image.
+    Had to use inline styles here because this specific background image
+    is only used on this page.
+  -->
   <section class="page-hero" aria-label="News & Patch Notes banner" style="background-image: linear-gradient(rgba(15,15,22,.55), rgba(15,15,22,.55)), url('Images/PatchImage.jpg'); background-size: cover; background-position: center; padding: 64px 5vw; margin: 0 0 24px; min-height: 220px; display: flex; align-items: flex-end;">
     <div class="container" style="width:100%">
       <h1 style="margin:0">News & Patch Notes</h1>
@@ -73,13 +84,27 @@
 
   <main id="main" class="container">
 
-    <!-- News & Updates -->
+    <!-- 
+      # NEWS & UPDATES SECTION
+      This section shows the latest game news and announcements. The first 6
+      cards are visible by default, and the rest are hidden until the user
+      clicks "Show more". Each card links to the actual Marvel Rivals website.
+      The "Show more/less" toggle was tricky because I had to make sure all
+      the hidden cards show/hide together, not one by one.
+    -->
     <section class="news-section" aria-labelledby="news-heading">
       <div class="section-head">
         <h2 id="news-heading">Latest News & Updates</h2>
-        <p class="section-sub">Fresh drops from the dev team — events, balance, and more.</p>
+        <p class="section-sub">This is totaly outdated but yay so many words to fill in the space!</p>
       </div>
 
+      <!-- 
+        # NEWS GRID
+        Grid of news cards. The first 6 are visible, the rest have the "more"
+        class and are hidden by default. The data-collapsed attribute tracks
+        whether the extra cards are shown or not. Each card has a data-href
+        attribute that links to the actual Marvel Rivals news article.
+      -->
       <div class="news-grid" id="news-grid" data-collapsed="true" aria-live="polite">
         <!-- Visible items -->
         <article class="news-card" tabindex="0" data-href="https://www.marvelrivals.com/gameupdate/20251003/41548_1263184.html">
@@ -142,7 +167,13 @@
           <p class="news-desc">Congratulations to all the winners — your content cut through the darkness and earned a place in the spotlight. Thank you to everyone who participated in the event. We can’t wait to see what you create next.</p>
         </article>
 
-        <!-- Hidden by default, revealed with Show more -->
+        <!-- 
+          # HIDDEN NEWS CARDS
+          These cards are hidden by default and only show when the user clicks
+          "Show more". They have both the "more" class and hidden attribute,
+          plus inline display:none as a fallback. The JavaScript handles showing
+          them all at once when the button is clicked.
+        -->
         <article class="news-card more" hidden style="display:none" data-href="https://www.marvelrivals.com/balancepost/20250904/41667_1257761.html">
           <figure class="news-media" aria-hidden="true"><img src="Images/New2.jpg" alt="News image" /></figure>
           <div class="news-meta">
@@ -212,16 +243,32 @@
 
     <div class="section-divider" role="separator" aria-hidden="true"></div>
 
-    <!-- Patch Updates -->
+    <!-- 
+      # PATCH UPDATES SECTION
+      This section shows hero balance changes - buffs and nerfs. Each hero card
+      has a badge showing whether they got buffed or nerfed. The cards have a
+      wavy animation effect that makes them stand out. The data-state attribute
+      ("buff" or "nerf") is used for styling - buffed heroes get one color scheme,
+      nerfed heroes get another. The descriptions are intentionally funny/sarcastic
+      because that's the vibe I wanted for this page.
+    -->
     <section class="patch-section" aria-labelledby="patch-heading">
       <div class="section-head patch-head">
         <div>
           <h2 id="patch-heading">Patch Updates</h2>
-          <p class="section-sub">Season 4.5 -- Nutshell Hero Buffs & Nerfs</p>
+          <p class="section-sub">Season 4.5 -- Nutshell Hero Buffs & Nerfs (Definitely upto date with the game.)</p>
         </div>
-        <p class="patch-tagline">Who rose, who fell, and why.</p>
+        <p class="patch-tagline">Oooh~ It has a wavy animation too so is not boring at all!</p>
       </div>
 
+      <!-- 
+        # PATCH GRID
+        Grid of hero cards showing balance changes. Each card has a data-state
+        of either "buff" or "nerf" which determines the badge color and styling.
+        The data-href is empty for now but could link to detailed patch notes
+        later. The wavy animation on the cards makes them feel more dynamic and
+        less static compared to regular hero cards.
+      -->
       <div class="hero-grid patch-grid">
         <!-- Buff Card -->
         <article class="hero-card" data-state="buff" data-href="">
@@ -384,6 +431,7 @@
     </section>
   </main>
 
+  <!-- Footer -->
   <footer>
     <div class="container foot-min">
       <div>
@@ -538,6 +586,18 @@
     </div>
   </div>
 
+  <!-- 
+    # PATCH PAGE JAVASCRIPT
+    This script handles the "Show more/less" functionality for news cards and
+    makes both news cards and hero cards clickable. The news grid shows the first
+    6 cards by default, and clicking "Show more" reveals all the hidden ones at once.
+    Each card has a data-href attribute that links to the actual article. The hero
+    cards in the patch section are also clickable, but their data-href is empty
+    for now - could add links to detailed patch notes later.
+    
+    Had to be careful with the show/hide logic because the cards have both the
+    hidden attribute and inline display:none, so I had to update both when toggling.
+  -->
   <script>
     // News grid: show first 6, toggle the rest all at once (Show more/less)
     (function () {

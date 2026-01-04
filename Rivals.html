@@ -11,7 +11,12 @@
   <link rel="stylesheet" href="Rivals.css" />
 </head>
 <body>
-  <!-- Page Loader -->
+  <!-- 
+    # PAGE LOADER SECTION
+    This is the loading screen that appears when navigating between pages.
+    Shows the Marvel Rivals logo with "RIVALING..." text and a progress bar.
+    The loader is controlled by Rivals.js and appears for 3 seconds during page transitions.
+  -->
   <div id="page-loader" class="page-loader">
     <div class="loader-content">
       <div class="loader-logo">
@@ -26,7 +31,16 @@
     </div>
   </div>
 
+  <!-- Skip to main content link for accessibility -->
   <a class="sr-only" href="#main">Skip to content</a>
+  
+  <!-- 
+    # HEADER / NAVIGATION SECTION
+    This is the main site header that stays fixed at the top when scrolling.
+    Contains the Marvel Rivals logo, navigation links (Patch Notes, Rival Cards, Spawn Chats),
+    login button, and the "Play Now" download button.
+    On mobile, the hamburger menu opens a drawer with the same navigation options.
+  -->
   <header class="site-header">
     <div class="container nav">
       <a class="brand" href="Rivals.html" aria-label="Marvel Rivals Home">
@@ -56,13 +70,26 @@
     </div>
   </header>
 
+  <!-- 
+    # MAIN CONTENT AREA
+    This is where all the homepage content lives - hero section, features, maps, news, and download section.
+  -->
   <main id="main">
+    <!-- 
+      # HERO SECTION
+      This is the big banner at the top of the homepage with the background video.
+      Shows the game title "Come And Meet Your Rival" with a tagline and download/watch trailer buttons.
+      Has animated floating orbs and stars in the background for visual effect.
+    -->
     <section class="hero" aria-label="Hero">
+    <!-- Background video that plays on loop - starts fullscreen then transitions to banner -->
     <video id="hero-video" class="video-intro" autoplay muted playsinline loop>
       <source src="Videos/BannerVid.mp4" type="video/mp4">
     </video>
 
+      <!-- Animated starfield background effect -->
       <div class="stars" aria-hidden="true"></div>
+      <!-- Floating colored orbs that move with parallax effect based on mouse movement -->
       <div class="hero-art" aria-hidden="true">
         <div class="orb red" data-parallax data-depth="0.06"></div>
         <div class="orb gold" data-parallax data-depth="0.08"></div>
@@ -79,6 +106,12 @@
       </div>
     </section>
 
+    <!-- 
+      # CORE GAMEPLAY FEATURES SECTION
+      Shows three main feature cards: 6v6 Hero Shooter, Free To Play, and Dynamic Maps.
+      Each card has an image that changes on hover and explains a key gameplay feature.
+      The cards have a popup effect when you hover over them.
+    -->
     <section id="features" class="container section-sep" aria-labelledby="features-title">
       <div class="section-head">
         <h2 id="features-title">Core Gameplays</h2>
@@ -86,6 +119,7 @@
       </div>
       <div class="features">
         <article class="feature" data-reveal>
+          <!-- Image container that swaps between default and hover images on mouse over -->
           <div class="media">
             <img src="Images/TeamUp.jpg" alt="Heroes clashing in 6v6" class="feature-img-default" />
             <img src="Images/Teams.jpg" alt="Heroes clashing in 6v6" class="feature-img-hover" />
@@ -121,6 +155,13 @@
       </div>
     </section>
 
+    <!-- 
+      # MAPS SHOWCASE SECTION
+      This is a carousel/slideshow that displays different game maps.
+      Users can navigate through maps using the previous/next buttons or the dot indicators.
+      Each map shows an image with a name and description overlay.
+      The carousel auto-plays and cycles through all available maps.
+    -->
     <section id="maps" class="container section-sep" aria-labelledby="maps-title">
       <div class="section-head">
         <h2 id="maps-title">Maps Showcase</h2>
@@ -159,7 +200,7 @@
             </div>
           </div>
           
-          <!-- Navigation Controls -->
+          <!-- Navigation buttons to manually go to previous/next map in the carousel -->
           <button class="carousel-btn carousel-prev" id="carousel-prev" aria-label="Previous map">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M15 18l-6-6 6-6"/>
@@ -171,7 +212,7 @@
             </svg>
           </button>
           
-          <!-- Dot Indicators -->
+          <!-- Dot navigation indicators - click any dot to jump directly to that map slide -->
           <div class="carousel-dots" id="carousel-dots">
             <button class="carousel-dot active" data-slide="0" aria-label="Go to slide 1"></button>
             <button class="carousel-dot" data-slide="1" aria-label="Go to slide 2"></button>
@@ -182,6 +223,13 @@
       </div>
     </section>
 
+    <!-- 
+      # LATEST UPDATES / NEWS SECTION
+      Displays a grid of news cards showing recent game updates, patch notes, and events.
+      Each card has a background image, title, and description.
+      Cards have a hover effect that lifts them up and adds a yellow glow.
+      At the bottom there's a "View More Patch" button that links to the Patch Notes page.
+    -->
     <section id="news" class="container" aria-labelledby="news-title">
       <div class="section-head">
         <h2 id="news-title">Latest Updates</h2>
@@ -253,6 +301,12 @@
       </div>
     </section>
 
+    <!-- 
+      # DOWNLOAD / PLATFORM LINKS SECTION
+      This is the call-to-action section at the bottom of the homepage.
+      Shows "Join The Rivals Now" with links to download on Steam, Epic Games, and Windows Store.
+      Has a background video playing behind the content for visual appeal.
+    -->
     <section id="download" class="section-sep full-bleed" aria-labelledby="download-title">
       <div class="cta-download" data-reveal>
         <div class="bg"><video src="Videos/PlayVid.mp4" autoplay muted loop playsinline></video></div>
@@ -276,6 +330,12 @@
     </section>
   </main>
 
+  <!-- 
+    # FOOTER SECTION
+    Contains legal links (Terms & Conditions, Privacy Policy, FAQ, etc.),
+    copyright information, and compliance badges (NetEase, Marvel Logo, ESRB rating).
+    The footer links have a yellow glow effect on hover to show they're clickable.
+  -->
   <footer>
     <div class="container foot-min">
       <div>
@@ -300,7 +360,14 @@
     </div>
   </footer>
 
-  <!-- Login/Sign-in Popup -->
+  <!-- 
+    # LOGIN / REGISTRATION POPUP MODAL
+    This is a split-screen modal that appears when users click the login button.
+    Left side: Registration form where new users can create an account (email, nickname, password, captcha).
+    Right side: Login form for existing users and a "Continue As Guest" button.
+    The modal can be closed by clicking the X button or clicking outside the modal.
+    All login/registration logic is handled by Rivals.js.
+  -->
   <div id="login-popup" class="login-popup" hidden>
     <div class="login-overlay"></div>
     <div class="login-modal">
@@ -308,7 +375,7 @@
       
       <!-- Split Screen Layout -->
       <div class="login-modal-content">
-        <!-- Left Section: Registration -->
+        <!-- Left side of login popup: New user registration form -->
         <div class="login-section registration-section">
           <div class="login-section-header">
             <div class="login-logo-container">
@@ -381,10 +448,10 @@
 
         </div>
 
-        <!-- Right Section: Login -->
+        <!-- Right side of login popup: Existing user login and guest access -->
         <div class="login-section login-right-section">
           <div class="login-right-content">
-            <!-- Guest login status display -->
+            <!-- Shows current guest login status if user is logged in as guest -->
             <div id="guest-status" class="guest-status" style="display: none;">
               <p class="guest-status-text">Currently logged in as <strong>Guest</strong></p>
               <button class="guest-logout-btn" id="guest-logout-btn">Logout Guest</button>
@@ -395,6 +462,7 @@
               <div class="login-social-icon">👤</div>
               <span>Continue As Guest</span>
             </button>
+            <!-- Expandable section that reveals the login form when clicked -->
             <div class="login-expandable-section">
               <button class="login-expand-btn" id="popup-expandLink">
                 <span>Played before but haven't linked an email?</span>
@@ -430,13 +498,34 @@
     </div>
   </div>
 
-  <!-- React and ReactDOM for Music Player (load first) -->
+  <!-- 
+    # MUSIC PLAYER SETUP
+    These React scripts are loaded first because the music player is built with React.
+    The music player appears as a floating button in the bottom-left corner that expands
+    into a full player panel when hovered. It plays YouTube videos as music and persists
+    across page navigations. The actual music player code is in music-player.js.
+  -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   
+  <!-- 
+    # MAIN JAVASCRIPT FILE
+    This file handles all the homepage functionality:
+    - Page loader animations
+    - Login/registration popup
+    - Mobile menu drawer
+    - YouTube trailer modal
+    - Scroll animations and parallax effects
+    - Hero video transitions
+  -->
   <script defer src="Rivals.js"></script>
   
-  <!-- YouTube Video Popup Modal -->
+  <!-- 
+    # YOUTUBE TRAILER MODAL
+    This modal pops up when users click "Watch Trailer" on the homepage.
+    It embeds a YouTube video player using the YouTube IFrame API.
+    The video automatically mutes background music while playing and unmutes when closed.
+  -->
   <div id="trailer-modal" class="trailer-modal" hidden>
     <div class="trailer-modal-backdrop" id="trailer-modal-backdrop"></div>
     <div class="trailer-modal-content">
@@ -451,10 +540,19 @@
     </div>
   </div>
 
-  <!-- YouTube IFrame Player API -->
+  <!-- 
+    # YOUTUBE API SCRIPT
+    Required for the YouTube trailer modal to work. This loads the YouTube IFrame Player API
+    which allows us to embed and control YouTube videos on the page.
+  -->
   <script src="https://www.youtube.com/iframe_api"></script>
   
-  <!-- Music Player Styles and Script -->
+  <!-- 
+    # MUSIC PLAYER STYLES AND SCRIPT
+    The music player CSS styles the floating player button and expanded panel.
+    The music-player.js file contains all the React component code for the music player,
+    including playlist management, shuffle functionality, and state persistence across pages.
+  -->
   <link rel="stylesheet" href="music-player.css" />
   <script defer src="music-player.js"></script>
 </body>

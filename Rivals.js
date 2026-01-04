@@ -1,7 +1,9 @@
 (function() {
   const root = document.documentElement;
 
-  // First boot detection - clear login state and ensure fresh start
+  // # FIRST BOOT DETECTION
+  // When the website loads for the first time in a session, this clears any saved login state
+  // so users start fresh. This prevents old login data from persisting across browser sessions.
   (function initFirstBoot() {
     const FIRST_BOOT_KEY = 'rivals_first_boot_complete';
     const isFirstBoot = !sessionStorage.getItem(FIRST_BOOT_KEY);
@@ -23,7 +25,10 @@
     }
   })();
 
-  // Page Loader - Show on navigation (except when going back to home or returning from external sites)
+  // # PAGE LOADER SYSTEM
+  // Controls the loading screen animation that appears when navigating between pages.
+  // The loader shows for 3 seconds when going from one page to another, but doesn't show
+  // when returning to the homepage or coming back from external sites like YouTube.
   (function initPageLoader() {
     const pageLoader = document.getElementById('page-loader');
     if (!pageLoader) return;
@@ -103,7 +108,9 @@
     });
   })();
 
-  // Mobile drawer
+  // # MOBILE MENU DRAWER
+  // Handles the hamburger menu that slides in from the right on mobile devices.
+  // When clicked, it opens a drawer panel with all the navigation links.
   const hamburger = document.querySelector('.hamburger');
   const drawer = document.getElementById('mobile-drawer');
   if (hamburger && drawer) {
@@ -121,7 +128,11 @@
     });
   }
 
-  // Login Popup
+  // # LOGIN/REGISTRATION POPUP MODAL
+  // Manages the login popup that appears when users click the login button.
+  // Handles opening/closing the modal, preventing body scroll when open,
+  // and checking guest login status. The actual login/registration forms
+  // are handled by separate functions below.
   const loginPopup = document.getElementById('login-popup');
   const loginBtn = document.getElementById('login-btn');
   const mobileLoginBtn = document.getElementById('mobile-login-btn');
@@ -164,7 +175,10 @@
   if (loginClose) loginClose.addEventListener('click', closeLoginPopup);
   if (loginOverlay) loginOverlay.addEventListener('click', closeLoginPopup);
 
-  // YouTube Trailer Modal
+  // # YOUTUBE TRAILER MODAL
+  // This section handles the YouTube video player that pops up when users click "Watch Trailer".
+  // It automatically mutes the background music when the trailer plays and unmutes when it closes.
+  // Also monitors all HTML5 video elements on the page to mute music when any video plays.
   const trailerModal = document.getElementById('trailer-modal');
   const watchTrailerBtn = document.getElementById('watch-trailer-btn');
   const trailerModalClose = document.getElementById('trailer-modal-close');
@@ -393,6 +407,14 @@
     }
   });
 
+  // # LOGIN/REGISTRATION FORM HANDLING
+  // This section contains all the functions for handling user registration and login:
+  // - Email validation (only allows specific email domains)
+  // - Password visibility toggles
+  // - Form validation and submission
+  // - Captcha generation and verification
+  // - Guest login functionality
+  
   // Email validation function
   function isValidEmail(email) {
     const validDomains = ['@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com'];

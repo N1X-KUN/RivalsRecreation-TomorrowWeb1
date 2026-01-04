@@ -37,7 +37,7 @@
   <!-- 
     # HEADER / NAVIGATION SECTION
     This is the main site header that stays fixed at the top when scrolling.
-    Contains the Marvel Rivals logo, navigation links (Patch Notes, Rival Cards, Spawn Chats),
+    Contains the Rivals logo, navigation links (Patch Notes, Rival Cards, Spawn Chats),
     login button, and the "Play Now" download button.
     On mobile, the hamburger menu opens a drawer with the same navigation options.
   -->
@@ -70,26 +70,21 @@
     </div>
   </header>
 
-  <!-- 
-    # MAIN CONTENT AREA
-    This is where all the homepage content lives - hero section, features, maps, news, and download section.
-  -->
   <main id="main">
     <!-- 
       # HERO SECTION
-      This is the big banner at the top of the homepage with the background video.
+      This is the background banner at the top of the homepage with the background video.
       Shows the game title "Come And Meet Your Rival" with a tagline and download/watch trailer buttons.
-      Has animated floating orbs and stars in the background for visual effect.
     -->
     <section class="hero" aria-label="Hero">
-    <!-- Background video that plays on loop - starts fullscreen then transitions to banner -->
+    <!-- Background video that plays on loop which starts fullscreen and then transitions to background banner -->
     <video id="hero-video" class="video-intro" autoplay muted playsinline loop>
       <source src="Videos/BannerVid.mp4" type="video/mp4">
     </video>
 
       <!-- Animated starfield background effect -->
       <div class="stars" aria-hidden="true"></div>
-      <!-- Floating colored orbs that move with parallax effect based on mouse movement -->
+      <!-- Floating colored orbs that move with parallax effect based on mouse movement.. because I dont know how to make lightning orbs-->
       <div class="hero-art" aria-hidden="true">
         <div class="orb red" data-parallax data-depth="0.06"></div>
         <div class="orb gold" data-parallax data-depth="0.08"></div>
@@ -108,8 +103,7 @@
 
     <!-- 
       # CORE GAMEPLAY FEATURES SECTION
-      Shows three main feature cards: 6v6 Hero Shooter, Free To Play, and Dynamic Maps.
-      Each card has an image that changes on hover and explains a key gameplay feature.
+      Shows three main feature cards: Each card has an image that changes on hover and explains a key gameplay feature.
       The cards have a popup effect when you hover over them.
     -->
     <section id="features" class="container section-sep" aria-labelledby="features-title">
@@ -157,10 +151,8 @@
 
     <!-- 
       # MAPS SHOWCASE SECTION
-      This is a carousel/slideshow that displays different game maps.
-      Users can navigate through maps using the previous/next buttons or the dot indicators.
-      Each map shows an image with a name and description overlay.
-      The carousel auto-plays and cycles through all available maps.
+      This is a carousel/slideshow that displays different game maps, which should be more maps but I am very lazy.
+      It is a carousel auto-plays and cycles through all available maps.
     -->
     <section id="maps" class="container section-sep" aria-labelledby="maps-title">
       <div class="section-head">
@@ -226,8 +218,6 @@
     <!-- 
       # LATEST UPDATES / NEWS SECTION
       Displays a grid of news cards showing recent game updates, patch notes, and events.
-      Each card has a background image, title, and description.
-      Cards have a hover effect that lifts them up and adds a yellow glow.
       At the bottom there's a "View More Patch" button that links to the Patch Notes page.
     -->
     <section id="news" class="container" aria-labelledby="news-title">
@@ -303,7 +293,6 @@
 
     <!-- 
       # DOWNLOAD / PLATFORM LINKS SECTION
-      This is the call-to-action section at the bottom of the homepage.
       Shows "Join The Rivals Now" with links to download on Steam, Epic Games, and Windows Store.
       Has a background video playing behind the content for visual appeal.
     -->
@@ -332,9 +321,8 @@
 
   <!-- 
     # FOOTER SECTION
-    Contains legal links (Terms & Conditions, Privacy Policy, FAQ, etc.),
-    copyright information, and compliance badges (NetEase, Marvel Logo, ESRB rating).
-    The footer links have a yellow glow effect on hover to show they're clickable.
+    Basic footer contents here with terms and conditions, etc have a yellow glow
+     effect on hover to show they're clickable so theres some interaction.
   -->
   <footer>
     <div class="container foot-min">

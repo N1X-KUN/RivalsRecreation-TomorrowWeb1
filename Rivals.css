@@ -53,6 +53,13 @@ header.site-header {
   backdrop-filter: saturate(120%) blur(8px);
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
+
+@media (max-width: 920px) {
+  header.site-header {
+    background: #0b0b12;
+    backdrop-filter: none;
+  }
+}
 .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; }
 .brand img { height: 40px !important; width: auto; }
@@ -104,12 +111,12 @@ header.site-header {
   .hamburger { display: none; }
 }
 
-.drawer { position: fixed; inset: 0; background: rgba(6,6,10,0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+.drawer { position: fixed; inset: 0; background: rgba(6,6,10,0.4); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
 .drawer[open] { opacity: 1; pointer-events: auto; }
-.drawer-panel { position: absolute; right: 0; top: 0; height: 100%; width: min(84vw, 360px); background: var(--bg-0); border-left: 1px solid rgba(255,255,255,0.06); transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; padding: 20px; gap: 12px; }
+.drawer-panel { position: absolute; right: 0; top: 0; height: 100%; width: min(84vw, 360px); background: #0b0b12; border-left: 1px solid rgba(255,255,255,0.06); transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; padding: 20px; gap: 12px; box-shadow: -4px 0 20px rgba(0,0,0,0.5); }
 .drawer[open] .drawer-panel { transform: translateX(0); }
-.drawer a { padding: 12px; border-radius: 10px; color: var(--text-1); transition: all 0.2s ease; }
-.drawer a:hover { background: rgba(255,255,255,0.04); color: var(--text-0); text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
+.drawer a { padding: 12px; border-radius: 10px; color: var(--text-1); transition: all 0.2s ease; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); }
+.drawer a:hover { background: rgba(255,255,255,0.08); color: var(--text-0); text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); border-color: rgba(255,215,0,0.3); }
 
 .hero {
   position: relative; overflow: clip; min-height: 78vh; display: grid; place-items: center;
@@ -2429,6 +2436,26 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   overflow-y: auto;
   overflow-x: hidden;
   max-height: 85vh;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 215, 0, 0.3) transparent;
+}
+
+.login-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.login-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.login-section::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.3);
+  border-radius: 3px;
+}
+
+.login-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 215, 0, 0.5);
 }
 
 .login-section.registration-section {
@@ -3071,6 +3098,10 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   text-align: center;
   position: relative;
   z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .login-description {
@@ -3210,6 +3241,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 @media (max-width: 968px) {
   .login-modal-content {
     grid-template-columns: 1fr;
+    max-height: 90vh;
   }
 
   .login-section.registration-section {
@@ -3219,6 +3251,13 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 
   .login-section {
     padding: 40px 30px;
+    max-height: 45vh;
+    min-height: 300px;
+  }
+
+  .login-section.login-right-section {
+    max-height: 45vh;
+    min-height: 200px;
   }
 
   .login-section-title {
@@ -3227,14 +3266,58 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 }
 
 @media (max-width: 640px) {
+  .login-popup {
+    padding: 0;
+    align-items: stretch;
+  }
+
   .login-modal {
     border-radius: 0;
     max-width: 100%;
+    width: 100%;
     height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .login-modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    height: 100%;
+    overflow: hidden;
   }
 
   .login-section {
-    padding: 30px 20px;
+    padding: 20px 18px;
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .login-section.registration-section {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  .login-section.login-right-section {
+    flex: 1;
+    min-height: 0;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .login-close {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    z-index: 100;
   }
 }
 

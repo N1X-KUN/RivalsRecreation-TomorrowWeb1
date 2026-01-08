@@ -1,7 +1,9 @@
+/* forces the element to take up the full width available */
 .full-bleed { width: 100%; }
 .full-bleed > .cta-download { border-left: none; border-right: none; border-radius: 0; }
 .full-bleed .inner { padding-left: 24px; padding-right: 24px; }
 @media (min-width: 1200px) { .full-bleed .inner { padding-left: 60px; padding-right: 60px; } }
+
 :root {
   --bg-0: #0b0b12;
   --bg-1: #0f0f16;
@@ -16,7 +18,7 @@
   --danger: #fb7185;
   --glow: 0 0 0 rgba(0,0,0,0);
   
-  /* Yellow theme variables for homepage */
+  /* setting up the yellow theme variables specifically for the homepage */
   --yellow-primary: #ffd700;
   --yellow-secondary: #ffeb3b;
   --yellow-accent: #fff176;
@@ -24,7 +26,7 @@
   --yellow-light: #ffff8d;
 }
 
-
+/* standard reset to make sure padding doesn't mess up widths */
 * { box-sizing: border-box; }
 
 html, body {
@@ -40,6 +42,7 @@ html, body {
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
+/* utility to hide things visually but keep them readable for screen readers */
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
@@ -47,6 +50,7 @@ img { max-width: 100%; display: block; }
 
 .container { width: 100%; margin: 0 auto; padding: 0 20px; max-width: 1200px; }
 
+/* keeping the header stuck to the top with a blur backdrop effect */
 header.site-header {
   position: sticky; top: 0; z-index: 50;
   background: linear-gradient(180deg, rgba(11,11,18,0.9), rgba(11,11,18,0.75) 60%, rgba(11,11,18,0));
@@ -60,15 +64,20 @@ header.site-header {
     backdrop-filter: none;
   }
 }
+
 .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; }
 .brand img { height: 40px !important; width: auto; }
 
+/* styles for the navigation links and hover states */
 .nav-links { display: none; gap: 18px; align-items: center; }
 .nav-links a { padding: 8px 10px; color: var(--text-1); transition: color 0.2s ease; }
 .nav-links a[aria-current="page"], .nav-links a:hover { color: var(--text-0); }
 .nav-links a:hover { text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
+
 .login-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+
+/* styling for the main call to action button, includes the glow animation */
 .cta {
   display: inline-flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px;
   background: #000000;
@@ -96,6 +105,7 @@ header.site-header {
   border-color: rgba(255, 215, 0, 1);
   color: #ffeb3b;
 }
+
 .cta[data-magnetic] { position: relative; overflow: hidden; }
 .cta .shine {
   position: absolute; inset: 0; background:
@@ -111,6 +121,7 @@ header.site-header {
   .hamburger { display: none; }
 }
 
+/* logic for the mobile drawer menu sliding in */
 .drawer { position: fixed; inset: 0; background: rgba(6,6,10,0.4); backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
 .drawer[open] { opacity: 1; pointer-events: auto; }
 .drawer-panel { position: absolute; right: 0; top: 0; height: 100%; width: min(84vw, 360px); background: #0b0b12; border-left: 1px solid rgba(255,255,255,0.06); transform: translateX(100%); transition: transform .25s ease; display: flex; flex-direction: column; padding: 20px; gap: 12px; box-shadow: -4px 0 20px rgba(0,0,0,0.5); }
@@ -118,6 +129,7 @@ header.site-header {
 .drawer a { padding: 12px; border-radius: 10px; color: var(--text-1); transition: all 0.2s ease; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); }
 .drawer a:hover { background: rgba(255,255,255,0.08); color: var(--text-0); text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); border-color: rgba(255,215,0,0.3); }
 
+/* setting up the main hero section with the gradient background */
 .hero {
   position: relative; overflow: clip; min-height: 78vh; display: grid; place-items: center;
   background:
@@ -166,15 +178,18 @@ header.site-header {
 section { padding: 120px 0; }
 .hero + .section-sep, main > section + section { margin-top: 64px; }
 @media (min-width: 920px) { .hero + .section-sep, main > section + section { margin-top: 96px; } }
-/* Explicit gaps for key sections */
+
+/* manually setting gaps for these specific sections */
 #maps { margin-top: 72px; margin-bottom: 72px; }
 #news { margin-top: 72px; margin-bottom: 72px; }
 #download { margin-top: 88px; margin-bottom: 0; padding-bottom: 0; }
+
 @media (min-width: 920px) {
   #maps { margin-top: 128px; margin-bottom: 110px; }
   #news { margin-top: 110px; margin-bottom: 110px; }
   #download { margin-top: 128px; margin-bottom: 0; padding-bottom: 0; }
 }
+
 footer { margin-top: 0; }
 .section-sep { position: relative; }
 .section-sep::after { content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: min(860px, 92%); height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.08), rgba(255,255,255,0)); }
@@ -198,7 +213,7 @@ footer { margin-top: 0; }
 .card p { margin: 0; color: var(--text-1); }
 .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: var(--text-1); }
 
-/* Enhanced Features with Popup Hover Effect */
+/* handling the popup effect when you hover over feature cards */
 .feature {
   position: relative;
   display: flex;
@@ -214,7 +229,7 @@ footer { margin-top: 0; }
   will-change: transform, box-shadow, z-index;
 }
 
-/* Staggered entrance animation */
+/* some delays of the staggered entrance for visual effects */
 .feature:nth-child(1) { animation-delay: 0.1s; }
 .feature:nth-child(2) { animation-delay: 0.2s; }
 .feature:nth-child(3) { animation-delay: 0.3s; }
@@ -357,7 +372,7 @@ footer { margin-top: 0; }
   font-size: 15px;
 }
 
-/* Popup Animation Keyframes */
+/* animation keyframes to make the card pop up */
 @keyframes featurePopup {
   0% {
     transform: scale(1) translateY(0);
@@ -369,7 +384,7 @@ footer { margin-top: 0; }
   }
 }
 
-/* Backdrop effect when hovering */
+/* dims the background slightly when you hover over the main container */
 .features::before {
   content: '';
   position: absolute;
@@ -386,14 +401,14 @@ footer { margin-top: 0; }
   opacity: 1;
 }
 
-/* Ensure other features fade slightly when one is hovered */
+/* blurs out the other non-hovered cards to focus on the active one */
 .features:hover .feature:not(:hover) {
   opacity: 0.6;
   transform: scale(0.95);
   filter: blur(1px);
 }
 
-/* Add pulsing glow effect on hover */
+/* continuous glowing pulse animation while hovering */
 .feature:hover {
   animation: featureGlow 2s ease-in-out infinite alternate;
 }
@@ -414,7 +429,7 @@ footer { margin-top: 0; }
   }
 }
 
-/* Accessibility: Respect reduced motion preferences */
+/* turns off animations if the user has reduced motion enabled in their settings */
 @media (prefers-reduced-motion: reduce) {
 .feature {
     transition: none;
@@ -450,8 +465,7 @@ footer { margin-top: 0; }
   }
 }
 
-/* Maps Roulette Slideshow */
-/* Maps Carousel - Redesigned */
+/* new look for the maps carousel container */
 .maps-carousel {
   position: relative;
   height: 500px;
@@ -503,11 +517,13 @@ footer { margin-top: 0; }
   filter: brightness(1);
 }
 
+/* zooming in slightly and brightening up the image when hovering the slide */
 .carousel-slide:hover img {
   transform: scale(1.05);
   filter: brightness(1.1);
 }
 
+/* the glass card overlay holding the text, hidden by default until active */
 .carousel-meta {
   position: absolute;
   left: 40px;
@@ -530,11 +546,13 @@ footer { margin-top: 0; }
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* sliding the info card up when this slide is the active one */
 .carousel-slide.active .carousel-meta {
   transform: translateY(0);
   opacity: 1;
 }
 
+/* fancy gradient text for the title with a bit of glow */
 .carousel-meta h4 {
   margin: 0 0 12px;
   font-size: 28px;
@@ -554,7 +572,7 @@ footer { margin-top: 0; }
   line-height: 1.6;
 }
 
-/* Navigation Buttons */
+/* styling the next/prev buttons and centering them vertically */
 .carousel-btn {
   position: absolute;
   top: 50%;
@@ -575,6 +593,7 @@ footer { margin-top: 0; }
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
+/* making the buttons pop a bit when you mouse over them */
 .carousel-btn:hover {
   background: rgba(255, 215, 0, 0.2);
   border-color: rgba(255, 215, 0, 0.8);
@@ -600,7 +619,7 @@ footer { margin-top: 0; }
   stroke-width: 3;
 }
 
-/* Dot Indicators */
+/* container for the little navigation dots at the bottom */
 .carousel-dots {
   position: absolute;
   bottom: 20px;
@@ -632,6 +651,7 @@ footer { margin-top: 0; }
   transform: scale(1.2);
 }
 
+/* highlighting the current slide's dot so users know where they are */
 .carousel-dot.active {
   background: linear-gradient(135deg, #ffd700, #ffeb3b);
   border-color: #ffd700;
@@ -639,7 +659,7 @@ footer { margin-top: 0; }
   transform: scale(1.3);
 }
 
-/* Auto-play indicator */
+/* little pulsing indicator to show that the slideshow is auto-playing */
 .carousel-container::before {
   content: '';
   position: absolute;
@@ -654,6 +674,7 @@ footer { margin-top: 0; }
   box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
 }
 
+/* simple heartbeat animation for the auto-play status */
 @keyframes pulse {
   0%, 100% {
     opacity: 0.6;
@@ -670,7 +691,7 @@ footer { margin-top: 0; }
   animation: none;
 }
 
-/* Responsive Design */
+/* tweaking the layout for tablets and smaller laptop screens */
 @media (max-width: 920px) {
   .maps-carousel {
     height: 400px;
@@ -705,6 +726,7 @@ footer { margin-top: 0; }
   }
 }
 
+/* shrinking everything down for mobile devices */
 @media (max-width: 640px) {
   .maps-carousel {
     height: 300px;
@@ -734,7 +756,7 @@ footer { margin-top: 0; }
   }
 }
 
-/* Accessibility */
+/* respecting user settings to kill movement if they don't want it */
 @media (prefers-reduced-motion: reduce) {
   .carousel-track {
     transition: none;
@@ -754,14 +776,7 @@ footer { margin-top: 0; }
 }
 
 
-/* ------------------------------
-   Hero Page
-------------------------------- */
-
-/* ------------------------------
-   Hero Page
-------------------------------- */
-
+/* hero page styles starts here */
 .hero-page {
   padding: 0;
 }
@@ -779,6 +794,7 @@ footer { margin-top: 0; }
   width: 100%;
 }
 
+/* main grid layout for the hero section, splitting sidebar and content */
 .hero-showcase {
   position: relative;
   display: grid;
@@ -797,6 +813,7 @@ footer { margin-top: 0; }
   z-index: 0;
 }
 
+/* background image layer with some filters applied */
 .hero-showcase__backdrop img {
   position: absolute;
   inset: 0;
@@ -817,6 +834,7 @@ footer { margin-top: 0; }
   pointer-events: none;
 }
 
+/* dark overlay to make sure text remains readable on top of the image */
 .hero-showcase__backdrop-overlay {
   position: absolute;
   inset: 0;
@@ -824,6 +842,7 @@ footer { margin-top: 0; }
   mix-blend-mode: multiply;
 }
 
+/* glassmorphism style for the sidebar container */
 .hero-sidebar {
   position: relative;
   z-index: 1;
@@ -845,6 +864,7 @@ footer { margin-top: 0; }
   text-transform: uppercase;
 }
 
+/* styling the main search bar input */
 .hero-search-input {
   width: 100%;
   padding: 12px 48px 12px 16px;
@@ -868,6 +888,7 @@ footer { margin-top: 0; }
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
+/* positioning the search icon button inside the input field */
 .hero-search-button {
   position: absolute;
   right: 8px;
@@ -896,6 +917,7 @@ footer { margin-top: 0; }
   border-radius: 4px;
 }
 
+/* dropdown container for when no search results are found */
 .hero-search-no-results {
   position: absolute;
   top: 100%;
@@ -943,6 +965,7 @@ footer { margin-top: 0; }
   margin-right: 4px;
 }
 
+/* styles for the quick suggestion tags */
 .hero-search-suggestion {
   padding: 6px 12px;
   border-radius: 8px;
@@ -973,6 +996,7 @@ footer { margin-top: 0; }
   gap: 12px;
 }
 
+/* clickable filter buttons in the sidebar */
 .hero-filter {
   display: flex;
   align-items: center;
@@ -987,6 +1011,7 @@ footer { margin-top: 0; }
   transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
+/* making sure the active or hovered filter buttons pop out with a glow and a little nudge */
 .hero-filter.active,
 .hero-filter:hover,
 .hero-filter:focus-visible {
@@ -997,6 +1022,7 @@ footer { margin-top: 0; }
   outline: none;
 }
 
+/* sidebar footer info, pushed to the bottom using auto margin */
 .hero-sidebar__meta {
   margin-top: auto;
   font-size: 14px;
@@ -1012,6 +1038,7 @@ footer { margin-top: 0; }
   font-size: 13px;
 }
 
+/* main container for the featured character, splitting the layout into two columns */
 .hero-feature {
   position: relative;
   z-index: 1;
@@ -1022,6 +1049,7 @@ footer { margin-top: 0; }
   padding: 0 0 20px;
 }
 
+/* the glass card background that holds the character info */
 .hero-feature__card {
   position: relative;
   width: 100%;
@@ -1035,6 +1063,7 @@ footer { margin-top: 0; }
   backdrop-filter: blur(20px);
 }
 
+/* area reserved for the character model/art, ensuring it has enough height */
 .hero-feature__canvas {
   position: relative;
   width: 100%;
@@ -1045,6 +1074,7 @@ footer { margin-top: 0; }
   overflow: visible;
 }
 
+/* styling the actual character image, adding a drop shadow to separate it from the bg */
 .hero-feature__portrait {
   width: 100%;
   height: 100%;
@@ -1065,6 +1095,7 @@ footer { margin-top: 0; }
   gap: 12px;
 }
 
+/* pill-shaped badge for the character role (e.g., Tank, Support) */
 .hero-role {
   display: inline-flex;
   align-items: center;
@@ -1087,6 +1118,7 @@ footer { margin-top: 0; }
   color: rgba(230,232,238,0.9);
 }
 
+/* big responsive typography for the character name */
 .hero-feature__name {
   margin: 0;
   font-size: clamp(34px, 3.4vw, 46px);
@@ -1101,6 +1133,7 @@ footer { margin-top: 0; }
   font-size: 14px;
 }
 
+/* grid layout for the basic stats (health, damage, etc) */
 .hero-feature__stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1151,6 +1184,7 @@ footer { margin-top: 0; }
   color: var(--hero-accent, rgba(255, 215, 0, 0.85));
 }
 
+/* allowing whitespace for the health value so it breaks lines nicely if needed */
 .hero-feature__meta-value[data-feature-health] {
   white-space: pre-line;
   line-height: 1.6;
@@ -1160,6 +1194,7 @@ footer { margin-top: 0; }
   margin-top: 8px;
 }
 
+/* primary action button to see full details, styled to match the hero accent */
 .hero-feature__view-more {
   position: relative;
   width: 100%;
@@ -1184,6 +1219,7 @@ footer { margin-top: 0; }
   filter: brightness(1.1);
 }
 
+/* logic for the popup menu, positioned absolutely relative to the button */
 .hero-feature__view-more-popup {
   position: absolute;
   bottom: calc(100% + 16px);
@@ -1203,7 +1239,7 @@ footer { margin-top: 0; }
   overflow-y: auto;
   display: block;
   backdrop-filter: blur(10px);
-  /* Prevent scroll from bubbling to main page */
+  /* stopping the scroll from propagating to the main window */
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -1212,14 +1248,14 @@ footer { margin-top: 0; }
   display: block;
 }
 
-/* Show popup on hover (only if not pinned) */
+/* revealing the popup on hover unless it's explicitly pinned open */
 .hero-feature__view-more:hover .hero-feature__view-more-popup:not(.pinned) {
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
-/* Show popup when pinned (stays visible even when mouse leaves) */
+/* forcing the popup to stay open via JS class toggle */
 .hero-feature__view-more-popup.pinned {
   opacity: 1 !important;
   transform: translateY(0) scale(1) !important;
@@ -1256,6 +1292,7 @@ footer { margin-top: 0; }
   transition: all 0.2s ease;
 }
 
+/* slide effect for list items inside the popup */
 .hero-feature__popup-skills li:hover {
   background: var(--hero-accent-soft, rgba(255, 215, 0, 0.2));
   border-color: var(--hero-accent, rgba(255, 215, 0, 0.6));
@@ -1288,6 +1325,7 @@ footer { margin-top: 0; }
   font-size: 12px;
 }
 
+/* main grid container for all the characters */
 .hero-roster {
   position: relative;
   z-index: 1;
@@ -1339,6 +1377,7 @@ footer { margin-top: 0; }
   gap: clamp(16px, 2vw, 26px);
 }
 
+/* base style for character cards, including the entry animation logic */
 .hero-roster__card {
   position: relative;
   display: flex;
@@ -1356,7 +1395,7 @@ footer { margin-top: 0; }
               box-shadow 0.25s ease,
               border-color 0.25s ease,
               background 0.25s ease;
-  /* Use hero-specific accent color */
+  /* defaults for the accent color if not set inline */
   --hero-accent: #ffd700;
   --hero-accent-soft: rgba(255,215,0,0.2);
 }
@@ -1366,7 +1405,7 @@ footer { margin-top: 0; }
   opacity: 1;
 }
 
-/* Unique styling for each hero card using their accent colors - GLOW ON BORDERS ONLY */
+/* heavy glow effects for the card hover state, using the specific hero's accent color */
 .hero-roster__card:is(:hover, :focus-visible) {
   transform: translateY(-6px) scale(1.02);
   border-color: var(--hero-accent, rgba(255,215,0,0.8));
@@ -1389,7 +1428,7 @@ footer { margin-top: 0; }
   background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
 }
 
-/* Role badge - KEEP ORIGINAL STYLING, NO ACCENT COLOR */
+/* intentionally keeping the role badge standard color to avoid rainbow chaos */
 .hero-roster__card .hero-roster__role {
   background: rgba(0,0,0,0.55);
   border: 1px solid rgba(255,255,255,0.1);
@@ -1402,7 +1441,7 @@ footer { margin-top: 0; }
   color: rgba(255,255,255,0.95);
 }
 
-/* Name - KEEP ORIGINAL STYLING, NO ACCENT COLOR */
+/* name label at the bottom of the card */
 .hero-roster__card .hero-roster__name {
   background: rgba(0,0,0,0.42);
   color: rgba(255,255,255,0.9);
@@ -1418,7 +1457,7 @@ footer { margin-top: 0; }
   position: relative;
 }
 
-/* Admin hide button on hero cards */
+/* hidden button for admin tools, fades in on hover */
 .hero-admin-hide-btn {
   position: absolute;
   top: 8px;
@@ -1455,6 +1494,7 @@ footer { margin-top: 0; }
   border-color: rgba(255, 0, 0, 0.3);
 }
 
+/* visuals for when a card is manually hidden by admin */
 .hero-roster__card--hidden::after {
   content: 'HIDDEN';
   position: absolute;
@@ -1471,6 +1511,9 @@ footer { margin-top: 0; }
   z-index: 5;
   pointer-events: none;
 }
+
+/* FIX: Added the missing selector below */
+.hero-roster__card {
   background: rgba(20,24,36,0.78);
 }
 
@@ -1480,6 +1523,7 @@ footer { margin-top: 0; }
   object-fit: cover;
 }
 
+/* styling for the role badge (tank, support, etc) that sits over the character card */
 .hero-roster__role {
   position: absolute;
   top: 12px;
@@ -1493,6 +1537,7 @@ footer { margin-top: 0; }
   text-transform: uppercase;
 }
 
+/* the nameplate at the bottom of the card with a slight glass blur */
 .hero-roster__name {
   margin: 0;
   padding: 14px 16px;
@@ -1508,10 +1553,12 @@ footer { margin-top: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
+/* triggering the entry animation when the JS reveals this card */
 .hero-roster__card.hero-roster__card--revealed {
   animation: heroCardPop 0.6s cubic-bezier(0.21, 0.95, 0.38, 1.1) both;
 }
 
+/* big call-to-action section at the bottom of the roster to drive downloads */
 .hero-roster__play-now {
   position: relative;
   margin-top: 80px;
@@ -1534,6 +1581,7 @@ footer { margin-top: 0; }
   z-index: 0;
 }
 
+/* darkening the background image so the text pops */
 .hero-roster__play-now-bg img {
   width: 100%;
   height: 100%;
@@ -1571,6 +1619,7 @@ footer { margin-top: 0; }
   line-height: 1.6;
 }
 
+/* the shiny gold button inviting them to play */
 .hero-roster__play-now-btn {
   font-size: 18px;
   padding: 16px 40px;
@@ -1592,7 +1641,7 @@ footer { margin-top: 0; }
   transform: translateY(-3px);
 }
 
-
+/* tweaking the layout for laptop screens and tablets */
 @media (max-width: 1080px) {
   .hero-showcase {
     grid-template-columns: minmax(0, 1fr);
@@ -1637,6 +1686,7 @@ footer { margin-top: 0; }
   }
 }
 
+/* mobile layout adjustments */
 @media (max-width: 720px) {
   .hero-showcase {
     padding: 100px 18px 140px;
@@ -1674,6 +1724,7 @@ footer { margin-top: 0; }
   }
 }
 
+/* killing all movement for accessibility if the user prefers reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .hero-filter,
   .hero-feature__nav,
@@ -1683,8 +1734,9 @@ footer { margin-top: 0; }
   }
 }
 
-/* Modal */
+/* Modal styles start here */
 
+/* the wrapper for the modal overlay, centering it on screen */
 .hero-modal {
   position: fixed;
   inset: 0;
@@ -1702,6 +1754,7 @@ footer { margin-top: 0; }
   pointer-events: auto;
 }
 
+/* dark backdrop behind the modal window */
 .hero-modal__overlay {
   position: absolute;
   inset: 0;
@@ -1709,6 +1762,7 @@ footer { margin-top: 0; }
   backdrop-filter: blur(10px);
 }
 
+/* the actual modal content box with the gradient bg */
 .hero-modal__dialog {
   position: relative;
   width: min(880px, 92vw);
@@ -1729,6 +1783,7 @@ footer { margin-top: 0; }
   opacity: 1;
 }
 
+/* close button in top right corner */
 .hero-modal__close {
   position: absolute;
   top: 18px;
@@ -1744,6 +1799,7 @@ footer { margin-top: 0; }
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
+/* rotating slightly on hover for a nice interactive feel */
 .hero-modal__close:hover {
   transform: rotate(90deg);
   background: rgba(255,215,0,0.25);
@@ -1818,6 +1874,7 @@ footer { margin-top: 0; }
   font-weight: 600;
 }
 
+/* box for the character's backstory/lore text */
 .hero-modal__lore {
   margin: 0;
   font-size: 15px;
@@ -1842,6 +1899,7 @@ footer { margin-top: 0; }
   list-style: none;
 }
 
+/* animation setup for each ability row */
 .hero-modal__ability {
   display: grid;
   gap: 6px;
@@ -1853,6 +1911,7 @@ footer { margin-top: 0; }
   animation: slideInUp 0.4s ease backwards;
 }
 
+/* creating a staggered entrance effect for the ability list */
 .hero-modal__ability:nth-child(1) { animation-delay: 0.05s; }
 .hero-modal__ability:nth-child(2) { animation-delay: 0.1s; }
 .hero-modal__ability:nth-child(3) { animation-delay: 0.15s; }
@@ -1866,6 +1925,7 @@ footer { margin-top: 0; }
   transform: translateX(4px);
 }
 
+/* keyframes used by the staggered entrance above */
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -1883,6 +1943,7 @@ footer { margin-top: 0; }
   gap: 12px;
 }
 
+/* visual for the keyboard key needed to trigger the ability */
 .hero-modal__ability-key {
   display: inline-flex;
   align-items: center;
@@ -1941,6 +2002,7 @@ footer { margin-top: 0; }
   font-weight: 700;
 }
 
+/* some last minute responsive cleanup */
 @media (max-width: 1080px) {
   .hero-showcase__content {
     grid-template-columns: minmax(0, 1fr);
@@ -1971,11 +2033,13 @@ footer { margin-top: 0; }
     text-align: right;
   }
 
+  /* resetting grid placement for the roster on smaller screens */
   .hero-roster {
     grid-column: auto;
   }
 }
 
+/* crushing everything down for mobile devices */
 @media (max-width: 720px) {
   .hero-showcase {
     padding: 100px 0 60px;
@@ -2016,6 +2080,7 @@ footer { margin-top: 0; }
   }
 }
 
+/* kill all animations if the user has motion sensitivity settings on */
 @media (prefers-reduced-motion: reduce) {
 .hero-roster__card,
   .hero-feature,
@@ -2026,10 +2091,13 @@ footer { margin-top: 0; }
   }
 }
 
+/* grid layout for the news feed, collapsing columns as screen gets smaller */
 .news { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 @media (max-width: 1200px) { .news { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 860px) { .news { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .news { grid-template-columns: 1fr; } }
+
+/* base style for news cards with a slight glass effect */
 .news-card { 
   display: grid; 
   grid-template-rows: 180px auto; 
@@ -2042,6 +2110,7 @@ footer { margin-top: 0; }
   cursor: pointer;
 }
 
+/* lifting the card up when hovered */
 .news-card:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0,0,0,0.4);
@@ -2052,6 +2121,7 @@ footer { margin-top: 0; }
   transition: transform 0.3s ease;
 }
 
+/* slight zoom on the thumbnail image */
 .news-card:hover > div:first-child {
   transform: scale(1.05);
 }
@@ -2075,6 +2145,7 @@ footer { margin-top: 0; }
   color: var(--yellow-primary);
 }
 
+/* truncating text to 3 lines so cards stay consistent height */
 .news-body p { 
   margin: 0; 
   color: var(--text-1);
@@ -2086,7 +2157,7 @@ footer { margin-top: 0; }
   color: var(--text-0);
 }
 
-/* View More Patch Button */
+/* centering the big 'view more' button below the news grid */
 .news-cta {
   display: flex;
   justify-content: center;
@@ -2126,6 +2197,7 @@ footer { margin-top: 0; }
   transform: translateX(4px);
 }
 
+/* shiny swipe effect on hover */
 .patch-btn::before {
   content: '';
   position: absolute;
@@ -2139,7 +2211,7 @@ footer { margin-top: 0; }
   transform: translateX(100%);
 }
 
-/* Download CTA section */
+/* container for the download section with the video background */
 .cta-download { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid rgba(0, 0, 0, 0.08); }
 .cta-download .bg { position: absolute; inset: 0; }
 .cta-download .bg video { width: 100%; height: 100%; object-fit: cover; filter: saturate(115%) contrast(105%); }
@@ -2156,6 +2228,7 @@ footer { margin-top: 0; }
   align-items: center;
 }
 
+/* platform buttons (steam, epic, etc) */
 .platform-link { 
   display: inline-flex; 
   align-items: center; 
@@ -2190,7 +2263,7 @@ footer { margin-top: 0; }
 footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); background: linear-gradient(180deg, var(--bg-0), #08080d); color: var(--text-1); }
 .foot { display: none; }
 
-/* New compact global footer */
+/* newer compact footer layout */
 .foot-min { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; }
 .foot-links { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 13px; color: #bfc6d9; }
 .foot-links a { color: #e6e8ee; transition: color 0.2s ease, text-shadow 0.2s ease; }
@@ -2205,17 +2278,18 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .foot-logo img { height: 50px; width: auto; display: block; object-fit: contain; }
 @media (max-width: 860px) { .foot-min { grid-template-columns: 1fr; } .foot-right { justify-content: flex-start; } }
 
-/* Global footer improvements */
+/* standard footer styles */
 .foot .brand { display: inline-flex; align-items: center; gap: 10px; }
 .foot .brand-mark { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(180deg, #ffeb3b, #ffd700); box-shadow: 0 0 12px rgba(255,215,0,0.5); }
 .foot .social-mini { display: flex; gap: 10px; margin-top: 10px; }
 .foot .social-mini a { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); transition: transform .15s ease, background .2s ease; }
 .foot .social-mini a:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
 
+/* helper class for scroll reveal animations */
 [data-reveal] { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
 [data-reveal].revealed { opacity: 1; transform: translateY(0); }
 
-/* Lightning Effect */
+/* adding the static glow effect behind the hero */
 .hero::before {
   content: '';
   position: absolute;
@@ -2238,7 +2312,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   opacity: 1;
 }
 
-/* Animated Lightning Bolts */
+/* animating random lightning strikes */
 @keyframes lightning-flash {
   0%, 90%, 100% { opacity: 0; }
   5%, 85% { opacity: 1; }
@@ -2259,7 +2333,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   z-index: 0;
 }
 
-/* Floating Animation for Hero Content */
+/* gentle floating up and down animation for the main content */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -2269,13 +2343,13 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   animation: float 6s ease-in-out infinite;
 }
 
-/* Pulse Animation for CTA Buttons */
+/* making the buttons pulse a bit so they get noticed */
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 10px 24px rgba(255, 215, 0, 0.35); }
   50% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.6), 0 0 20px rgba(255,235,59,0.4); }
 }
 
-/* Interactive Orb Enhancement */
+/* making the background orbs react when you mouse over the section */
 .hero-art .orb {
   transition: transform 0.3s ease, filter 0.3s ease;
 }
@@ -2295,7 +2369,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   filter: blur(28px) saturate(170%);
 }
 
-/* Starlord's Mixtapes (floating audio player) - boxed layout */
+/* Starlord's Mixtape Player - fixed to bottom left */
 .mixtape { position: fixed; left: 14px; bottom: 18px; z-index: 80; color: #e6e8ee; }
 .mixtape .panel { width: 280px; min-height: 220px; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; padding: 12px; border-radius: 14px; background: rgba(15,15,22,0.92); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 24px 50px rgba(0,0,0,0.55); }
 .mixtape .head { display:flex; align-items:center; justify-content: space-between; gap:8px; }
@@ -2312,16 +2386,17 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .mixtape .progress > span { display:block; height:100%; width:0; background: linear-gradient(90deg, #ffeb3b, #ffd700); }
 .mixtape .panel { display: none; }
 .mixtape:hover .panel { display: grid; }
-/* keep icon visible even when expanded */
+/* icon visible when player is collapsed */
 .mixtape .fab { display: inline-flex; }
 .mixtape .fab { width: 46px; height: 46px; display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 18px 36px rgba(0,0,0,0.45); cursor: pointer; }
 .mixtape .fab:hover { background: rgba(255,255,255,0.14); }
 .mixtape .fab svg { width: 28px; height: 28px; }
-/* spinning when playing */
+/* spinning the icon when music is playing */
 @keyframes spinDisc { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .mixtape.playing .fab svg { animation: spinDisc 2.2s linear infinite; }
 @media (max-width: 720px) { .mixtape .panel { width: 240px; min-height: 200px; } }
 
+/* again, safety check to kill all animations for accessibility */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
   .hero-inner { animation: none; }
@@ -2329,13 +2404,13 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   .hero::after { animation: none; }
 }
 
-/* Social sidebar */
+/* sticky sidebar for social icons on the right */
 .social-sidebar { position: fixed; right: 14px; top: 24vh; display: flex; flex-direction: column; gap: 10px; z-index: 60; }
 .social-sidebar a { width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; color: #e8edf7; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 18px rgba(0,0,0,0.35); transition: transform .15s ease, background .2s ease, color .2s ease; }
 .social-sidebar a:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); color: #ffffff; }
 @media (max-width: 920px) { .social-sidebar { right: 8px; top: auto; bottom: 18px; flex-direction: row; } }
 
-/* Cookie banner */
+/* the annoying cookie banner that pops up in the corner */
 .cookie-banner { 
   position: fixed; 
   right: 18px; 
@@ -2374,7 +2449,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .cookie-btn.primary { background: linear-gradient(180deg, #ffeb3b, #ffd700); color: #000; border-color: rgba(0,0,0,0.1); font-weight: 800; }
 .cookie-btn:hover { filter: brightness(1.05); }
 
-/* Login Popup Styles - Split Screen Design */
+/* full screen overlay for the login popup */
 .login-popup {
   position: fixed;
   inset: 0;
@@ -2420,7 +2495,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   transform: scale(1) translateY(0);
 }
 
-/* Split Screen Layout */
+/* split screen layout: form on left, art on right */
 .login-modal-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -2441,6 +2516,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   scrollbar-color: rgba(255, 215, 0, 0.3) transparent;
 }
 
+/* customization for the scrollbar so it fits the dark theme */
 .login-section::-webkit-scrollbar {
   width: 6px;
 }
@@ -2458,11 +2534,13 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   background: rgba(255, 215, 0, 0.5);
 }
 
+/* separation line between the form and the image */
 .login-section.registration-section {
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(11, 15, 25, 0.5);
 }
 
+/* the right side of the split, holding the big background image */
 .login-section.login-right-section {
   background-image: var(--login-right-bg, url('Images/Rival.png'));
   background-size: cover;
@@ -2473,6 +2551,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   padding-top: 80px;
 }
 
+/* dark overlay to make sure text on top of the image is readable */
 .login-section.login-right-section::before {
   content: '';
   position: absolute;
@@ -2487,6 +2566,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   width: 100%;
 }
 
+/* X button in the corner, spins when you hover it */
 .login-close {
   position: absolute;
   top: 20px;
@@ -2513,7 +2593,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   transform: rotate(90deg);
 }
 
-/* Section Header */
+/* header area for the form side */
 .login-section-header {
   margin-bottom: 20px;
 }
@@ -2566,7 +2646,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   filter: drop-shadow(0 8px 24px rgba(255, 215, 0, 0.3));
 }
 
-/* Legacy styles for icon/text (kept for compatibility) */
+/* keeping these legacy icon styles around just in case */
 .login-brand-icon {
   width: 80px;
   height: 80px;
@@ -2590,7 +2670,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   text-transform: uppercase;
 }
 
-/* Section Title */
+/* main title text above the inputs */
 .login-section-title {
   font-size: 24px;
   font-weight: 700;
@@ -2598,7 +2678,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   color: #ffffff;
 }
 
-/* Forms */
+/* stacking the inputs vertically */
 .login-auth-form {
   display: flex;
   flex-direction: column;
@@ -2632,7 +2712,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
 }
 
-/* Password Group with Toggle */
+/* specific styling for the password field to handle the eye icon */
 .login-password-group {
   position: relative;
 }
@@ -2658,7 +2738,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   border-radius: 4px;
 }
 
-/* Logged-in Account Panel (Login Popup Left Side) */
+/* area for logged-in users to see their profile details */
 .login-account-panel {
   margin-top: 12px;
 }
@@ -2685,6 +2765,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   justify-content: space-between;
 }
 
+/* preview card showing the currently selected hero */
 .account-hero-preview {
   display: flex;
   gap: 12px;
@@ -2760,7 +2841,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   margin-top: 8px;
 }
 
-/* Hero Picker Modal */
+/* modal popup for picking a hero */
 .hero-picker-modal[hidden] {
   display: none !important;
 }
@@ -2782,6 +2863,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   backdrop-filter: blur(8px);
 }
 
+/* the actual container holding the hero grid */
 .hero-picker-panel {
   position: relative;
   width: min(860px, 95vw);
@@ -2829,6 +2911,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   max-height: calc(78vh - 58px);
 }
 
+/* individual hero cards within the picker */
 .hero-picker-card {
   text-align: left;
   border-radius: 14px;
@@ -2863,7 +2946,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   text-overflow: ellipsis;
 }
 
-/* Right-side Bio Panel (Login Popup) */
+/* bio panel for user profiles inside the popup */
 .account-bio-panel[hidden] {
   display: none !important;
 }
@@ -2936,7 +3019,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   display: block;
 }
 
-/* Password toggle icons - first SVG (eye) shows when password is hidden, second SVG (eye-off) shows when password is visible */
+/* swapping the eye icons based on visibility state: show 'eye' when hidden, 'eye-off' when visible */
 .password-toggle svg:first-child {
   display: block;
 }
@@ -2953,7 +3036,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   display: block;
 }
 
-/* Captcha Group */
+/* layout for the captcha input and the code display box */
 .login-captcha-group {
   display: flex;
   gap: 12px;
@@ -2983,6 +3066,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   font-size: 12px;
 }
 
+/* simple rotate animation when clicking the refresh captcha button */
 .login-captcha-refresh {
   background: transparent;
   border: none;
@@ -3002,7 +3086,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   transform: rotate(180deg);
 }
 
-/* Checkbox */
+/* custom styling for checkboxes to override browser defaults */
 .login-checkbox-group {
   margin: 4px 0;
 }
@@ -3035,7 +3119,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   color: #ffeb3b;
 }
 
-/* Submit Button */
+/* big login button - grayed out when disabled, gold gradient when ready */
 .login-submit-btn {
   width: 100%;
   padding: 12px;
@@ -3066,7 +3150,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   transform: translateY(-2px);
 }
 
-/* Switch Auth */
+/* the 'don't have an account?' toggle area */
 .login-switch-auth {
   margin-top: 24px;
   padding-top: 24px;
@@ -3093,7 +3177,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   color: #ffeb3b;
 }
 
-/* Login Section Content */
+/* right side content wrapper for the login modal */
 .login-right-content {
   text-align: center;
   position: relative;
@@ -3111,6 +3195,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   line-height: 1.5;
 }
 
+/* distinct style for social login buttons (google, discord etc) */
 .login-social-login-btn {
   width: 100%;
   padding: 12px 20px;
@@ -3148,7 +3233,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   font-weight: 700;
 }
 
-/* Expandable Section */
+/* collapsible sections within the form */
 .login-expandable-section {
   margin-top: 24px;
 }
@@ -3180,7 +3265,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   transform: rotate(180deg);
 }
 
-/* Guest Status Display */
+/* box showing the user they are currently just a guest */
 .guest-status {
   background: rgba(255, 215, 0, 0.1);
   border: 1px solid rgba(255, 215, 0, 0.3);
@@ -3237,7 +3322,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   }
 }
 
-/* Responsive Design */
+/* squishing the login modal for tablet and mobile views */
 @media (max-width: 968px) {
   .login-modal-content {
     grid-template-columns: 1fr;
@@ -3321,7 +3406,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   }
 }
 
-/* Video element shared styles */
+/* background video handling, keeping it smooth when scaling */
 #hero-video {
   object-fit: cover;
   z-index: 0;
@@ -3329,7 +3414,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease-in-out;
 }
 
-/* Fullscreen intro state */
+/* state for when the video covers the full screen on load */
 #hero-video.video-intro {
   position: fixed;
   top: 0;
@@ -3339,7 +3424,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   z-index: 9999; /* ensure splash is above sticky header and all content */
 }
 
-/* Banner state inside .hero */
+/* state for when the video settles into the hero banner position */
 #hero-video.video-banner {
   position: absolute;
   top: 0;
@@ -3348,7 +3433,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   height: 100%;
 }
 
-/* Fade-in effect for hero content */
+/* fade in the hero text only after video is ready */
 .hero .content {
   opacity: 0;
   transition: opacity 0.8s ease-in-out;
@@ -3360,8 +3445,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 
 
 
-/* Patch News Css */
-/* Top news section */
+/* styling for the news grid seen on the patch notes page */
 .news-section { margin-top: 8px; }
 .news-section .section-head { margin: 24px 0 12px; }
 .news-section .section-head h2 { font-size: 28px; line-height: 1.2; margin: 0; }
@@ -3383,7 +3467,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
 .news-title { font-size: 16px; margin: 8px 12px 6px; line-height: 1.35; }
 .news-desc { color: #afb6c4; font-size: 13px; margin: 0 12px 14px; }
 
-/* Patch Updates section */
+/* fancy shuffling cards section for the latest patch notes */
 .patch-section {
   margin-top: 0;
   padding: 40px 0 60px;
@@ -3500,6 +3584,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   overflow: hidden;
 }
 
+/* subtle idle movement for the patch notes cards */
 @keyframes patchShuffle {
   0% { transform: translate3d(0,0,0) rotate(-0.4deg); }
   35% { transform: translate3d(0,-6px,0) rotate(0.6deg); }
@@ -3532,7 +3617,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   }
 }
 
-/* YouTube Trailer Modal */
+/* popup overlay to watch the game trailer without leaving the page */
 .trailer-modal {
   position: fixed;
   top: 0;
@@ -3644,7 +3729,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   }
 }
 
-/* Loading Screen */
+/* global loading screen with the pulsing logo */
 .page-loader {
   position: fixed;
   top: 0;
@@ -3778,7 +3863,7 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
   }
 }
 
-/* Removed - content should always be visible */
+/* removed - content should always be visible */
 
 @media (max-width: 768px) {
   .loader-logo {
@@ -3795,4 +3880,3 @@ footer { padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.08); backgrou
     width: 150px;
   }
 }
-

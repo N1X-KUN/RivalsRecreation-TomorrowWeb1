@@ -15,7 +15,7 @@
   <div id="page-loader" class="page-loader">
     <div class="loader-content">
       <div class="loader-logo">
-        <img src="Images/Icon Logo.svg" alt="Rivals Nexus" />
+        <img src="Images/Icon Logo.svg" alt="Rivals" />
       </div>
       <div class="loader-text">
         RIVALING<span class="loader-dots"></span>
@@ -29,7 +29,7 @@
   <a class="sr-only" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="container nav">
-      <a class="brand" href="Rivals.html" aria-label="Rivals Nexus Home">
+      <a class="brand" href="Rivals.html" aria-label="Rivals Home">
         <img src="Images/Icon Logo.svg" alt="Brand" style="height:40px;width:auto" />
       </a>
       <nav class="nav-links" aria-label="Primary">
@@ -342,7 +342,7 @@
           <a href="https://act.neteasegames.com/activity/3sSWzy">Perks</a><span class="sep">|</span>
           <a href="https://www.marvelrivals.com/creator_program.html">PartnerHub</a>
         </div>
-        <div class="foot-meta">Copyright © 2025 Rivals Nexus. All rights reserved.</div>
+        <div class="foot-meta">Copyright © 2026 Rivals . Yippie New Year!</div>
         <div class="foot-badges">
           <img src="Images/NetEase.png" alt="Compliance badge" class="badge-img" />
           <img src="Images/Marvel Logo.png" alt="Age rating" class="badge-img" />
@@ -500,18 +500,18 @@
   <script defer src="Rivals.js"></script>
   <!-- 
     # COMMUNITY.JS - MAIN COMMUNITY PAGE LOGIC
-    This is the big one - handles all the community page functionality:
+    This is the sum of what Community.js handles:
     - Post creation, editing, deletion (with media support)
     - Comment system with admin deletion
     - Like/follow functionality
     - Admin features (ban users, delete comments, view all accounts)
     - localStorage management for posts (with quota handling)
-    - Media handling (images and videos - single attachment only)
+    - Media handling (images and videos)
     - Tab filtering (Discussions, Popular, Following)
     - Seeded posts initialization and reloading
     
     The file is huge (almost 2000 lines) because it has to handle so many features.
-    The localStorage quota issue was a major problem - had to add file size checks,
+    The localStorage quota issue was a major problem as it had to add file size checks,
     warnings, and a clearOldPosts() function to help users manage storage when it gets full.
     Also had to fix issues with posts containing only videos not appearing, and ID matching
     between MongoDB (_id) and localStorage (userId) for the admin panel.

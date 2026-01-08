@@ -1,9 +1,7 @@
 (function() {
   const root = document.documentElement;
 
-  // # FIRST BOOT DETECTION
-  // When the website loads for the first time in a session, this clears any saved login state
-  // so users start fresh. This prevents old login data from persisting across browser sessions.
+  // First load this session: clear stale login stuff so everyone starts fresh
   (function initFirstBoot() {
     const FIRST_BOOT_KEY = 'rivals_first_boot_complete';
     const isFirstBoot = !sessionStorage.getItem(FIRST_BOOT_KEY);
@@ -25,10 +23,7 @@
     }
   })();
 
-  // # PAGE LOADER SYSTEM
-  // Controls the loading screen animation that appears when navigating between pages.
-  // The loader shows for 3 seconds when going from one page to another, but doesn't show
-  // when returning to the homepage or coming back from external sites like YouTube.
+  // Loader only on in-site hops; skip if you're coming home or back from elsewhere
   (function initPageLoader() {
     const pageLoader = document.getElementById('page-loader');
     if (!pageLoader) return;
@@ -108,9 +103,7 @@
     });
   })();
 
-  // # MOBILE MENU DRAWER
-  // Handles the hamburger menu that slides in from the right on mobile devices.
-  // When clicked, it opens a drawer panel with all the navigation links.
+  // Mobile drawer: hamburger toggles the slide-in nav on phones
   const hamburger = document.querySelector('.hamburger');
   const drawer = document.getElementById('mobile-drawer');
   if (hamburger && drawer) {
@@ -128,11 +121,7 @@
     });
   }
 
-  // # LOGIN/REGISTRATION POPUP MODAL
-  // Manages the login popup that appears when users click the login button.
-  // Handles opening/closing the modal, preventing body scroll when open,
-  // and checking guest login status. The actual login/registration forms
-  // are handled by separate functions below.
+  // Login popup: open/close, lock scroll, and keep guest vs login in sync
   const loginPopup = document.getElementById('login-popup');
   const loginBtn = document.getElementById('login-btn');
   const mobileLoginBtn = document.getElementById('mobile-login-btn');
@@ -175,10 +164,7 @@
   if (loginClose) loginClose.addEventListener('click', closeLoginPopup);
   if (loginOverlay) loginOverlay.addEventListener('click', closeLoginPopup);
 
-  // # YOUTUBE TRAILER MODAL
-  // This section handles the YouTube video player that pops up when users click "Watch Trailer".
-  // It automatically mutes the background music when the trailer plays and unmutes when it closes.
-  // Also monitors all HTML5 video elements on the page to mute music when any video plays.
+  // Trailer popup (and any page video) mutes site music while it plays
   const trailerModal = document.getElementById('trailer-modal');
   const watchTrailerBtn = document.getElementById('watch-trailer-btn');
   const trailerModalClose = document.getElementById('trailer-modal-close');
@@ -321,12 +307,12 @@
     }
   }
 
+  // Open trailer modal - waits for YT API if not loaded yet
   function openTrailerModal() {
     if (trailerModal) {
       trailerModal.toggleAttribute('hidden', false);
       document.body.style.overflow = 'hidden';
       
-      // Wait for YouTube API to be ready, then initialize player
       if (window.YT && window.YT.Player) {
         initializeTrailerPlayer();
       } else if (window.onYouTubeIframeAPIReady) {
@@ -344,18 +330,15 @@
     }
   }
 
+  // Close trailer modal - stops video and unmutes background music
   function closeTrailerModal() {
     if (trailerModal) {
       trailerModal.toggleAttribute('hidden', true);
       document.body.style.overflow = '';
       
-      // Remove YouTube video from active videos
       activeVideos.delete('youtube-trailer');
-      
-      // Unmute music when closing modal
       unmuteBackgroundMusic();
       
-      // Stop and destroy YouTube player
       if (trailerPlayer) {
         try {
           if (trailerPlayer.stopVideo) {
@@ -393,29 +376,25 @@
     trailerModalBackdrop.addEventListener('click', closeTrailerModal);
   }
 
-  // Close modal with Escape key
+  // Escape key closes trailer modal
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && trailerModal && !trailerModal.hasAttribute('hidden')) {
       closeTrailerModal();
     }
   });
 
-  // Close popup with Escape key
+  // Escape key closes login popup
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && loginPopup && loginPopup.hasAttribute('open')) {
       closeLoginPopup();
     }
   });
 
-  // # LOGIN/REGISTRATION FORM HANDLING
-  // This section contains all the functions for handling user registration and login:
-  // - Email validation (only allows specific email domains)
-  // - Password visibility toggles
-  // - Form validation and submission
-  // - Captcha generation and verification
-  // - Guest login functionality
+  // ============================================
+  // AUTHENTICATION: email, passwords, captcha
+  // ============================================
   
-  // Email validation function
+  // Only accept common email domains
   function isValidEmail(email) {
     const validDomains = ['@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com'];
     if (!email || !email.includes('@')) return false;
@@ -423,12 +402,12 @@
     return validDomains.some(domain => emailLower.endsWith(domain));
   }
   
-  // Password visibility toggle
+  // Toggle password visibility (show/hide)
   function setupPasswordToggle(toggleId, inputId) {
     const toggle = document.getElementById(toggleId);
     const input = document.getElementById(inputId);
     if (toggle && input) {
-      // Remove any existing listeners by cloning
+      // Clone to remove old listeners
       const newToggle = toggle.cloneNode(true);
       toggle.parentNode.replaceChild(newToggle, toggle);
       
@@ -438,7 +417,7 @@
         const isPassword = input.type === 'password';
         input.type = isPassword ? 'text' : 'password';
         
-        // Toggle icons - show eye-off when password is visible (text type)
+        // Swap the eye icons for hidden and revealed
         const svgs = newToggle.querySelectorAll('svg');
         if (svgs.length >= 2) {
           svgs[0].style.display = isPassword ? 'block' : 'none'; // eye icon
@@ -449,12 +428,12 @@
     }
   }
   
-  // Setup password toggles
+  // Wire up password toggles for reg and login forms
   setupPasswordToggle('popup-reg-password-toggle', 'popup-reg-password');
   setupPasswordToggle('popup-reg-password-repeat-toggle', 'popup-reg-password-repeat');
   setupPasswordToggle('popup-login-password-toggle', 'popup-login-password');
   
-  // Switch between registration and login in split-screen design
+  // Switch between reg/login panels
   const popupSwitchToLogin = document.getElementById('popup-switchToLogin');
   const popupExpandLink = document.getElementById('popup-expandLink');
   const popupExpandContent = document.getElementById('popup-expandContent');
@@ -483,14 +462,14 @@
     });
   }
 
-  // Generate random captcha for popup
+  // Random 4-digit captcha
   let popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
   const popupCaptchaText = document.getElementById('popup-captcha-text');
   if (popupCaptchaText) {
     popupCaptchaText.textContent = popupCaptcha.toString();
   }
 
-  // Refresh captcha
+  // Refresh button for captcha
   const popupRefreshCaptcha = document.getElementById('popup-refreshCaptcha');
   if (popupRefreshCaptcha) {
     popupRefreshCaptcha.addEventListener('click', () => {
@@ -501,7 +480,7 @@
     });
   }
 
-  // Enable/disable registration button
+  // Enable register button only when all fields are valid
   function checkPopupRegistrationForm() {
     const submitBtn = document.getElementById('popup-reg-submit-btn');
     if (!submitBtn) return;
@@ -525,7 +504,7 @@
     submitBtn.disabled = !isValid;
   }
 
-  // Add event listeners for registration form validation
+  // Validate on every keystroke
   ['popup-reg-email', 'popup-reg-nickname', 'popup-reg-password', 'popup-reg-password-repeat', 'popup-reg-captcha', 'popup-reg-terms'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -534,7 +513,7 @@
     }
   });
 
-  // Password match validation
+  // Check passwords match
   const popupPasswordRepeat = document.getElementById('popup-reg-password-repeat');
   if (popupPasswordRepeat) {
     popupPasswordRepeat.addEventListener('input', function() {
@@ -550,7 +529,9 @@
     });
   }
 
-  // Registration Form Submission
+  // ============================================
+  // REGISTRATION SUBMIT
+  // ============================================
   const popupRegistrationForm = document.getElementById('popup-registrationForm');
   if (popupRegistrationForm) {
     popupRegistrationForm.addEventListener('submit', async (e) => {
@@ -562,19 +543,16 @@
       const passwordRepeat = document.getElementById('popup-reg-password-repeat').value;
       const captcha = document.getElementById('popup-reg-captcha').value.trim();
       
-      // Validate email format
       if (!isValidEmail(email)) {
         alert('Please enter a proper email address.\nAccepted domains: @gmail.com, @yahoo.com, @hotmail.com, @outlook.com');
         return;
       }
       
-      // Validate password match
       if (password !== passwordRepeat) {
         alert('Passwords do not match. Please enter the same password in both fields.');
         return;
       }
       
-      // Validate captcha
       if (captcha !== popupCaptcha.toString()) {
         alert('Invalid verification code. Please enter the correct code shown above.');
         popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
@@ -613,7 +591,7 @@
             minute: '2-digit'
           });
           
-          // Save user data locally
+          // Save locally so user stays logged in
           const newUser = {
             id: data._id || data.id || `user_${Date.now()}`,
             name: nickname,
@@ -633,15 +611,14 @@
           localStorage.removeItem('isGuest');
           sessionStorage.removeItem('isGuest');
           
-          // Dispatch login event
+          // Trigger login event for other components
           window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user: newUser } }));
 
-          // NOTE: Welcome-email sending (if enabled) is handled server-side in `routes/users.js`.
-          // We intentionally do NOT call `/send-welcome-email` from the browser to avoid duplicates/spam.
+          // Welcome email handled server-side to avoid duplicate sends
 
           alert('✅ Account created successfully!\n\nUsername: ' + nickname + '\nEmail: ' + email);
           
-          // Clear form
+          // Reset form fields
           document.getElementById('popup-reg-email').value = '';
           document.getElementById('popup-reg-nickname').value = '';
           document.getElementById('popup-reg-password').value = '';
@@ -649,18 +626,17 @@
           document.getElementById('popup-reg-captcha').value = '';
           document.getElementById('popup-reg-terms').checked = false;
           
-          // Generate new captcha
+          // New captcha for next time
           popupCaptcha = Math.floor(Math.random() * 9000) + 1000;
           if (popupCaptchaText) popupCaptchaText.textContent = popupCaptcha.toString();
           
-          // Expand login section
+          // Show login section with email pre-filled
           const expandContent = document.getElementById('popup-expandContent');
           const expandBtn = document.getElementById('popup-expandLink');
           if (expandContent && expandBtn) {
             expandContent.hidden = false;
             expandBtn.setAttribute('aria-expanded', 'true');
           }
-          // Pre-fill email
           const loginEmail = document.getElementById('popup-login-email');
           if (loginEmail) loginEmail.value = email;
         } else {
@@ -687,7 +663,9 @@
     });
   }
 
-  // Login Form Submission
+  // ============================================
+  // LOGIN SUBMIT
+  // ============================================
   const popupLoginForm = document.getElementById('popup-loginForm');
   if (popupLoginForm) {
     popupLoginForm.addEventListener('submit', async (e) => {
@@ -696,7 +674,6 @@
       const email = document.getElementById('popup-login-email').value.trim();
       const password = document.getElementById('popup-login-password').value;
       
-      // Validate email format
       if (!isValidEmail(email)) {
         alert('Please enter a proper email address.\nAccepted domains: @gmail.com, @yahoo.com, @hotmail.com, @outlook.com');
         return;
@@ -714,7 +691,7 @@
         const data = await response.json();
         
         if (response.ok) {
-          // Save user data locally
+          // Store user info for the session
           const loggedInUser = {
             id: data.user?.id || data.user?._id || `user_${Date.now()}`,
             name: data.user?.name || data.user?.username || data.user?.nickname || email.split('@')[0],
@@ -737,13 +714,12 @@
           localStorage.removeItem('guestUser');
           sessionStorage.removeItem('guestUser');
           
-          // Dispatch login event
           window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: { user: loggedInUser } }));
           
           alert('Login successful!');
           closeLoginPopup();
           
-          // Reload page to update UI
+          // Reload so the UI refreshes
           setTimeout(() => {
             window.location.reload();
           }, 500);
@@ -757,7 +733,7 @@
     });
   }
 
-  // Check if user is logged in as guest on page load
+  // Update UI based on guest/logged-in status
   function checkGuestStatus() {
     const isGuest = localStorage.getItem('isGuest') === 'true' || sessionStorage.getItem('isGuest') === 'true';
     const storedUser = (() => {
@@ -796,7 +772,9 @@
     }
   }
 
-  // Logged-in Account Panel (replaces registration form UI when user is logged in)
+  // ============================================
+  // ACCOUNT PANEL (when logged in)
+  // ============================================
   function getStoredUser() {
     try {
       return JSON.parse(localStorage.getItem('loggedInUser') || sessionStorage.getItem('loggedInUser') || 'null');
@@ -929,8 +907,8 @@
     return panel;
   }
 
+  // Save profile to MongoDB (non-blocking, localStorage is primary)
   async function persistUserProfile(user) {
-    // Persist to MongoDB (best effort). Still keeps localStorage as source of truth for UI.
     if (!user?.id || user.id.toString().startsWith('guest_')) return;
     try {
       await fetch(`/users/${encodeURIComponent(user.id)}`, {
@@ -946,8 +924,7 @@
         })
       });
     } catch (e) {
-      // Non-blocking (offline-friendly)
-      console.warn('Failed to persist profile to server (will stay local).', e);
+      console.warn('Profile save failed, staying local', e);
     }
   }
 
@@ -1001,7 +978,7 @@
       if (rankSelect) rankSelect.value = user.rank || 'Unranked';
       if (winrateEl) winrateEl.textContent = `${Number(user.winrate || 0)}%`;
 
-      // Right side background: use selected hero's background image
+      // Set hero background on right panel
       if (loginRightSection) {
         const catalog = Array.isArray(window.RIVALS_HERO_CATALOG) ? window.RIVALS_HERO_CATALOG : [];
         const hero = catalog.find(h => h.id === user.mainHeroId) || catalog.find(h => h.name === user.favoriteCharacter);
@@ -1009,7 +986,7 @@
         loginRightSection.style.setProperty('--login-right-bg', `url('${bg}')`);
       }
 
-      // Right side bio panel (fills the empty space)
+      // Bio panel on right side
       if (bioPanel) {
         bioPanel.removeAttribute('hidden');
         const bioInput = document.getElementById('account-bio-input');
@@ -1113,7 +1090,7 @@
       });
     }
 
-    // Bio autosave (debounced)
+    // Bio saves after typing stops (debounced)
     if (bioPanel) {
       const bioInput = document.getElementById('account-bio-input');
       const count = document.getElementById('account-bio-count');
@@ -1141,11 +1118,13 @@
     }
   }
 
-  // Guest Login Button (Continue As Guest)
+  // ============================================
+  // GUEST LOGIN
+  // ============================================
   const popupGuestLogin = document.getElementById('popup-guestLogin');
   if (popupGuestLogin) {
     popupGuestLogin.addEventListener('click', async () => {
-      // Create guest user locally (no MongoDB required)
+      // Guest user - works offline, no DB needed
       const guestUser = {
         name: 'Guest User',
         email: `guest_${Date.now()}@anonymous.local`,
@@ -1153,33 +1132,28 @@
         isGuest: true
       };
       
-      // Store guest session in browser storage (no server needed)
       sessionStorage.setItem('guestUser', JSON.stringify(guestUser));
       sessionStorage.setItem('isGuest', 'true');
       localStorage.setItem('isGuest', 'true');
       localStorage.setItem('guestUser', JSON.stringify(guestUser));
       
-      // Remove any logged in user data
+      // Clear any existing login
       localStorage.removeItem('loggedInUser');
       sessionStorage.removeItem('loggedInUser');
       
-      // Dispatch logout event (to switch from logged in to guest)
       window.dispatchEvent(new CustomEvent('userLoggedOut'));
-      
-      // Update UI to show guest status
       checkGuestStatus();
       
-      // Show success message
       alert('Logged in as Guest! Welcome to Rival!');
       
-      // Reload page to update community profile
+      // Refresh community page if on it
       setTimeout(() => {
         if (window.location.pathname.includes('Community.html')) {
           window.location.reload();
         }
       }, 500);
       
-      // Optionally try to save to server in background (non-blocking)
+      // Try to save guest to server (optional, non-blocking)
       try {
         const response = await fetch('/users', {
           method: 'POST',
@@ -1192,22 +1166,20 @@
             password: null
           })
         });
-        // Don't wait for response - guest login works regardless
       } catch (error) {
-        // Ignore server errors - guest login works offline
-        console.log('Guest user saved locally (server unavailable)');
+        console.log('Guest saved locally (server offline)');
       }
     });
   }
 
-  // Guest Logout Button
+  // Logout button (works for guest and registered users)
   const guestLogoutBtn = document.getElementById('guest-logout-btn');
   if (guestLogoutBtn) {
     guestLogoutBtn.addEventListener('click', () => {
       const user = getStoredUser();
       const isLoggedIn = !!user && user.isGuest === false;
 
-      // Clear guest or logged-in session
+      // Clear all session data
       localStorage.removeItem('isGuest');
       sessionStorage.removeItem('isGuest');
       localStorage.removeItem('guestUser');
@@ -1215,16 +1187,12 @@
       localStorage.removeItem('loggedInUser');
       sessionStorage.removeItem('loggedInUser');
       
-      // Dispatch logout event
       window.dispatchEvent(new CustomEvent('userLoggedOut'));
-      
-      // Update UI
       checkGuestStatus();
       renderAccountPanelState();
       
       alert(isLoggedIn ? 'Logged out' : 'Logged out as Guest');
       
-      // Reload page to update community profile
       setTimeout(() => {
         if (window.location.pathname.includes('Community.html')) {
           window.location.reload();
@@ -1233,14 +1201,15 @@
     });
   }
 
-  // Check on page load
+  // Init auth state on page load
   checkGuestStatus();
-  // Setup account panel (logged-in view)
   ensureAccountPanel();
   renderAccountPanelState();
   wireAccountPanelHandlers();
 
-  // Scroll reveal
+  // ============================================
+  // SCROLL ANIMATIONS
+  // ============================================
   const revealables = Array.from(document.querySelectorAll('[data-reveal]'));
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
@@ -1256,7 +1225,7 @@
     revealables.forEach(el => el.classList.add('revealed'));
   }
 
-  // Parallax orbs (scroll + mouse) + Lightning Effect
+  // Parallax effect on orbs + lightning (respects reduced motion)
   const parallaxEls = Array.from(document.querySelectorAll('[data-parallax]'));
   const heroSection = document.querySelector('.hero');
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1294,7 +1263,7 @@
     applyParallax();
   }
 
-  // Magnetic buttons + shine
+  // Magnetic button hover effect
   function makeMagnetic(el) {
     const rect = () => el.getBoundingClientRect();
     function onMove(e) {
@@ -1320,7 +1289,7 @@
   }
   document.querySelectorAll('[data-magnetic]').forEach(makeMagnetic);
 
-  // Tilt cards
+  // 3D tilt on card hover
   function makeTilt(el) {
     const strength = 10;
     const reset = () => {
@@ -1343,8 +1312,9 @@
     document.querySelectorAll('[data-tilt]').forEach(makeTilt);
   }
 
-  // Maps Roulette (mouse direction control with persistence)
-  // Maps Carousel - Redesigned with manual controls
+  // ============================================
+  // MAPS CAROUSEL
+  // ============================================
   const mapsCarousel = document.getElementById('maps-carousel');
   const carouselTrack = document.getElementById('carousel-track');
   const carouselContainer = mapsCarousel?.querySelector('.carousel-container');
@@ -1358,9 +1328,7 @@
     let autoPlayInterval = null;
     const autoPlayDelay = 5000; // 5 seconds
     
-    // Function to update carousel
     function updateCarousel(index) {
-      // Remove active class from all slides and dots
       slides.forEach((slide, i) => {
         slide.classList.toggle('active', i === index);
       });
@@ -1368,24 +1336,20 @@
         dot.classList.toggle('active', i === index);
       });
       
-      // Update track position
       carouselTrack.style.transform = `translateX(-${index * 100}%)`;
       currentSlide = index;
     }
     
-    // Next slide
     function nextSlide() {
       const next = (currentSlide + 1) % slides.length;
       updateCarousel(next);
     }
     
-    // Previous slide
     function prevSlide() {
       const prev = (currentSlide - 1 + slides.length) % slides.length;
       updateCarousel(prev);
     }
     
-    // Auto-play
     function startAutoPlay() {
       stopAutoPlay();
       autoPlayInterval = setInterval(nextSlide, autoPlayDelay);
@@ -1404,36 +1368,35 @@
       }
     }
     
-    // Event listeners
+    // Carousel controls
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
         nextSlide();
-        startAutoPlay(); // Restart auto-play after manual navigation
+        startAutoPlay();
       });
     }
     
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
         prevSlide();
-        startAutoPlay(); // Restart auto-play after manual navigation
+        startAutoPlay();
       });
     }
     
-    // Dot navigation
     dots.forEach((dot, index) => {
       dot.addEventListener('click', () => {
         updateCarousel(index);
-        startAutoPlay(); // Restart auto-play after manual navigation
+        startAutoPlay();
       });
     });
     
-    // Pause on hover
+    // Pause on hover, resume on leave
     if (carouselContainer) {
       carouselContainer.addEventListener('mouseenter', stopAutoPlay);
       carouselContainer.addEventListener('mouseleave', startAutoPlay);
     }
     
-    // Keyboard navigation
+    // Arrow keys navigate carousel
     document.addEventListener('keydown', (e) => {
       if (mapsCarousel && !mapsCarousel.hasAttribute('hidden')) {
         if (e.key === 'ArrowLeft') {
@@ -1446,15 +1409,12 @@
       }
     });
     
-    // Start auto-play
     startAutoPlay();
-    
-    // Initialize first slide
     updateCarousel(0);
   }
   
 
-  // Keyboard focus styles: show outline only when tabbing
+  // Focus rings only show when tabbing (not clicking)
   function handleFirstTab(e) {
     if (e.key === 'Tab') {
       root.classList.add('user-tabbing');
@@ -1469,12 +1429,12 @@
   }
   window.addEventListener('keydown', handleFirstTab);
 
-  // Enhance outlines for tabbing
+  // Inject keyboard-only focus style
   const style = document.createElement('style');
   style.textContent = `.user-tabbing :focus { outline: 2px solid ${getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#e93d54'} !important; outline-offset: 2px; }`;
   document.head.appendChild(style);
 
-  // Inject global social sidebar
+  // Social links sidebar
   (function injectSocialSidebar(){
     if (document.querySelector('.social-sidebar')) return;
     const wrapper = document.createElement('div');
@@ -1499,8 +1459,7 @@
     document.body.appendChild(wrapper);
   })();
 
-  // Cookie banner: show once per session until a choice or close
-  // Fades in after 10 seconds (after splash video)
+  // Cookie banner (shows once per session)
   (function cookieBanner(){
     if (sessionStorage.getItem('cookieBannerSeen')) return;
     const banner = document.createElement('div');
@@ -1520,18 +1479,15 @@
     `;
     document.body.appendChild(banner);
     
-    // Fade in after 10 seconds
+    // Show after 10s
     setTimeout(() => {
       banner.classList.add('cookie-banner--visible');
     }, 10000);
     
     const done = () => {
       sessionStorage.setItem('cookieBannerSeen', '1');
-      // Smooth fade out
       banner.classList.add('cookie-banner--fade-out');
-      setTimeout(() => {
-        banner.remove();
-      }, 400); // Match transition duration
+      setTimeout(() => { banner.remove(); }, 400);
     };
     
     banner.addEventListener('click', (e) => {
@@ -1541,9 +1497,9 @@
     });
   })();
 
-  // Old mixtape player removed - React music player handles all audio now
-
-  // Hero page logic
+  // ============================================
+  // HERO PAGE: roster, filters, search, modal
+  // ============================================
   (function initHeroPage(){
     const heroPage = document.querySelector('.hero-page');
 
@@ -2833,8 +2789,7 @@
       ...strategistHeroes.map((hero, index) => createHero(hero, vanguardHeroes.length + duelistHeroes.length + index))
     ];
 
-    // Expose a minimal catalog globally so other pages (login popup) can use hero images for profile selection.
-    // This is safe because we only export data; the DOM-heavy hero page logic still only runs on Hero.html.
+    // Global catalog for other pages (like login popup hero picker)
     window.RIVALS_HERO_CATALOG = heroCatalog.map(h => ({
       id: h.id,
       name: h.name,
@@ -2870,7 +2825,7 @@
     const viewMorePopupSkills = document.querySelector('[data-feature-popup-skills]');
     const viewMorePopupLore = document.querySelector('[data-feature-popup-lore]');
     
-    let isPopupPinned = false; // Track if popup is pinned open
+    let isPopupPinned = false;
 
     const countAll = document.querySelector('[data-count-all]');
     const countVanguard = document.querySelector('[data-count-vanguard]');
@@ -3073,7 +3028,7 @@
       });
     }
 
-    // Admin check and hidden heroes storage
+    // Admin functions for hiding heroes
     function getCurrentUser() {
       try {
         const loggedStr = localStorage.getItem('loggedInUser') || sessionStorage.getItem('loggedInUser');
@@ -3297,7 +3252,7 @@
       });
     });
     
-    // Search functionality
+    // Search heroes by name, team, title, etc
     function handleSearch() {
       searchQuery = heroSearchInput ? heroSearchInput.value : '';
       const heroes = filteredHeroes();
@@ -3321,7 +3276,7 @@
       heroSearchButton.addEventListener('click', handleSearch);
     }
     
-    // Handle suggestion clicks
+    // Quick search suggestions
     heroSuggestions.forEach(suggestionBtn => {
       suggestionBtn.addEventListener('click', () => {
         const suggestion = suggestionBtn.dataset.suggestion;
@@ -3333,7 +3288,7 @@
       });
     });
 
-    // View More button - toggle pin/unpin popup
+    // View More popup toggle
     if (viewMoreButton) {
       viewMoreButton.addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent event bubbling
@@ -3355,9 +3310,8 @@
       });
     }
 
-    // Prevent popup scroll from scrolling the main page
+    // Stop popup scroll from moving the main page
     if (viewMorePopup) {
-      // Stop wheel events from bubbling to prevent page scroll
       viewMorePopup.addEventListener('wheel', (e) => {
         const { scrollTop, scrollHeight, clientHeight } = viewMorePopup;
         const isScrollingUp = e.deltaY < 0;
@@ -3365,23 +3319,19 @@
         const isAtTop = scrollTop <= 0;
         const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
         
-        // If we can scroll in the popup, prevent the event from reaching the page
         if (!((isAtTop && isScrollingUp) || (isAtBottom && isScrollingDown))) {
           e.stopPropagation();
         } else {
-          // At boundaries, prevent default to stop page scroll
           e.preventDefault();
           e.stopPropagation();
         }
       }, { passive: false });
 
-      // Stop touch scroll events from bubbling
       viewMorePopup.addEventListener('touchmove', (e) => {
         const { scrollTop, scrollHeight, clientHeight } = viewMorePopup;
         const isAtTop = scrollTop <= 0;
         const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
         
-        // If not at boundaries, stop propagation so page doesn't scroll
         if (!isAtTop && !isAtBottom) {
           e.stopPropagation();
         }
@@ -3479,11 +3429,10 @@
       });
     }
 
-    // Initial animation
     animateCards();
     if (rosterSection) rosterSection.dataset.revealed = 'true';
 
-    // Continuous animation on scroll - reset when scrolling up
+    // Re-animate cards when scrolling up significantly
     let scrollTimeout;
     window.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);
@@ -3492,8 +3441,7 @@
         const scrollDelta = currentScrollY - lastScrollY;
         
         if (scrollDelta < -50 && scrollDirection === 'down') {
-          // Scrolled up significantly - reset animation
-          scrollDirection = 'up';
+        scrollDirection = 'up';
           animateCards();
         } else if (scrollDelta > 50 && scrollDirection === 'up') {
           scrollDirection = 'down';
@@ -3502,7 +3450,7 @@
       }, 100);
     }, { passive: true });
 
-    // Also animate when roster section comes into view
+    // Animate cards when roster section scrolls into view
     const rosterRevealObserver = ('IntersectionObserver' in window) ? new IntersectionObserver((entries, obs) => {
       for (const entry of entries) {
         if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
@@ -3516,7 +3464,9 @@
     }
   })();
 
-  // Hero video splash -> banner transition
+  // ============================================
+  // HERO VIDEO SPLASH
+  // ============================================
   const heroVideo = document.getElementById('hero-video');
   const heroContent = document.querySelector('.hero .content');
   if (heroVideo && heroContent) {
@@ -3526,31 +3476,26 @@
       heroVideo.classList.add('video-banner');
       heroContent.classList.add('visible');
     } else {
-      // Lock scroll during splash
+      // Lock scroll during 8s splash, then animate video into banner position
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
-      const SPLASH_MS = 8000; // 8 seconds fullscreen splash
+      const SPLASH_MS = 8000;
       setTimeout(() => {
-        // Smooth FLIP transition from fullscreen to hero banner position
         const heroSection = document.querySelector('.hero');
         const heroRect = heroSection ? heroSection.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
 
-        // First: measure fullscreen
         const startRect = { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
-        const endRect = heroRect; // where the banner will be
+        const endRect = heroRect;
 
-        // Compute scale and translate
         const scaleX = endRect.width / startRect.width;
         const scaleY = endRect.height / startRect.height;
         const translateX = endRect.left - startRect.left;
         const translateY = endRect.top - startRect.top;
 
-        // Apply transform to animate into place
         heroVideo.style.transformOrigin = 'top left';
         heroVideo.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
 
-        // When the transform animation ends, switch to in-hero layout class
         const onTransitionEnd = () => {
           heroVideo.removeEventListener('transitionend', onTransitionEnd);
           heroVideo.style.transform = '';

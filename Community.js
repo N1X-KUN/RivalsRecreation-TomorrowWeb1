@@ -2,26 +2,20 @@
 (function() {
   'use strict';
 
-  // Data Storage (localStorage - ready for backend migration)
   const STORAGE_KEY = 'rivals_community_posts';
-  // Legacy community user key (kept for backward compatibility)
   const USER_STORAGE_KEY = 'rivals_current_user';
-  // Main site login key used by `Rivals.js` (source of truth across pages)
   const LOGGED_IN_USER_KEY = 'loggedInUser';
   const GUEST_KEY = 'isGuest';
-  // Following storage (per user)
   const FOLLOWING_KEY_PREFIX = 'rivals_following_';
-  // Blocked posts storage (per user)
   const BLOCKED_KEY_PREFIX = 'rivals_blocked_posts_';
 
-  // urls for quick navigation links
   const QUICK_NAV_LINKS = {
     hotList: 'https://www.marvelrivals.com/heroes_data/',
     teamUp: 'https://www.marvelrivals.com/heroes/teamup.html',
     media: 'https://www.marvelrivals.com/media/'
   };
 
-  // Get current user
+  // Figures out who is currently using the page (real account or temporary guest)
   function getCurrentUser() {
     // Prefer main-site auth state so Community stays in sync after login/logout on any page
     const loggedStr = localStorage.getItem(LOGGED_IN_USER_KEY) || sessionStorage.getItem(LOGGED_IN_USER_KEY);
@@ -61,12 +55,10 @@
     };
   }
   
-  // Check if user is guest
   function isGuest() {
     return currentUser.isGuest === true;
   }
 
-  // Save current user
   function saveCurrentUser(user) {
     // Keep both keys in sync to avoid "Guest" showing up after a real login.
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
@@ -111,7 +103,6 @@
     return set;
   }
 
-  // Save posts
   function savePosts(posts) {
     try {
       const postsJson = JSON.stringify(posts);
@@ -223,7 +214,6 @@
     document.querySelectorAll('.post-menu').forEach(menu => menu.setAttribute('hidden', ''));
   }
 
-  // Add new post
   function addPost(postData) {
     const posts = getPosts();
     const newPost = {
@@ -245,7 +235,6 @@
     return newPost;
   }
   
-  // Function to clear old posts to free up storage
   window.clearOldPosts = function(keepCount = 10) {
     if (!confirm(`This will delete all posts except the ${keepCount} most recent ones. Continue?`)) {
       return;
@@ -287,7 +276,6 @@
     return null;
   }
 
-  // Add comment to post
   function addComment(postId, commentData) {
     if (isGuest()) {
       alert('Please sign up to comment on posts!');
@@ -342,7 +330,6 @@
     return null;
   }
 
-  // DOM Elements
   const createPostInput = document.getElementById('create-post-input');
   const submitPostBtn = document.getElementById('submit-post-btn');
   const mediaUploadInput = document.getElementById('media-upload-input');
@@ -354,7 +341,6 @@
   const postModalBody = document.getElementById('post-modal-body');
   const currentUserAvatar = document.getElementById('current-user-avatar');
   
-  // Profile elements
   const profileGuestState = document.getElementById('profile-guest-state');
   const profileLoggedState = document.getElementById('profile-logged-state');
   const profileSignupTrigger = document.getElementById('profile-signup-trigger');
@@ -439,7 +425,6 @@
     }
   }
 
-  // Initialize
   function init() {
     // Set current user avatar
     if (currentUserAvatar && currentUser.avatar) {
@@ -865,7 +850,6 @@
     }
   }
 
-  // Handle media upload
   function handleMediaUpload(e) {
     const file = e.target.files[0]; // Only get the first file
     if (!file) return;
@@ -935,7 +919,6 @@
     e.target.value = ''; // Reset input
   }
 
-  // Update media preview
   function updateMediaPreview() {
     if (!mediaPreview) return;
     
@@ -974,7 +957,6 @@
     }
   }
 
-  // Handle post submit
   function handlePostSubmit() {
     if (isGuest()) {
       alert('Please sign up to create posts!');
@@ -1062,7 +1044,6 @@
     }
   }
 
-  // Open edit post modal
   function openEditPostModal(postId) {
     const posts = getPosts();
     const post = posts.find(p => p.id === postId);
@@ -1393,14 +1374,12 @@
     }
   };
 
-  // Extract hashtags from text
   function extractHashtags(text) {
     const hashtagRegex = /#(\w+)/g;
     const matches = text.match(hashtagRegex);
     return matches ? [...new Set(matches)] : [];
   }
 
-  // Load and render posts
   function loadPosts() {
     if (!postsFeed) return;
 
@@ -1454,7 +1433,6 @@
     attachPostListeners();
   }
 
-  // Render single post
   function renderPost(post) {
     const timeAgo = getTimeAgo(new Date(post.createdAt));
     const isLiked = post.likedBy && post.likedBy.includes(currentUser.id);
@@ -1577,7 +1555,6 @@
     `;
   }
 
-  // Render post media
   function renderPostMedia(media) {
     if (!media || media.length === 0) return '';
 
@@ -1625,7 +1602,6 @@
     `;
   }
 
-  // Render comments
   function renderComments(comments, postId) {
     if (!comments || comments.length === 0) return '';
     return comments.map(comment => {
@@ -1656,7 +1632,6 @@
     }).join('');
   }
 
-  // Attach post listeners
   function attachPostListeners() {
     // Follow buttons
     document.querySelectorAll('.follow-btn').forEach(btn => {
@@ -1846,7 +1821,6 @@
     });
   }
 
-  // Utility functions
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -1879,7 +1853,6 @@
   }
 
 
-  // Listen for user changes (login/logout)
   function syncUserFromStorage() {
     // Check for guest user
     const guestUserStr = localStorage.getItem('guestUser') || sessionStorage.getItem('guestUser');

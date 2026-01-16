@@ -2436,7 +2436,7 @@
         lore: 'Terrifying experiments turned him into a brainwashed assassin, but now James "Bucky" Barnes is in control of his own fate once again. With his enhanced mechanical arm, the Winter Soldier is primed to deliver earth-shattering blows to any foe in his path!',
         portrait: 'Images/Winter.png',
         background: 'Images/WinterSilhouette.webp',
-        card: 'Images/Winter.webp',
+        card: 'Images/WInter.webp',
         accent: '#2a5727',
         realName: 'James Bucky Barnes',
         attackType: 'Hitscans Heroes',

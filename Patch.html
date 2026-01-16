@@ -683,6 +683,7 @@
       const btnLess = document.getElementById('news-less');
       if (!grid || !btnMore || !btnLess) return;
 
+      const extraCards = Array.from(grid.querySelectorAll('.news-card.more'));
       let isAdmin = isAdminUser();
       const allCards = Array.from(grid.querySelectorAll('.news-card'));
 
@@ -781,21 +782,18 @@
         });
       }
 
-      const extraCards = Array.from(grid.querySelectorAll('.news-card.more'));
-
       function showExtras(show) {
         const hiddenNews = getHiddenNews(); // Get fresh hidden news set
         isAdmin = isAdminUser(); // Check admin status fresh
         
-        // Admins see all cards by default - no need for show more/less
+        // Admins see all cards by default
         if (isAdmin) {
           extraCards.forEach(card => {
             const newsId = card.getAttribute('data-news-id');
-            // Admins can see all cards, even hidden ones (they're dimmed)
             card.hidden = false;
             card.style.display = '';
           });
-          grid.dataset.collapsed = 'false';
+          grid.dataset.collapsed = 'false'; 
           updateShowMoreButtons();
           return;
         }
@@ -821,33 +819,25 @@
       function updateShowMoreButtons() {
         const hiddenNews = getHiddenNews(); // Get fresh hidden news set
         isAdmin = isAdminUser(); // Check admin status fresh
-        
-        // Admins don't need show more/less buttons - they see everything
-        if (isAdmin) {
-          btnMore.hidden = true;
-          btnLess.hidden = true;
-          return;
-        }
-        
-        // Regular users: check if there are more cards to show
         const isCollapsed = grid.dataset.collapsed === 'true';
-        const visibleCards = allCards.filter(card => {
+        
+        // Filter the 'extraCards' to see if any are allowed to be shown
+        const availableMoreCards = extraCards.filter(card => {
           const newsId = card.getAttribute('data-news-id');
-          // Non-admins can't see hidden news
-          if (newsId && hiddenNews.has(String(newsId))) {
+          
+          // If user is NOT admin, and this specific card is hidden by admin, don't count it
+          if (!isAdmin && newsId && hiddenNews.has(String(newsId))) {
             return false;
           }
-          // Check if card is in "more" section and collapsed
-          if (card.classList.contains('more') && isCollapsed) {
-            return false;
-          }
-          return card.style.display !== 'none' && !card.hidden;
+          return true;
         });
         
-        const visibleMoreCards = visibleCards.filter(card => card.classList.contains('more'));
-        const hasMore = visibleMoreCards.length > 0;
+        const hasMore = availableMoreCards.length > 0;
         
+        // Show 'Show more' if we have hidden content and the grid is currently collapsed
         btnMore.hidden = !hasMore || !isCollapsed;
+        
+        // Show 'Show less' if we have hidden content and the grid is currently expanded
         btnLess.hidden = !hasMore || isCollapsed;
       }
 
@@ -859,11 +849,13 @@
         const href = card.getAttribute('data-href') || '';
         card.setAttribute('role', 'link');
         card.tabIndex = 0;
+        
         function go(e) {
           // Don't navigate if clicking the hide button
           if (e.target.closest('.news-card__hide-btn')) return;
           if (href) window.location.href = href;
         }
+        
         card.addEventListener('click', go);
         card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(e); } });
       });
@@ -888,21 +880,18 @@
       // Initialize show/hide state based on admin status
       isAdmin = isAdminUser();
       if (isAdmin) {
-        // Admins see all cards by default
         showExtras(true);
       } else {
-        // Regular users see first 6, then show more button
         showExtras(false);
       }
       
-      // Re-check admin status periodically (in case user logs in/out)
+      // Re-check admin status periodically
       setInterval(() => {
         const wasAdmin = isAdmin;
         const nowAdmin = isAdminUser();
         if (wasAdmin !== nowAdmin) {
           filterHiddenNews();
           setupAdminButtons();
-          // Re-initialize show/hide state
           if (nowAdmin) {
             showExtras(true);
           } else {

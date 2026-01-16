@@ -787,24 +787,32 @@
         const hiddenNews = getHiddenNews(); // Get fresh hidden news set
         isAdmin = isAdminUser(); // Check admin status fresh
         
+        // Admins see all cards by default - no need for show more/less
+        if (isAdmin) {
+          extraCards.forEach(card => {
+            const newsId = card.getAttribute('data-news-id');
+            // Admins can see all cards, even hidden ones (they're dimmed)
+            card.hidden = false;
+            card.style.display = '';
+          });
+          grid.dataset.collapsed = 'false';
+          updateShowMoreButtons();
+          return;
+        }
+        
+        // Regular users: show/hide based on button state
         extraCards.forEach(card => {
           const newsId = card.getAttribute('data-news-id');
           // Don't show if it's hidden (for non-admins)
-          if (!isAdmin && newsId && hiddenNews.has(String(newsId))) {
+          if (newsId && hiddenNews.has(String(newsId))) {
             card.hidden = true;
             card.style.display = 'none';
             return;
           }
           
-          // Only toggle if not hidden (admins can see hidden cards but they're dimmed)
-          if (!newsId || !hiddenNews.has(String(newsId))) {
-            card.hidden = !show;
-            card.style.display = show ? '' : 'none';
-          } else if (isAdmin && hiddenNews.has(String(newsId))) {
-            // Admins can see hidden cards even in "more" section
-            card.hidden = !show;
-            card.style.display = show ? '' : 'none';
-          }
+          // Show or hide based on button state
+          card.hidden = !show;
+          card.style.display = show ? '' : 'none';
         });
         grid.dataset.collapsed = String(!show);
         updateShowMoreButtons();
@@ -814,12 +822,19 @@
         const hiddenNews = getHiddenNews(); // Get fresh hidden news set
         isAdmin = isAdminUser(); // Check admin status fresh
         
-        // Get all visible cards (not hidden, and respecting show more/less state)
+        // Admins don't need show more/less buttons - they see everything
+        if (isAdmin) {
+          btnMore.hidden = true;
+          btnLess.hidden = true;
+          return;
+        }
+        
+        // Regular users: check if there are more cards to show
         const isCollapsed = grid.dataset.collapsed === 'true';
         const visibleCards = allCards.filter(card => {
           const newsId = card.getAttribute('data-news-id');
           // Non-admins can't see hidden news
-          if (!isAdmin && newsId && hiddenNews.has(String(newsId))) {
+          if (newsId && hiddenNews.has(String(newsId))) {
             return false;
           }
           // Check if card is in "more" section and collapsed
@@ -869,7 +884,16 @@
       // Initialize
       filterHiddenNews();
       setupAdminButtons();
-      showExtras(false);
+      
+      // Initialize show/hide state based on admin status
+      isAdmin = isAdminUser();
+      if (isAdmin) {
+        // Admins see all cards by default
+        showExtras(true);
+      } else {
+        // Regular users see first 6, then show more button
+        showExtras(false);
+      }
       
       // Re-check admin status periodically (in case user logs in/out)
       setInterval(() => {
@@ -878,7 +902,12 @@
         if (wasAdmin !== nowAdmin) {
           filterHiddenNews();
           setupAdminButtons();
-          updateShowMoreButtons();
+          // Re-initialize show/hide state
+          if (nowAdmin) {
+            showExtras(true);
+          } else {
+            showExtras(false);
+          }
         }
       }, 1000);
     })();

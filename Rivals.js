@@ -18,7 +18,6 @@
       
       // Mark first boot as complete (only for this session)
       sessionStorage.setItem(FIRST_BOOT_KEY, 'true');
-      
       console.log('🔄 First boot: Cleared login state for fresh start');
     }
   })();
@@ -2988,10 +2987,18 @@
       if (featureDifficulty) {
         featureDifficulty.textContent = hero.difficulty || '★★★☆☆';
       }
+      // Video background is always visible, image is hidden
       if (featureBgImg) {
-        featureBgImg.src = hero.backgroundImage;
-        featureBgImg.style.objectPosition = hero.backgroundPosition;
-        featureBgImg.alt = `${hero.name} backdrop`;
+        featureBgImg.style.display = 'none'; // Keep image hidden, video is the backdrop
+      }
+      // Ensure video is always playing
+      const featureBgVideo = document.querySelector('[data-feature-bg-video]');
+      if (featureBgVideo) {
+        featureBgVideo.style.display = 'block';
+        // Ensure video is playing (restart if paused)
+        if (featureBgVideo.paused) {
+          featureBgVideo.play().catch(() => {}); // Ignore autoplay errors
+        }
       }
       renderStats(featureStats, hero.stats);
 

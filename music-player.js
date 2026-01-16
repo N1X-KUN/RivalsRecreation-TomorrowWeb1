@@ -3,7 +3,7 @@
 
   const { useState, useEffect, useRef } = React;
 
-  // TODO: Replace these with your YouTube API credentials
+  // My YouTube API credentials
   const YOUTUBE_API_KEY = 'AIzaSyDQcRnvaqDlX0xD4EGS3uImntcvtxzPI34'; 
   const YOUTUBE_PLAYLIST_ID = 'PLifrH-9w0BzLWOBZ7VbonEQHI6xTt1B_5'; 
  

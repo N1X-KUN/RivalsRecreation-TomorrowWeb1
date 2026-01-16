@@ -23,7 +23,7 @@
       </div>
     </div>
   </div>
-
+  
   <a class="sr-only" href="#main">Skip to content</a>
   <header class="site-header">
     <div class="container nav">
@@ -67,7 +67,10 @@
     <section class="hero-showcase" aria-labelledby="hero-roster-title" data-hero-focus>
       <div class="hero-showcase__backdrop" data-feature-bg>
         <div class="hero-showcase__backdrop-overlay"></div>
-        <img data-feature-bg-img alt="" aria-hidden="true" />
+        <video class="hero-showcase__backdrop-video" data-feature-bg-video autoplay muted loop playsinline aria-hidden="true">
+          <source src="Videos/JeffApologyVid.mp4" type="video/mp4">
+        </video>
+        <img data-feature-bg-img alt="" aria-hidden="true" style="display: none;" />
       </div>
 
       <!-- 
@@ -387,6 +390,9 @@
 
         <!-- Right Section: Login -->
         <div class="login-section login-right-section">
+          <video class="login-right-section__video" autoplay muted loop playsinline aria-hidden="true">
+            <source src="Videos/LunaDanceVid.mp4" type="video/mp4">
+          </video>
           <div class="login-right-content">
             <!-- Guest login status display -->
             <div id="guest-status" class="guest-status" style="display: none;">

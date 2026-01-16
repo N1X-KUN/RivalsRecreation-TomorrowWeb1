@@ -67,10 +67,7 @@
     <section class="hero-showcase" aria-labelledby="hero-roster-title" data-hero-focus>
       <div class="hero-showcase__backdrop" data-feature-bg>
         <div class="hero-showcase__backdrop-overlay"></div>
-        <video class="hero-showcase__backdrop-video" data-feature-bg-video autoplay muted loop playsinline aria-hidden="true">
-          <source src="Videos/JeffApologyVid.mp4" type="video/mp4">
-        </video>
-        <img data-feature-bg-img alt="" aria-hidden="true" style="display: none;" />
+        <img data-feature-bg-img alt="" aria-hidden="true" />
       </div>
 
       <!-- 
@@ -216,7 +213,10 @@
       -->
       <div class="hero-roster__play-now">
         <div class="hero-roster__play-now-bg">
-          <img src="Images/New1.jpg" alt="Game background" />
+          <video class="hero-roster__play-now-video" autoplay muted loop playsinline aria-hidden="true">
+            <source src="Videos/JeffApologyVid.mp4" type="video/mp4">
+          </video>
+          <img src="Images/New1.jpg" alt="Game background" style="display: none;" />
         </div>
         <div class="hero-roster__play-now-content">
           <h2>Ready to Battle?</h2>

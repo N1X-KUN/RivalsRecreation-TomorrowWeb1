@@ -2987,18 +2987,10 @@
       if (featureDifficulty) {
         featureDifficulty.textContent = hero.difficulty || '★★★☆☆';
       }
-      // Video background is always visible, image is hidden
       if (featureBgImg) {
-        featureBgImg.style.display = 'none'; // Keep image hidden, video is the backdrop
-      }
-      // Ensure video is always playing
-      const featureBgVideo = document.querySelector('[data-feature-bg-video]');
-      if (featureBgVideo) {
-        featureBgVideo.style.display = 'block';
-        // Ensure video is playing (restart if paused)
-        if (featureBgVideo.paused) {
-          featureBgVideo.play().catch(() => {}); // Ignore autoplay errors
-        }
+        featureBgImg.src = hero.backgroundImage;
+        featureBgImg.style.objectPosition = hero.backgroundPosition;
+        featureBgImg.alt = `${hero.name} backdrop`;
       }
       renderStats(featureStats, hero.stats);
 

@@ -194,7 +194,7 @@
       
       globalIsMuted = shouldBeMuted;
       setIsMuted(shouldBeMuted);
-      globalAudio.volume = shouldBeMuted ? 0 : DEFAULT_VOLUME / 100;
+      globalAudio.volume = shouldBeMuted ? 0 : DEFAULT_VOLUME / 50;
       
       // Load and play audio
       globalAudio.src = audioPath;

@@ -16,7 +16,7 @@
   let globalCurrentIndex = 0;
   let globalIsPlaying = false;
   let globalIsMuted = false;
-  const DEFAULT_VOLUME = 60; 
+  const DEFAULT_VOLUME = 40; 
   let youtubeAPIReady = false;
   let isAdvancing = false; 
   let playbackPositionInterval = null; 
@@ -194,7 +194,7 @@
       
       globalIsMuted = shouldBeMuted;
       setIsMuted(shouldBeMuted);
-      globalAudio.volume = shouldBeMuted ? 0 : DEFAULT_VOLUME / 50;
+      globalAudio.volume = shouldBeMuted ? 0 : DEFAULT_VOLUME / 100;
       
       // Load and play audio
       globalAudio.src = audioPath;

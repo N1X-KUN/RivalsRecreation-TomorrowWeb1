@@ -1875,6 +1875,7 @@
         currentUser = {
           id: loggedInUser.id || loggedInUser._id,
           username: loggedInUser.name || loggedInUser.username || loggedInUser.nickname,
+          email: loggedInUser.email,
           avatar: loggedInUser.avatar || 'Images/Rival.png',
           bio: loggedInUser.bio || '',
           favoriteCharacter: loggedInUser.favoriteCharacter || 'Not set',
@@ -1913,6 +1914,7 @@
       currentUser = {
         id: e.detail.user.id || e.detail.user._id,
         username: e.detail.user.name || e.detail.user.username || e.detail.user.nickname,
+        email: e.detail.user.email,
         avatar: e.detail.user.avatar || 'Images/Rival.png',
         bio: e.detail.user.bio || '',
         favoriteCharacter: e.detail.user.favoriteCharacter || 'Not set',

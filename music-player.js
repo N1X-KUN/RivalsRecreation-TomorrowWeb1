@@ -164,7 +164,7 @@
       // Create or reuse HTML5 audio element
       if (!globalAudio) {
         globalAudio = new Audio();
-        globalAudio.volume = DEFAULT_VOLUME / 100;
+        globalAudio.volume = DEFAULT_VOLUME / 50;
         globalAudio.loop = false;
         
         // Auto-play next song when current ends

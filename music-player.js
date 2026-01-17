@@ -16,7 +16,7 @@
   let globalCurrentIndex = 0;
   let globalIsPlaying = false;
   let globalIsMuted = false;
-  const DEFAULT_VOLUME = 40; 
+  const DEFAULT_VOLUME = 15; 
   let youtubeAPIReady = false;
   let isAdvancing = false; 
   let playbackPositionInterval = null; 
